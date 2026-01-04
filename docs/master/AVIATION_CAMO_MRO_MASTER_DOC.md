@@ -1,6 +1,6 @@
 # AVIATION CAMO & MRO PLATFORM — MASTER DOCUMENT
 
-**Version:** v0.1.0 (Documentation Baseline)  
+**Version:** v0.1.1 (Documentation Update)  
 **Status:** Approved baseline  
 **Date:** 2026-01-05  
 
@@ -52,7 +52,13 @@ Build a modern, browser-based, multi-tenant CAMO & MRO system for small and mid-
 
 ## 3. WBS (See: docs/00_product/wbs.md)
 
+
 ## 4. RBAC (See: docs/00_product/rbac_matrix.md)
+
+## 5. Logical Architecture
+
+### 5.0 API Contract
+- OpenAPI: `docs/02_api/openapi.yaml` (v0.2.0 contract baseline)
 
 ## 5. Logical Architecture
 See diagrams in this document and detailed notes in `docs/01_architecture/architecture_overview.md`.

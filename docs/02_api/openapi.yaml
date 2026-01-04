@@ -1,20 +1,661 @@
 openapi: 3.0.3
 info:
   title: Aviation CAMO & MRO API
-  version: 0.1.0
+  version: 0.2.0
+  description: >
+    Contract baseline for multi-tenant CAMO + MRO + Logistics platform.
+    Tenant isolation is implemented via PostgreSQL schema-per-tenant.
 servers:
   - url: http://localhost:8000
+    description: Local dev
+tags:
+  - name: Core
+  - name: CAMO
+  - name: MRO
+  - name: Logistics
+  - name: Integrations
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        OIDC access token (Keycloak). Tenant context is resolved from token claims.
+  headers:
+    X-Request-Id:
+      description: Correlation id (if provided, echoed back).
+      schema: { type: string }
+    X-Tenant-Id:
+      description: >
+        Optional. Used ONLY by Platform Admin operations to target a tenant.
+        Normal tenant users MUST NOT override tenant context.
+      schema: { type: string, format: uuid }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: object, additionalProperties: true }
+      required: [code, message]
+
+    # --- CORE ---
+    Tenant:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        aoc_number: { type: string }
+        status: { type: string, enum: [ACTIVE, SUSPENDED] }
+        created_at: { type: string, format: date-time }
+      required: [id, name, status]
+
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string }
+        active: { type: boolean }
+      required: [id, tenant_id, email, active]
+
+    Role:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        description: { type: string }
+      required: [id, code]
+
+    AuditEvent:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        entity_type: { type: string }
+        entity_id: { type: string }
+        action: { type: string }
+        performed_by: { type: string, format: uuid }
+        performed_at: { type: string, format: date-time }
+        before_state: { type: object, additionalProperties: true }
+        after_state: { type: object, additionalProperties: true }
+      required: [id, tenant_id, entity_type, entity_id, action, performed_at]
+
+    # --- CAMO ---
+    Aircraft:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        tail_number: { type: string }
+        aircraft_type: { type: string }
+        msn: { type: string }
+        status: { type: string, enum: [ACTIVE, STORED, RETIRED] }
+      required: [id, tenant_id, tail_number, aircraft_type, status]
+
+    MaintenanceProgram:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        aircraft_type: { type: string }
+        name: { type: string }
+        revision: { type: string }
+        effective_date: { type: string, format: date }
+      required: [id, aircraft_type, name, revision, effective_date]
+
+    MaintenanceTask:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        program_id: { type: string, format: uuid }
+        ata: { type: string }
+        description: { type: string }
+        interval_days: { type: integer, minimum: 0, nullable: true }
+        interval_fh: { type: integer, minimum: 0, nullable: true }
+        interval_fc: { type: integer, minimum: 0, nullable: true }
+      required: [id, program_id, ata, description]
+
+    TaskExecution:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        aircraft_id: { type: string, format: uuid }
+        task_id: { type: string, format: uuid }
+        last_done_date: { type: string, format: date, nullable: true }
+        last_done_fh: { type: integer, nullable: true }
+        last_done_fc: { type: integer, nullable: true }
+        next_due_date: { type: string, format: date, nullable: true }
+        next_due_fh: { type: integer, nullable: true }
+        next_due_fc: { type: integer, nullable: true }
+        status: { type: string, enum: [OK, DUE_SOON, OVERDUE] }
+      required: [id, aircraft_id, task_id, status]
+
+    # --- MRO ---
+    WorkOrder:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        aircraft_id: { type: string, format: uuid }
+        type: { type: string, enum: [LINE, HANGAR] }
+        status: { type: string, enum: [DRAFT, RELEASED, IN_PROGRESS, COMPLETED, CLOSED] }
+        opened_at: { type: string, format: date-time }
+        closed_at: { type: string, format: date-time, nullable: true }
+        reference: { type: string, nullable: true }
+      required: [id, aircraft_id, type, status, opened_at]
+
+    WorkOrderTask:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        work_order_id: { type: string, format: uuid }
+        description: { type: string }
+        ata: { type: string, nullable: true }
+        status: { type: string, enum: [OPEN, IN_PROGRESS, DONE, SIGNED_OFF] }
+      required: [id, work_order_id, description, status]
+
+    SignOff:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        work_order_task_id: { type: string, format: uuid }
+        signed_by: { type: string, format: uuid }
+        license_type: { type: string }
+        signed_at: { type: string, format: date-time }
+      required: [id, work_order_task_id, signed_by, signed_at]
+
+    # --- LOGISTICS ---
+    Part:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        part_number: { type: string }
+        description: { type: string }
+        part_type: { type: string, enum: [ROTABLE, CONSUMABLE, EXPENDABLE] }
+      required: [id, part_number, part_type]
+
+    InventoryItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        part_id: { type: string, format: uuid }
+        serial_number: { type: string, nullable: true }
+        condition: { type: string, enum: [SERVICEABLE, UNSERVICEABLE, QUARANTINE] }
+        owner: { type: string }
+        location: { type: string }
+      required: [id, part_id, condition, owner, location]
+
+    InventoryMovement:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        inventory_item_id: { type: string, format: uuid }
+        movement_type: { type: string, enum: [RECEIPT, ISSUE, RETURN, TRANSFER, ADJUSTMENT] }
+        related_work_order_id: { type: string, format: uuid, nullable: true }
+        quantity: { type: number }
+        movement_date: { type: string, format: date-time }
+      required: [id, inventory_item_id, movement_type, quantity, movement_date]
+
+    CostEntry:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        work_order_id: { type: string, format: uuid }
+        cost_type: { type: string, enum: [LABOR, PART, POOL] }
+        amount: { type: number }
+        currency: { type: string, example: PLN }
+      required: [id, work_order_id, cost_type, amount, currency]
+
+    # --- INTEGRATIONS ---
+    IntegrationRun:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        connector: { type: string, enum: [SAP, SYMFONIA, GENERIC_CSV] }
+        direction: { type: string, enum: [EXPORT, IMPORT] }
+        status: { type: string, enum: [QUEUED, RUNNING, FAILED, SUCCEEDED] }
+        started_at: { type: string, format: date-time, nullable: true }
+        finished_at: { type: string, format: date-time, nullable: true }
+        error_message: { type: string, nullable: true }
+      required: [id, tenant_id, connector, direction, status]
+
+  parameters:
+    TenantIdHeader:
+      name: X-Tenant-Id
+      in: header
+      required: false
+      schema: { type: string, format: uuid }
+      description: >
+        Platform Admin only. Use to target a tenant schema.
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+security:
+  - bearerAuth: []
+
 paths:
   /health:
     get:
+      tags: [Core]
       summary: Health check
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Request-Id: { $ref: '#/components/headers/X-Request-Id' }
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+
+  # --- CORE ---
+  /v1/tenants:
+    get:
+      tags: [Core]
+      summary: List tenants (Platform Admin)
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
+                type: array
+                items: { $ref: '#/components/schemas/Tenant' }
+
+    post:
+      tags: [Core]
+      summary: Create tenant (Platform Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                aoc_number: { type: string }
+              required: [name]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Tenant' }
+
+  /v1/users:
+    get:
+      tags: [Core]
+      summary: List users (Tenant Admin)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/User' }
+
+  /v1/roles:
+    get:
+      tags: [Core]
+      summary: List roles
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Role' }
+
+  /v1/audit-events:
+    get:
+      tags: [Core]
+      summary: Query audit events (Auditor/Tenant Admin)
+      parameters:
+        - name: entity_type
+          in: query
+          required: false
+          schema: { type: string }
+        - name: entity_id
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AuditEvent' }
+
+  # --- CAMO ---
+  /v1/camo/aircraft:
+    get:
+      tags: [CAMO]
+      summary: List aircraft
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Aircraft' } }
+    post:
+      tags: [CAMO]
+      summary: Create aircraft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tail_number: { type: string }
+                aircraft_type: { type: string }
+                msn: { type: string }
+                status: { type: string, enum: [ACTIVE, STORED, RETIRED] }
+              required: [tail_number, aircraft_type, status]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Aircraft' }
+
+  /v1/camo/programs:
+    get:
+      tags: [CAMO]
+      summary: List maintenance programs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/MaintenanceProgram' } }
+
+  /v1/camo/tasks:
+    get:
+      tags: [CAMO]
+      summary: List maintenance tasks
+      parameters:
+        - name: program_id
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/MaintenanceTask' } }
+
+  /v1/camo/due-list:
+    get:
+      tags: [CAMO]
+      summary: Due list (forecast)
+      parameters:
+        - name: horizon_days
+          in: query
+          required: false
+          schema: { type: integer, default: 60, minimum: 1, maximum: 365 }
+        - name: tail_number
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/TaskExecution' } }
+
+  # --- MRO ---
+  /v1/mro/work-orders:
+    get:
+      tags: [MRO]
+      summary: List work orders
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/WorkOrder' } }
+
+    post:
+      tags: [MRO]
+      summary: Create work order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                aircraft_id: { type: string, format: uuid }
+                type: { type: string, enum: [LINE, HANGAR] }
+                reference: { type: string }
+              required: [aircraft_id, type]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WorkOrder' }
+
+  /v1/mro/work-orders/{work_order_id}/tasks:
+    get:
+      tags: [MRO]
+      summary: List tasks for a work order
+      parameters:
+        - name: work_order_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/WorkOrderTask' } }
+
+    post:
+      tags: [MRO]
+      summary: Add task to a work order
+      parameters:
+        - name: work_order_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description: { type: string }
+                ata: { type: string }
+              required: [description]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WorkOrderTask' }
+
+  /v1/mro/work-order-tasks/{work_order_task_id}/sign-off:
+    post:
+      tags: [MRO]
+      summary: Sign-off a work order task (Certifying Staff)
+      parameters:
+        - name: work_order_task_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                license_type: { type: string }
+              required: [license_type]
+      responses:
+        '201':
+          description: Signed off
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SignOff' }
+
+  # --- LOGISTICS ---
+  /v1/logistics/parts:
+    get:
+      tags: [Logistics]
+      summary: List parts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Part' } }
+
+    post:
+      tags: [Logistics]
+      summary: Create part
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                part_number: { type: string }
+                description: { type: string }
+                part_type: { type: string, enum: [ROTABLE, CONSUMABLE, EXPENDABLE] }
+              required: [part_number, part_type]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Part' }
+
+  /v1/logistics/inventory-items:
+    get:
+      tags: [Logistics]
+      summary: List inventory items
+      parameters:
+        - name: part_id
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/InventoryItem' } }
+
+  /v1/logistics/movements:
+    post:
+      tags: [Logistics]
+      summary: Create inventory movement (issue/return/receipt/transfer)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inventory_item_id: { type: string, format: uuid }
+                movement_type: { type: string, enum: [RECEIPT, ISSUE, RETURN, TRANSFER, ADJUSTMENT] }
+                related_work_order_id: { type: string, format: uuid }
+                quantity: { type: number }
+              required: [inventory_item_id, movement_type, quantity]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InventoryMovement' }
+
+  /v1/logistics/cost-entries:
+    get:
+      tags: [Logistics]
+      summary: List cost entries
+      parameters:
+        - name: work_order_id
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/CostEntry' } }
+
+  # --- INTEGRATIONS ---
+  /v1/integrations/runs:
+    get:
+      tags: [Integrations]
+      summary: List integration runs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/IntegrationRun' } }
+
+    post:
+      tags: [Integrations]
+      summary: Trigger integration run (manual)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                connector: { type: string, enum: [SAP, SYMFONIA, GENERIC_CSV] }
+                direction: { type: string, enum: [EXPORT, IMPORT] }
+              required: [connector, direction]
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IntegrationRun' }
