@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: aviation
+      POSTGRES_PASSWORD: aviation
+      POSTGRES_DB: aviation
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+
+  api:
+    build:
+      context: ../../
+      dockerfile: infra/docker/api.Dockerfile
+    environment:
+      DATABASE_URL: postgresql://aviation:aviation@db:5432/aviation
+      REDIS_URL: redis://redis:6379/0
+      OIDC_ISSUER: http://keycloak:8080/realms/master
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+      - keycloak
+
+  worker:
+    build:
+      context: ../../
+      dockerfile: infra/docker/worker.Dockerfile
+    environment:
+      DATABASE_URL: postgresql://aviation:aviation@db:5432/aviation
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  db_data:
