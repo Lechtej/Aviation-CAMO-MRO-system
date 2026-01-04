@@ -21,3 +21,14 @@ Services:
 - Master document: `docs/master/AVIATION_CAMO_MRO_MASTER_DOC.md`
 - WBS / RBAC / ERD: `docs/00_product/`
 - API contract: `docs/02_api/openapi.yaml`
+
+
+## Runtime verification (KROK 11A)
+1. `docker compose -f infra/docker/docker-compose.yml up --build`
+2. Check:
+   - API health: `http://localhost:8000/health`
+   - API docs: `http://localhost:8000/docs`
+   - Keycloak: `http://localhost:8080` (Realm: `aviation`)
+3. Test users (dev only):
+   - platformadmin / platformadmin
+   - tenantadmin / tenantadmin

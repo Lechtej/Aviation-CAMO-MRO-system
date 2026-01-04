@@ -1,0 +1,94 @@
+{
+  "realm": "aviation",
+  "enabled": true,
+  "displayName": "Aviation CAMO & MRO",
+  "clients": [
+    {
+      "clientId": "aviation-api",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:8000/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "*"
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "PLATFORM_ADMIN"
+      },
+      {
+        "name": "TENANT_ADMIN"
+      },
+      {
+        "name": "AUDITOR"
+      },
+      {
+        "name": "CAMO_PLANNER"
+      },
+      {
+        "name": "CAMO_ENGINEER"
+      },
+      {
+        "name": "MAINT_PLANNER"
+      },
+      {
+        "name": "MECHANIC"
+      },
+      {
+        "name": "CERTIFYING_STAFF"
+      },
+      {
+        "name": "LOGISTICS_OFFICER"
+      },
+      {
+        "name": "FINANCE"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "tenantadmin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Tenant",
+      "lastName": "Admin",
+      "email": "tenantadmin@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "tenantadmin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "TENANT_ADMIN"
+      ]
+    },
+    {
+      "username": "platformadmin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Platform",
+      "lastName": "Admin",
+      "email": "platformadmin@example.local",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "platformadmin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PLATFORM_ADMIN"
+      ]
+    }
+  ]
+}

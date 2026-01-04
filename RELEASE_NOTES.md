@@ -14,6 +14,23 @@
 - (next)
 
 
+
+## v0.2.1 (2026-01-05) — Runtime baseline (Docker Compose)
+### Added
+- Keycloak realm import (infra/docker/keycloak/realm-aviation.json) + compose import-realm
+- API container serves OpenAPI from docs/02_api/openapi.yaml via `/docs` and `/openapi.json`
+- Worker container stable entrypoint (placeholder loop)
+- Dev smoke test script: scripts/dev/smoke_test.sh
+
+### Changed
+- Fixed Dockerfile paths for monorepo runtime
+
+### Fixed
+- API Docker entrypoint now runs `uvicorn main:app`
+
+### Security
+- OIDC bearer scheme kept in OpenAPI; token validation wired in future step (post-plumbing)
+
 ## v0.2.0 (2026-01-05) — API Contract baseline
 ### Added
 - OpenAPI v0.2.0: Core + CAMO + MRO + Logistics + Integrations endpoints (contract only)
