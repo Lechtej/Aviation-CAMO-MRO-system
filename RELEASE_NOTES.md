@@ -1,11 +1,5 @@
 # Release Notes
 
-## v0.2.11 (2026-01-05)
-- FIX: BAT – token handling hardened (trim) to prevent missing/invalid Authorization header on Windows.
-- FIX: /v1/tenants call now passes token via env var (avoids cmd quoting edge-cases) and uses PowerShell ErrorAction Stop.
-- KEEP: diagnostics mode, unified exit codes, SUMMARY section, logs to .\logs.
-
-
 ## Unreleased
 ### Added
 - (next)
@@ -20,20 +14,14 @@
 - (next)
 
 
-
-
-
-
-
-
-
-## v0.2.10 (2026-01-05)
-### Added
-- Windows BAT: diagnostics mode (DIAG=1 or /diag + dedicated start_and_test_DIAG_v0.2.10.bat) capturing: docker version/info (selected), docker compose version, docker compose ps, and port checks for 8000/8080.
-- Log footer SUMMARY section (OK/FAIL + cause + exit code + log file path) for self-service troubleshooting.
+## v0.2.25 (2026-01-05) — BAT DIAG polish fixes (KROK 14D)
+### Fixed
+- DIAG port checks now report correctly (store connection state before closing the TCP client).
+- Removed escaped quotes in "Log saved to" path output on Windows.
 
 ### Changed
-- Windows BAT: standardized failure exit codes for common failure points (Docker Engine, compose build/up, API health, Keycloak well-known, token, /v1/tenants).
+- Increased DIAG port-check connect timeout to 1500ms for stability on busy machines.
+
 
 ## v0.2.9 (2026-01-05) — BAT logging + Docker Engine retry (KROK 14B)
 ### Added
@@ -186,6 +174,19 @@ Date: 2026-01-05
 - This version uses ORM `metadata.create_all` as a temporary migration mechanism.
 - SQL reference migrations added under db/migrations (shared + tenant) for future hardening.
 
-## v0.2.12 — BAT PS1 stability for tenants/bootstrap
-- Fix: replace inline PowerShell blocks with dedicated scripts (call_tenants.ps1, call_bootstrap.ps1) to avoid parser/quoting issues on Windows.
-- Keep: DIAG mode, SUMMARY, exit codes, logs in .\logs, pause, start_and_test flow.
+## v0.2.19 (2026-01-05)
+- KROK 14C: stable Windows BAT hardening + diagnostics.
+- Added /diag mode, exit codes, and SUMMARY section.
+- Added PowerShell scripts for HTTP checks, token acquisition, and Bearer calls.
+- Added concurrency guard to prevent parallel runs.
+
+## v0.2.21 - 2026-01-05
+- KROK 14C: rebuilt Windows BAT runner with deterministic stop-on-fail and a single SUMMARY.
+- Rewrote scripts/bat/*.ps1 (health/well-known wait, token, bearer call, DIAG helpers) to eliminate corrupted lines and improve reliability.
+- Added concurrency lock to prevent parallel runs.
+
+## v0.2.24 - 2026-01-05
+### Changed
+- BAT logger uses safe `echo(`-style output to avoid `ECHO is off.` noise in console/logs.
+- DIAG now runs via `scripts/bat/run_diag.ps1` and writes diagnostic command output to both console and log file (docker version/info, compose ps, port checks).
+
