@@ -32,3 +32,11 @@ Services:
 3. Test users (dev only):
    - platformadmin / platformadmin
    - tenantadmin / tenantadmin
+
+## Troubleshooting
+- If API fails with `ModuleNotFoundError: psycopg2`, update to v0.2.3+ and rebuild images.
+
+## Security (dev)
+- Keycloak realm: `aviation` (imported on startup)
+- For `/v1/*` endpoints you must send a Bearer token.
+- Debug tenant header is OFF by default (`DEBUG_TENANT_HEADER=false`).

@@ -1,3 +1,8 @@
 fastapi
 uvicorn
 pyyaml
+PyJWT
+sqlalchemy
+psycopg[binary]
+psycopg2-binary
+cryptography

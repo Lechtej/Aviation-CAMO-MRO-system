@@ -11,3 +11,8 @@ echo
 echo "[3/3] Opening API docs..."
 echo "Open in browser: http://localhost:8000/docs"
 echo "Keycloak: http://localhost:8080 (realm: aviation)"
+
+
+echo "[4/4] Debug context (no tenant):"
+curl -fsS http://localhost:8000/v1/_debug/context | cat
+echo

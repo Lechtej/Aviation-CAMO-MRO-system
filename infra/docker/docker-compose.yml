@@ -33,7 +33,9 @@ services:
     environment:
       DATABASE_URL: postgresql://aviation:aviation@db:5432/aviation
       REDIS_URL: redis://redis:6379/0
-      OIDC_ISSUER: http://keycloak:8080/realms/master
+      OIDC_ISSUER: http://localhost:8080/realms/aviation
+      OIDC_JWKS_URL: http://host.docker.internal:8080/realms/aviation/protocol/openid-connect/certs
+      DEBUG_TENANT_HEADER: "false"
     ports:
       - "8000:8000"
     depends_on:

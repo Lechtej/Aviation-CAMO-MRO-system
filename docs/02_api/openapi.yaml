@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Aviation CAMO & MRO API
-  version: 0.2.0
+  version: 0.2.6
   description: >
     Contract baseline for multi-tenant CAMO + MRO + Logistics platform.
     Tenant isolation is implemented via PostgreSQL schema-per-tenant.
@@ -659,3 +659,23 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/IntegrationRun' }
+
+
+  /v1/_debug/context:
+    get:
+      tags: [Core]
+      summary: Debug tenant/auth context (local/dev)
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Tenant-Id:
+              schema: { type: string, format: uuid }
+            X-Tenant-Schema:
+              schema: { type: string }
+            X-Tenant-Source:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
