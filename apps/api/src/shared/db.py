@@ -36,3 +36,16 @@ SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 def get_db_session() -> Session:
     return SessionLocal()
+
+
+from sqlalchemy import text
+
+def ensure_schema(schema: str) -> None:
+    """Create schema if missing.
+
+    Intended for tenant bootstrap (schema-per-tenant) and shared dictionaries.
+    """
+    if not schema:
+        return
+    with engine.begin() as conn:
+        conn.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema}"'))

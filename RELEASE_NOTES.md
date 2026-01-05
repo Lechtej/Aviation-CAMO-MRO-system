@@ -1,5 +1,11 @@
 # Release Notes
 
+## v0.2.11 (2026-01-05)
+- FIX: BAT – token handling hardened (trim) to prevent missing/invalid Authorization header on Windows.
+- FIX: /v1/tenants call now passes token via env var (avoids cmd quoting edge-cases) and uses PowerShell ErrorAction Stop.
+- KEEP: diagnostics mode, unified exit codes, SUMMARY section, logs to .\logs.
+
+
 ## Unreleased
 ### Added
 - (next)
@@ -19,6 +25,26 @@
 
 
 
+
+
+## v0.2.10 (2026-01-05)
+### Added
+- Windows BAT: diagnostics mode (DIAG=1 or /diag + dedicated start_and_test_DIAG_v0.2.10.bat) capturing: docker version/info (selected), docker compose version, docker compose ps, and port checks for 8000/8080.
+- Log footer SUMMARY section (OK/FAIL + cause + exit code + log file path) for self-service troubleshooting.
+
+### Changed
+- Windows BAT: standardized failure exit codes for common failure points (Docker Engine, compose build/up, API health, Keycloak well-known, token, /v1/tenants).
+
+## v0.2.9 (2026-01-05) — BAT logging + Docker Engine retry (KROK 14B)
+### Added
+- Batch script now writes a timestamped run log to `.\logs\start_and_test_v0.2.9_YYYYMMDD_HHMMSS.log`.
+
+### Changed
+- Prerequisite check for Docker Engine now waits/retries before failing (10 attempts x 5s).
+
+### Fixed
+- Defensive cleanup against a stray standalone `\` line in the batch file that can trigger: `'\' is not recognized as an internal or external command`.
+- Improved error logging: key docker-compose / curl steps append stderr to the run log.
 
 ## v0.2.6 (2026-01-05) — Fix JWT audience handling + return 401 instead of 500
 ### Added
@@ -137,3 +163,29 @@
 
 ### Security
 - RBAC and auditability principles documented for MVP baseline
+## v0.2.8 (2026-01-05)
+
+- Inventory/Logistics skeleton (models + minimal CRUD + bootstrap + SQL migration refs)
+- Added start_and_test_v0.2.8.bat (includes Logistics bootstrap call)
+- Based on latest repo snapshot provided (Aviation-CAMO-MRO-system-main.zip)
+
+## v0.2.7 — Inventory/Logistics skeleton (KROK 14)
+Date: 2026-01-05
+
+### Added
+- Logistics module: SQLAlchemy ORM models for Part, Warehouse, Location, StockItem + shared UoM dictionary.
+- CRUD endpoints (minimal): /v1/logistics/parts, /warehouses, /locations, /stock-items, /uom.
+- Dev bootstrap endpoint: POST /v1/logistics/_admin/bootstrap (creates schemas/tables + seeds UoM).
+- Tenant schema auto-create: middleware ensures tenant schema exists (CREATE SCHEMA IF NOT EXISTS).
+
+### Docs
+- Added high-level WBS: docs/01_architecture/wbs_modules.md
+- Updated architecture overview to reference WBS.
+
+### Notes
+- This version uses ORM `metadata.create_all` as a temporary migration mechanism.
+- SQL reference migrations added under db/migrations (shared + tenant) for future hardening.
+
+## v0.2.12 — BAT PS1 stability for tenants/bootstrap
+- Fix: replace inline PowerShell blocks with dedicated scripts (call_tenants.ps1, call_bootstrap.ps1) to avoid parser/quoting issues on Windows.
+- Keep: DIAG mode, SUMMARY, exit codes, logs in .\logs, pause, start_and_test flow.

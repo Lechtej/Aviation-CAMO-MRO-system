@@ -8,7 +8,8 @@ import os
 
 from modules.core.security import build_auth_context, AuthError
 from modules.core.tenant_context import build_tenant_context
-from shared.db import current_schema
+from shared.db import current_schema, ensure_schema
+from modules.logistics.router import router as logistics_router
 
 OPENAPI_YAML_PATH = Path("/app/openapi.yaml")
 
@@ -21,6 +22,8 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+app.include_router(logistics_router)
 
 _cached_schema: dict | None = None
 
@@ -85,6 +88,7 @@ async def tenant_context_middleware(request: Request, call_next):
         ctx = build_tenant_context(tenant_id, source=source or "unknown")
         request.state.tenant = ctx
         current_schema.set(ctx.schema)
+        ensure_schema(ctx.schema)
         response: Response = await call_next(request)
         response.headers["X-Tenant-Id"] = ctx.tenant_id
         response.headers["X-Tenant-Schema"] = ctx.schema
