@@ -51,6 +51,9 @@ class Part(Base):
     )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    # Transitional tenant isolation (DB column added in v0.2.28).
+    # Nullable for migration compatibility; API enforces per-tenant access.
+    tenant_id = Column(UUID(as_uuid=True), nullable=True)
     part_number = Column(String(64), nullable=False)
     description = Column(String(255), nullable=True)
     part_type = Column(String(16), nullable=False)  # PartType values

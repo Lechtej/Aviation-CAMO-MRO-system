@@ -21,7 +21,7 @@ def load_openapi_yaml() -> dict:
 
 app = FastAPI(
     title="Aviation CAMO & MRO API",
-    version="0.2.27",
+    version="0.2.28",
     docs_url="/docs",
     redoc_url="/redoc",
 )
