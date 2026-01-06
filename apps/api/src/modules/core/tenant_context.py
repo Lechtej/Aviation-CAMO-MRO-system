@@ -13,15 +13,27 @@ Security note:
 
 from dataclasses import dataclass
 from uuid import UUID
-import re
 
-SCHEMA_PREFIX = "t_"  # schema name will be: t_<tenant_uuid_without_dashes>
+from .tenants_repo import get_schema_name_for_tenant_id
 
-def schema_name_for_tenant_id(tenant_id: str) -> str:
-    # Normalize UUID (strip dashes). Validate format.
+FALLBACK_SCHEMA_PREFIX = "t_"  # fallback schema name: t_<tenant_uuid_without_dashes>
+
+
+def _fallback_schema_name_for_tenant_id(tenant_id: str) -> str:
     tid = str(UUID(tenant_id))
     compact = tid.replace("-", "")
-    return f"{SCHEMA_PREFIX}{compact}"
+    return f"{FALLBACK_SCHEMA_PREFIX}{compact}"
+
+
+def schema_name_for_tenant_id(tenant_id: str) -> str:
+    """Resolve schema name for a tenant.
+
+    - Primary: lookup in public.tenants (schema_name)
+    - Fallback: deterministic UUID-based schema (t_<uuid_without_dashes>)
+    """
+    tid = str(UUID(tenant_id))
+    found = get_schema_name_for_tenant_id(tid)
+    return found or _fallback_schema_name_for_tenant_id(tid)
 
 @dataclass(frozen=True)
 class TenantContext:

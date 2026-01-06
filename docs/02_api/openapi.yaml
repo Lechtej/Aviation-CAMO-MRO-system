@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Aviation CAMO & MRO API
-  version: 0.2.7
+  version: 0.2.26
   description: 'Contract baseline for multi-tenant CAMO + MRO + Logistics platform.
     Tenant isolation is implemented via PostgreSQL schema-per-tenant.
 
@@ -14,6 +14,7 @@ tags:
 - name: CAMO
 - name: MRO
 - name: Logistics
+- name: Inventory
 - name: Integrations
 components:
   securitySchemes:
@@ -58,9 +59,11 @@ components:
         id:
           type: string
           format: uuid
+        code:
+          type: string
         name:
           type: string
-        aoc_number:
+        schema_name:
           type: string
         status:
           type: string
@@ -72,7 +75,9 @@ components:
           format: date-time
       required:
       - id
+      - code
       - name
+      - schema_name
       - status
     User:
       type: object
@@ -652,11 +657,12 @@ paths:
             schema:
               type: object
               properties:
+                code:
+                  type: string
                 name:
                   type: string
-                aoc_number:
-                  type: string
               required:
+              - code
               - name
       responses:
         '201':
@@ -665,6 +671,129 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tenant'
+
+  /v1/inventory/parts:
+    get:
+      tags:
+      - Inventory
+      summary: List parts (tenant-scoped)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Part'
+    post:
+      tags:
+      - Inventory
+      summary: Create part (tenant-scoped)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                part_number:
+                  type: string
+                description:
+                  type: string
+                  nullable: true
+                part_type:
+                  type: string
+                  enum: [ROTABLE, CONSUMABLE, EXPENDABLE]
+                uom_code:
+                  type: string
+                  nullable: true
+                is_pool_item:
+                  type: boolean
+              required: [part_number, part_type, is_pool_item]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Part'
+        '409':
+          description: Conflict
+
+  /v1/inventory/parts/{part_id}:
+    get:
+      tags:
+      - Inventory
+      summary: Get part (tenant-scoped)
+      parameters:
+      - name: part_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Part'
+        '404':
+          description: Not found
+    put:
+      tags:
+      - Inventory
+      summary: Update part (tenant-scoped)
+      parameters:
+      - name: part_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  nullable: true
+                part_type:
+                  type: string
+                  enum: [ROTABLE, CONSUMABLE, EXPENDABLE]
+                uom_code:
+                  type: string
+                  nullable: true
+                is_pool_item:
+                  type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Part'
+        '404':
+          description: Not found
+    delete:
+      tags:
+      - Inventory
+      summary: Delete part (tenant-scoped)
+      parameters:
+      - name: part_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: Deleted
   /v1/users:
     get:
       tags:

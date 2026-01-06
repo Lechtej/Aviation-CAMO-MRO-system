@@ -68,7 +68,16 @@ class JwtVerifier:
                 "verify_exp": False,
             })
 
-        signing_key = self.jwks_client.get_signing_key_from_jwt(token).key
+        # NOTE: get_signing_key_from_jwt() parses the JWT header and can raise
+        # DecodeError when the token is malformed (e.g. placeholder text).
+        # Wrap it so callers consistently get AuthError -> 401 (not 500).
+        try:
+            signing_key = self.jwks_client.get_signing_key_from_jwt(token).key
+        except jwt.PyJWTError as e:
+            raise AuthError(str(e)) from e
+        except Exception as e:
+            # Defensive: JWKS client can throw non-PyJWT exceptions.
+            raise AuthError(str(e)) from e
 
         options = {"require": ["exp", "iat"]}
         kwargs: Dict[str, Any] = {

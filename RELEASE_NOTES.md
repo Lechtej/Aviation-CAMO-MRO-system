@@ -14,6 +14,34 @@
 - (next)
 
 
+## v0.2.27 (2026-01-06) — Auth/middleware hardening (fix 500 on bad/empty tokens)
+
+### Fixed
+- API: invalid/malformed Bearer token now returns **401** instead of **500** (wrap JWKS signing-key resolution errors).
+- API: middleware no longer leaks `HTTPException` as `ExceptionGroup` -> **500**; it is translated into a proper JSON response.
+
+### Notes
+- Operational change only: no API contract changes for tenants/inventory.
+- PowerShell reminder: use the token produced by `scripts\bat\kc_get_token.ps1` (placeholder text in Authorization header will now return 401).
+
+## v0.2.26 (2026-01-05) — KROK 15: First multi-tenant vertical slice (Tenants + Inventory)
+
+### Added
+- Core: persistent `public.tenants` table (id, code, name, schema_name, created_at).
+- Core: real `/v1/tenants` implementation (GET list, POST create) for `PLATFORM_ADMIN`.
+- Multi-tenant bootstrap: on tenant creation the API creates the tenant schema (`tenant_<code>`) and runs minimal migrations (ORM `metadata.create_all`) inside that schema.
+- Inventory: new tenant-scoped endpoints `/v1/inventory/parts` (minimal CRUD) backed by tenant schema tables.
+
+### Changed
+- Tenant context: schema is resolved from `public.tenants.schema_name` when available; fallback remains deterministic UUID-based schema (`t_<uuid_without_dashes>`).
+- API version bumped to `0.2.26`.
+- OpenAPI contract updated (tenant fields: code + schema_name; added Inventory tag and `/v1/inventory/parts`).
+
+### Notes
+- Tenant header/token contract remains `X-Tenant-Id` = tenant UUID.
+- For smoke test C), use the tenant UUID returned from POST `/v1/tenants` as `X-Tenant-Id` for Inventory calls.
+
+
 ## v0.2.25 (2026-01-05) — BAT DIAG polish fixes (KROK 14D)
 ### Fixed
 - DIAG port checks now report correctly (store connection state before closing the TCP client).

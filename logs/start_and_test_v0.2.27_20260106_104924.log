@@ -1,0 +1,173 @@
+Log saved to:
+  "C:\Users\tejwa\Downloads\AviationCAMO-MRO_v0.2.27_AUTH-MW-FIX\AviationCAMO-MRO_v0.2.27_AUTH-MW-FIX\logs\start_and_test_v0.2.27_20260106_104924.log"
+
+[0/7] Checking prerequisites...
+OK.
+
+[3/7] Waiting for API /health (max 90s)...
+OK 200 http://localhost:8000/health
+
+[4/7] Waiting for Keycloak well-known (max 120s)...
+OK 200 http://localhost:8080/realms/aviation/.well-known/openid-configuration
+
+[5/7] Getting token (platformadmin)...
+Token OK.
+
+[6/7] Calling /v1/tenants with Bearer token...
+[]
+
+SUCCESS.
+
+===== SUMMARY =====
+RESULT=OK
+CAUSE=All checks passed.
+EXIT_CODE=0
+LOG_FILE=C:\Users\tejwa\Downloads\AviationCAMO-MRO_v0.2.27_AUTH-MW-FIX\AviationCAMO-MRO_v0.2.27_AUTH-MW-FIX\logs\start_and_test_v0.2.27_20260106_104924.log
+--- Press any key to close ---
+ Container docker-worker-1  Stopping
+ Container docker-api-1  Stopping
+ Container docker-api-1  Stopped
+ Container docker-api-1  Removing
+ Container docker-api-1  Removed
+ Container docker-keycloak-1  Stopping
+ Container docker-keycloak-1  Stopped
+ Container docker-keycloak-1  Removing
+ Container docker-keycloak-1  Removed
+ Container docker-worker-1  Stopped
+ Container docker-worker-1  Removing
+ Container docker-worker-1  Removed
+ Container docker-redis-1  Stopping
+ Container docker-db-1  Stopping
+ Container docker-db-1  Stopped
+ Container docker-db-1  Removing
+ Container docker-db-1  Removed
+ Container docker-redis-1  Stopped
+ Container docker-redis-1  Removing
+ Container docker-redis-1  Removed
+ Network docker_default  Removing
+ Network docker_default  Removed
+
+[2/7] Starting stack (build)...
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.26kB done
+#1 DONE 0.0s
+
+#2 [api internal] load build definition from api.Dockerfile
+#2 transferring dockerfile: 400B done
+#2 DONE 0.0s
+
+#3 [worker internal] load build definition from worker.Dockerfile
+#3 transferring dockerfile: 181B done
+#3 DONE 0.0s
+
+#4 [worker internal] load metadata for docker.io/library/python:3.12-slim
+#4 DONE 0.5s
+
+#5 [worker internal] load .dockerignore
+#5 transferring context: 2B 0.0s done
+#5 DONE 0.0s
+
+#6 [api 1/4] FROM docker.io/library/python:3.12-slim@sha256:a75662dfec8d90bd7161c91050be2e0a9b21d284f3b7a7253d5db25f7d583fb3
+#6 resolve docker.io/library/python:3.12-slim@sha256:a75662dfec8d90bd7161c91050be2e0a9b21d284f3b7a7253d5db25f7d583fb3 0.0s done
+#6 DONE 0.0s
+
+#7 [api internal] load build context
+#7 transferring context: 1.74kB 0.0s done
+#7 DONE 0.0s
+
+#8 [worker internal] load build context
+#8 transferring context: 137B 0.0s done
+#8 DONE 0.0s
+
+#9 [api 3/6] COPY apps/api/requirements.txt /app/requirements.txt
+#9 CACHED
+
+#10 [api 4/6] RUN pip install --no-cache-dir -r /app/requirements.txt
+#10 CACHED
+
+#11 [api 5/6] COPY apps/api/src/ /app/
+#11 CACHED
+
+#12 [api 6/6] COPY docs/02_api/openapi.yaml /app/openapi.yaml
+#12 CACHED
+
+#13 [worker 2/4] WORKDIR /app
+#13 CACHED
+
+#14 [worker 3/4] COPY apps/worker/src/ /app/
+#14 CACHED
+
+#15 [worker 4/4] RUN pip install --no-cache-dir celery redis
+#15 CACHED
+
+#16 [worker] exporting to image
+#16 exporting layers done
+#16 exporting manifest sha256:5f7d028e23022a972a58ffb7b4b31739383e596b14246df1ae7bbb0eace426b0 done
+#16 exporting config sha256:ecaf434d569d35cf7ce7d92974fc52054ea9fe56f907331265449ff7dbe78abc 0.0s done
+#16 exporting attestation manifest sha256:b3e13b25f901e3e26678b1410b8cf90dc520b0d780ff4f6d76aded29b94c5b9e
+#16 exporting attestation manifest sha256:b3e13b25f901e3e26678b1410b8cf90dc520b0d780ff4f6d76aded29b94c5b9e 0.1s done
+#16 exporting manifest list sha256:b850aa86683e23aa38aa84ec9b0f6fdb44d45860f2988e3862726782fba578f8 0.0s done
+#16 naming to docker.io/library/docker-worker:latest done
+#16 unpacking to docker.io/library/docker-worker:latest 0.0s done
+#16 DONE 0.2s
+
+#17 [api] exporting to image
+#17 exporting layers done
+#17 exporting manifest sha256:118cbeef576dad815a8b24ff2eb51057e94df510e7e7aee26e760cdfaa080f0d done
+#17 exporting config sha256:0386abcabc7c0ea0d0236ea4ed8e80cd307cc0bcdcae9c6882e66e0511d2fca4 done
+#17 exporting attestation manifest sha256:2b36b1812b1e6568bf8a3528be42902c5011e8fdeee37008550c9b282f56e734 0.1s done
+#17 exporting manifest list sha256:621a8a27afd8831086f001c9495241ac17495231200208a80be2f0df6d9aab93 0.0s done
+#17 naming to docker.io/library/docker-api:latest done
+#17 unpacking to docker.io/library/docker-api:latest 0.0s done
+#17 DONE 0.2s
+
+#18 [api] resolving provenance for metadata file
+#18 DONE 0.0s
+
+#19 [worker] resolving provenance for metadata file
+#19 DONE 0.0s
+ docker-api  Built
+ docker-worker  Built
+ Network docker_default  Creating
+ Network docker_default  Created
+ Container docker-redis-1  Creating
+ Container docker-db-1  Creating
+ Container docker-keycloak-1  Creating
+ Container docker-keycloak-1  Created
+ Container docker-redis-1  Created
+ Container docker-db-1  Created
+ Container docker-api-1  Creating
+ Container docker-worker-1  Creating
+ Container docker-api-1  Created
+ Container docker-worker-1  Created
+ Container docker-keycloak-1  Starting
+ Container docker-redis-1  Starting
+ Container docker-db-1  Starting
+ Container docker-db-1  Started
+ Container docker-redis-1  Started
+ Container docker-worker-1  Starting
+ Container docker-keycloak-1  Started
+ Container docker-api-1  Starting
+ Container docker-worker-1  Started
+ Container docker-api-1  Started
+
+[3/7] Waiting for API /health (max 90s)...
+OK 200 http://localhost:8000/health
+
+[4/7] Waiting for Keycloak well-known (max 120s)...
+OK 200 http://localhost:8080/realms/aviation/.well-known/openid-configuration
+
+[5/7] Getting token (platformadmin)...
+Token OK.
+
+[6/7] Calling /v1/tenants with Bearer token...
+[]
+
+SUCCESS.
+
+===== SUMMARY =====
+RESULT=OK
+CAUSE=All checks passed.
+EXIT_CODE=0
+LOG_FILE=C:\Users\tejwa\Downloads\AviationCAMO-MRO_v0.2.27_AUTH-MW-FIX\AviationCAMO-MRO_v0.2.27_AUTH-MW-FIX\logs\start_and_test_v0.2.27_20260106_104924.log
+--- Press any key to close ---
