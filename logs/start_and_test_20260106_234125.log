@@ -1,0 +1,162 @@
+=== AviationCAMO-MRO start_and_test (v0.2.42) ===
+Root: C:\Users\tejwa\Downloads\AviationCAMO-MRO_v0.2.42_MAINTENANCE-EVENTS\AviationCAMO-MRO_v0.2.42_MAINTENANCE-EVENTS\
+Log:  C:\Users\tejwa\Downloads\AviationCAMO-MRO_v0.2.42_MAINTENANCE-EVENTS\AviationCAMO-MRO_v0.2.42_MAINTENANCE-EVENTS\logs\start_and_test_20260106_234125.log
+Running: docker compose -f infra\docker\docker-compose.yml up -d --build
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.92kB done
+#1 DONE 0.0s
+
+#2 [worker internal] load build definition from worker.Dockerfile
+#2 transferring dockerfile: 181B done
+#2 DONE 0.1s
+
+#3 [api internal] load build definition from api.Dockerfile
+#3 transferring dockerfile: 400B done
+#3 DONE 0.1s
+
+#4 [web internal] load build definition from web.Dockerfile
+#4 transferring dockerfile: 180B done
+#4 DONE 0.1s
+
+#5 [worker internal] load metadata for docker.io/library/python:3.12-slim
+#5 ...
+
+#6 [auth] library/python:pull token for registry-1.docker.io
+#6 DONE 0.0s
+
+#5 [web internal] load metadata for docker.io/library/python:3.12-slim
+#5 DONE 0.9s
+
+#7 [api internal] load .dockerignore
+#7 transferring context: 2B done
+#7 DONE 0.0s
+
+#8 [worker internal] load build context
+#8 DONE 0.0s
+
+#9 [api 1/4] FROM docker.io/library/python:3.12-slim@sha256:a75662dfec8d90bd7161c91050be2e0a9b21d284f3b7a7253d5db25f7d583fb3
+#9 resolve docker.io/library/python:3.12-slim@sha256:a75662dfec8d90bd7161c91050be2e0a9b21d284f3b7a7253d5db25f7d583fb3
+#9 resolve docker.io/library/python:3.12-slim@sha256:a75662dfec8d90bd7161c91050be2e0a9b21d284f3b7a7253d5db25f7d583fb3 0.1s done
+#9 DONE 0.1s
+
+#10 [web internal] load build context
+#10 transferring context: 5.07kB done
+#10 DONE 0.1s
+
+#11 [web 2/4] WORKDIR /app
+#11 CACHED
+
+#12 [web 3/3] COPY apps/web/ /app/
+#12 CACHED
+
+#13 [api internal] load build context
+#13 transferring context: 229.64kB 0.0s done
+#13 DONE 0.1s
+
+#8 [worker internal] load build context
+#8 transferring context: 536B done
+#8 DONE 0.1s
+
+#14 [web] exporting to image
+#14 exporting layers done
+#14 exporting manifest sha256:6ed47de75e4750c98544f90f496041a0a883f5cfbeda8dd162e9642a7e183977 done
+#14 exporting config sha256:525338c5b312bbd3d749febc9a3e8fe76cd1c3b546775c6c814e8ce78119c17b done
+#14 exporting attestation manifest sha256:7b018fdb2eaeb8af1387ed8fac24d29104013c81fa70ddeb846ef8ab4d34d375
+#14 ...
+
+#15 [api 3/6] COPY apps/api/requirements.txt /app/requirements.txt
+#15 CACHED
+
+#16 [api 4/6] RUN pip install --no-cache-dir -r /app/requirements.txt
+#16 CACHED
+
+#17 [worker 3/4] COPY apps/worker/src/ /app/
+#17 CACHED
+
+#11 [worker 2/4] WORKDIR /app
+#11 CACHED
+
+#18 [worker 4/4] RUN pip install --no-cache-dir celery redis
+#18 CACHED
+
+#14 [web] exporting to image
+#14 exporting attestation manifest sha256:7b018fdb2eaeb8af1387ed8fac24d29104013c81fa70ddeb846ef8ab4d34d375 0.1s done
+#14 exporting manifest list sha256:55c57cb1d09f567525c302fb29bc365a5274f5494659b7e03dbe034b8376ed20 0.0s done
+#14 naming to docker.io/library/docker-web:latest
+#14 naming to docker.io/library/docker-web:latest 0.0s done
+#14 unpacking to docker.io/library/docker-web:latest 0.0s done
+#14 DONE 0.2s
+
+#19 [api 5/6] COPY apps/api/src/ /app/
+#19 DONE 0.1s
+
+#20 [worker] exporting to image
+#20 exporting layers done
+#20 exporting manifest sha256:5f7d028e23022a972a58ffb7b4b31739383e596b14246df1ae7bbb0eace426b0 0.0s done
+#20 exporting config sha256:ecaf434d569d35cf7ce7d92974fc52054ea9fe56f907331265449ff7dbe78abc 0.0s done
+#20 exporting attestation manifest sha256:8a4b704a806b0da0d2edfaf42e2e789a5bb9104a47406c22e6bec7c585f24bf6 0.1s done
+#20 exporting manifest list sha256:4a3408d07ce047367c4d2339db056e6122c12ea61a764b2c71ceb41a62727311 0.1s done
+#20 naming to docker.io/library/docker-worker:latest
+#20 naming to docker.io/library/docker-worker:latest 0.0s done
+#20 unpacking to docker.io/library/docker-worker:latest 0.0s done
+#20 DONE 0.3s
+
+#21 [api 6/6] COPY docs/02_api/openapi.yaml /app/openapi.yaml
+#21 DONE 0.1s
+
+#22 [api] exporting to image
+#22 exporting layers 0.3s done
+#22 ...
+
+#23 [web] resolving provenance for metadata file
+#23 DONE 0.0s
+
+#24 [worker] resolving provenance for metadata file
+#24 DONE 0.0s
+
+#22 [api] exporting to image
+#22 exporting manifest sha256:3e52330d7fe6c79f73d8c08132563d8f15cbaf630f3b99564aeeed498dca8ed5 0.0s done
+#22 exporting config sha256:e3f387616effbfb19be0fd7990d79f0296e2e4a2bc248ffd4a399c302e3d4d3e 0.0s done
+#22 exporting attestation manifest sha256:4b5e1a3ee13ecf5ae20c7f7bb02530dad95a14d2b7b69b908d5e32bda7f18d5b 0.0s done
+#22 exporting manifest list sha256:28994dedbf20d1fbb0b336e6c2b6e03ecadacf0b70ca0d723530b1ef533c18fa
+#22 exporting manifest list sha256:28994dedbf20d1fbb0b336e6c2b6e03ecadacf0b70ca0d723530b1ef533c18fa 0.0s done
+#22 naming to docker.io/library/docker-api:latest done
+#22 unpacking to docker.io/library/docker-api:latest 0.1s done
+#22 DONE 0.5s
+
+#25 [api] resolving provenance for metadata file
+#25 DONE 0.0s
+ docker-api  Built
+ docker-web  Built
+ docker-worker  Built
+ Container docker-redis-1  Running
+ Container docker-keycloak-1  Recreate
+ Container docker-db-1  Running
+ Container docker-worker-1  Recreate
+ Container docker-keycloak-1  Recreated
+ Container docker-api-1  Recreate
+ Container docker-api-1  Recreated
+ Container docker-web-1  Recreate
+ Container docker-worker-1  Recreated
+ Container docker-web-1  Recreated
+ Container docker-keycloak-1  Starting
+ Container docker-worker-1  Starting
+ Container docker-worker-1  Started
+ Container docker-keycloak-1  Started
+ Container docker-api-1  Starting
+ Container docker-api-1  Started
+ Container docker-web-1  Starting
+ Container docker-web-1  Started
+Running: docker compose -f infra\docker\docker-compose.yml ps
+NAME                IMAGE                            COMMAND                  SERVICE    CREATED         STATUS                  PORTS
+docker-api-1        docker-api                       "uvicorn main:app --…"   api        2 seconds ago   Up Less than a second   0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp
+docker-db-1         postgres:16                      "docker-entrypoint.s…"   db         12 hours ago    Up 12 hours             0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+docker-keycloak-1   quay.io/keycloak/keycloak:25.0   "/opt/keycloak/bin/k…"   keycloak   3 seconds ago   Up Less than a second   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
+docker-redis-1      redis:7                          "docker-entrypoint.s…"   redis      12 hours ago    Up 12 hours             0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
+docker-web-1        docker-web                       "python -m http.serv…"   web        2 seconds ago   Up Less than a second   0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+docker-worker-1     docker-worker                    "python worker.py"       worker     3 seconds ago   Up Less than a second   
+Healthcheck API: http://localhost:8000/docs
+OK: API is up (HTTP 200).
+Healthcheck UI: http://localhost:3000
+OK: UI is up (HTTP 200).
+Done.

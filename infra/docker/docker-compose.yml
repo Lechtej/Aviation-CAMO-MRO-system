@@ -54,5 +54,14 @@ services:
       - db
       - redis
 
+  web:
+    build:
+      context: ../../
+      dockerfile: infra/docker/web.Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
 volumes:
   db_data:

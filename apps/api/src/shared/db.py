@@ -34,8 +34,19 @@ def _set_search_path(dbapi_conn, conn_record, conn_proxy):
 
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
-def get_db_session() -> Session:
-    return SessionLocal()
+
+def get_db_session():
+    """FastAPI dependency: provide a DB session and always close it.
+
+    IMPORTANT: Returning a Session instance directly will leak connections because
+    FastAPI won't automatically close it. Using a generator dependency ensures
+    sessions are closed even if a request raises.
+    """
+    db: Session = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 from sqlalchemy import text

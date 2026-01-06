@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Aviation CAMO & MRO API
-  version: 0.2.30
+  version: 0.2.37
   description: 'Contract baseline for multi-tenant CAMO + MRO + Logistics platform.
     Tenant isolation is implemented via PostgreSQL schema-per-tenant.
 
@@ -676,6 +676,133 @@ components:
         type: string
       active:
         type: boolean
+
+  AircraftMaintenanceEventCreate:
+    type: object
+    required: [title]
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+        nullable: true
+      planned_start_at:
+        type: string
+        format: date-time
+        nullable: true
+      planned_end_at:
+        type: string
+        format: date-time
+        nullable: true
+      status:
+        type: string
+        enum: [OPEN, IN_PROGRESS, DONE, CANCELED]
+
+  AircraftMaintenanceEventUpdate:
+    type: object
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+        nullable: true
+      planned_start_at:
+        type: string
+        format: date-time
+        nullable: true
+      planned_end_at:
+        type: string
+        format: date-time
+        nullable: true
+      status:
+        type: string
+        enum: [OPEN, IN_PROGRESS, DONE, CANCELED]
+      mro_notes:
+        type: string
+        nullable: true
+
+  AircraftMaintenanceEventOut:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      aircraft_id:
+        type: string
+        format: uuid
+      created_by_tenant_id:
+        type: string
+        format: uuid
+      title:
+        type: string
+      description:
+        type: string
+        nullable: true
+      status:
+        type: string
+        enum: [OPEN, IN_PROGRESS, DONE, CANCELED]
+      planned_start_at:
+        type: string
+        format: date-time
+        nullable: true
+      planned_end_at:
+        type: string
+        format: date-time
+        nullable: true
+      mro_notes:
+        type: string
+        nullable: true
+      created_at:
+        type: string
+        format: date-time
+      updated_at:
+        type: string
+        format: date-time
+
+  # Global (tenant-isolated) maintenance events endpoints
+  MaintenanceEventCreate:
+    type: object
+    required: [aircraft_id, event_type]
+    properties:
+      aircraft_id:
+        type: string
+        format: uuid
+      event_type:
+        type: string
+        description: Type/discriminator of the event (e.g. LINE_MAINTENANCE)
+      description:
+        type: string
+        nullable: true
+      status:
+        type: string
+        enum: [OPEN, IN_PROGRESS, DONE, CANCELLED]
+
+  MaintenanceEventOut:
+    type: object
+    required: [id, aircraft_id, tenant_id, status, created_at]
+    properties:
+      id:
+        type: string
+        format: uuid
+      aircraft_id:
+        type: string
+        format: uuid
+      tenant_id:
+        type: string
+        format: uuid
+        description: Tenant that created the event
+      event_type:
+        type: string
+        nullable: true
+      description:
+        type: string
+        nullable: true
+      status:
+        type: string
+        enum: [OPEN, IN_PROGRESS, DONE, CANCELLED]
+      created_at:
+        type: string
+        format: date-time
 
   parameters:
     TenantIdHeader:
@@ -1775,6 +1902,152 @@ paths:
               schema:
                 $ref: '#/components/schemas/MroAccess'
 
+  /v1/maintenance-events:
+    get:
+      tags: [Maintenance Events]
+      summary: List maintenance events (tenant-isolated)
+      parameters:
+      - name: aircraft_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MaintenanceEventOut'
+    post:
+      tags: [Maintenance Events]
+      summary: Create maintenance event (owner or MRO_EDITOR)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceEventCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceEventOut'
+
+  /v1/maintenance-events/{event_id}:
+    delete:
+      tags: [Maintenance Events]
+      summary: Delete maintenance event (tenant-scoped)
+      parameters:
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: No Content
+
+
+  /v1/aircraft/{aircraft_id}/maintenance-events:
+    get:
+      tags: [Aircraft]
+      summary: List maintenance events (owner or assigned MRO)
+      parameters:
+      - name: aircraft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AircraftMaintenanceEventOut'
+    post:
+      tags: [Aircraft]
+      summary: Create maintenance event (owner only)
+      parameters:
+      - name: aircraft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AircraftMaintenanceEventCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AircraftMaintenanceEventOut'
+
+  /v1/aircraft/{aircraft_id}/maintenance-events/{event_id}:
+    put:
+      tags: [Aircraft]
+      summary: Update maintenance event (owner or assigned MRO)
+      parameters:
+      - name: aircraft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AircraftMaintenanceEventUpdate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AircraftMaintenanceEventOut'
+    delete:
+      tags: [Aircraft]
+      summary: Delete maintenance event (owner or assigned MRO)
+      parameters:
+      - name: aircraft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '204':
+          description: No Content
   /v1/aircraft/_admin/bootstrap:
     post:
       tags: [Aircraft]

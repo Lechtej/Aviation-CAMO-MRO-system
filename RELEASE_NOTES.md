@@ -1,4 +1,260 @@
-# Release Notes
+# AviationCAMO-MRO — Release Notes (cumulative)
+
+## v0.2.42 (2026-01-06)
+
+### Fixed
+- **CORS / UI tester**: API teraz akceptuje żądania z UI uruchomionego na `http://localhost` (dowolny port), dzięki czemu przycisk **Send request** nie kończy się błędem typu „Failed to fetch”.
+
+## v0.2.41 (2026-01-06)
+
+### Fixed
+- **UI draft**: naprawione niespójne ID elementów (index.html vs app.js). UI na `http://localhost:3000` działa po starcie stacka.
+- UI tester ma teraz prosty, stabilny zestaw akcji: **Ping /docs**, wysyłka requestu do dowolnej ścieżki, opcjonalny Bearer token.
+
+## v0.2.40 (2026-01-06)
+
+### Fixed
+- **start_and_test.bat**: naprawiony healthcheck `/docs` (wcześniej w pliku był ucięty fragment komendy PowerShell, co zawsze kończyło się błędem mimo działającego API).
+- Healthcheck jest teraz **odporny na wolny start**: do 30 prób z krótkim retry.
+
+## v0.2.39 (2026-01-06)
+
+### Added
+- **UI draft (very first)**: minimal static web UI served at `http://localhost:3000` (container `web`) with basic API helpers.
+
+### Changed
+- Windows `.bat` scripts no longer depend on `tee` and keep the console open on errors (better for double-click runs).
+
+### Fixed
+- Diagnostic script now calls the main script via absolute path (so it works from any current directory).
+
+## v0.2.38
+
+- Consolidated all per-version release notes into this single cumulative file.
+- Kept only the latest BAT scripts in the ZIP (start_and_test.bat, start_and_test_DIAG.bat).
+
+## v0.2.28
+
+# AviationCAMO-MRO v0.2.28 — Tenant Isolation (Inventory / Parts)
+
+## Why
+A confirmed data leak allowed Tenant B to see `Parts` created by Tenant A via `GET /v1/inventory/parts`.
+
+## Changes
+### DB
+- `public.parts`
+  - added column `tenant_id uuid` (nullable; transitional migration step)
+  - added index `idx_parts_tenant_id` on `(tenant_id)`
+
+### API
+- All `/v1/inventory/parts*` endpoints are now tenant-scoped.
+  - **CREATE** writes `tenant_id` from the resolved tenant context.
+  - **LIST** filters by `tenant_id`.
+  - **GET/UPDATE/DELETE** only operate within the caller's tenant (otherwise `404`).
+- Requests without a resolved tenant context are rejected with `403 Tenant context missing`.
+
+## Notes / Limitations
+- `tenant_id` is nullable to allow a safe transition. Records with `tenant_id = NULL` will not be returned by tenant-scoped list queries.
+- Existing unique constraint on `part_number` remains global (not per-tenant) in this version.
+
+## How to test (A vs B)
+1. Obtain tokens for Tenant A and Tenant B (token must contain `tenant_id` claim or use `X-Tenant-Id` only with `PLATFORM_ADMIN`).
+2. Tenant A: `POST /v1/inventory/parts` (create a new part).
+3. Tenant B: `GET /v1/inventory/parts`.
+
+Expected: Tenant B does **not** see Tenant A's part.
+
+## # v0.2.29 — PO Guide + BAT cleanup (2026-01-06)
+### Added
+- PO-friendly guide: `docs/00_product/PO_GUIDE.md`
+- Updated Windows helpers: `start_and_test_v0.2.29.bat`, `start_and_test_DIAG_v0.2.29.bat`
+
+### Changed
+- Version bump only (no functional changes vs v0.2.28)
+
+### Removed
+- Older `start_and_test*.bat` versions from the ZIP (keep only latest)
+
+## v0.2.30
+
+# AviationCAMO-MRO v0.2.30 — Release Notes
+
+## Zmiany funkcjonalne
+- **Aircraft: własność + dostęp MRO**
+  - Nowe endpointy `/v1/aircraft`:
+    - Owner tenant może tworzyć i usuwać samoloty.
+    - Owner tenant może nadawać/odbierać dostęp MRO (`/mro-access`).
+    - Tenant MRO widzi przypisane samoloty i może aktualizować tylko **status_tech** i **notes**.
+
+## Zmiany techniczne
+- Dodano tabele w `public`:
+  - `public.aircraft`
+  - `public.aircraft_mro_access`
+- Dodano dev bootstrap: `POST /v1/aircraft/_admin/bootstrap`.
+
+## Zgodność / kompatybilność
+- Zmiany są addytywne (bez migracji istniejących danych).
+- Wersja jest przygotowana pod późniejsze, formalne migracje.
+
+## v0.2.31
+
+# AviationCAMO-MRO — Release Notes v0.2.31
+
+Data: 2026-01-06
+
+## Zakres
+### Aircraft — Maintenance Events
+Dodano obsługę **Maintenance Events** dla samolotów:
+- Owner tenant (linia lotnicza) może tworzyć i w pełni aktualizować zdarzenia utrzymaniowe.
+- Tenants MRO z aktywnym dostępem do danego samolotu mogą:
+  - przeglądać zdarzenia,
+  - aktualizować tylko `status` oraz `mro_notes`.
+
+Endpointy:
+- `GET /v1/aircraft/{aircraft_id}/maintenance-events`
+- `POST /v1/aircraft/{aircraft_id}/maintenance-events`
+- `PUT /v1/aircraft/{aircraft_id}/maintenance-events/{event_id}`
+
+## Techniczne
+- Nowa tabela w schemacie `public`: `aircraft_maintenance_events`.
+- Zaktualizowano `docs/02_api/openapi.yaml`.
+
+## Narzędzia uruchomieniowe (Windows)
+- Zaktualizowano pliki `.bat` do wersji v0.2.31.
+- Skrypty `.bat` nie zamykają się automatycznie (ułatwia diagnozę).
+
+## v0.2.32
+
+# AviationCAMO-MRO — Release Notes v0.2.32
+
+Data: 2026-01-06
+
+## Zakres
+### Maintenance Events — global endpoints + izolacja tenantów (A5)
+Dodano globalne endpointy dla Maintenance Events dopasowane do testu A5:
+- MRO tenant z aktywnym dostępem do aircraft i rolą `MRO_EDITOR` może tworzyć Maintenance Event.
+- MRO tenant widzi wyłącznie eventy utworzone przez siebie (izolacja po `created_by_tenant_id`).
+- Owner tenant widzi wszystkie eventy dla aircraft.
+- Tenant bez dostępu do aircraft dostaje odpowiedź `200` z pustą listą (`[]`).
+
+Endpointy (NOWE):
+- `POST /v1/maintenance-events`
+- `GET /v1/maintenance-events?aircraft_id=...`
+
+Uwagi do payload:
+- `event_type` jest zapisywany jako nowa kolumna `event_type` oraz mapowany do istniejącego pola `title` (kompatybilność wstecz).
+
+## Techniczne
+- Dodano kolumnę `event_type` do tabeli `public.aircraft_maintenance_events` (idempotentny `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`).
+- Dodano nowy moduł API: `modules/maintenance_events`.
+- Zaktualizowano `docs/02_api/openapi.yaml` i `docs/00_product/PO_GUIDE.md`.
+
+## Narzędzia uruchomieniowe (Windows)
+- Dodano pliki: `start_and_test_v0.2.32.bat`, `start_and_test_DIAG_v0.2.32.bat`.
+
+## v0.2.33
+
+# AviationCAMO-MRO — Release Notes v0.2.34
+
+Date: 2026-01-06
+
+## Fixed
+- A5: `GET /v1/maintenance-events?aircraft_id=...` now performs owner check via an explicit query (instead of `db.get()`), improving reliability across environments.
+- For MRO tenants with active access, listing returns all events for the aircraft (still access-gated). Tenants without access receive an empty list.
+
+## v0.2.34
+
+# AviationCAMO-MRO v0.2.34 — MAINTENANCE-EVENTS
+
+## Fixes
+- Fix: `GET /v1/maintenance-events?aircraft_id=...` now reliably returns events for MRO tenants with active access.
+  - Implementation switched to a direct SELECT from `public.aircraft_maintenance_events` to avoid schema/search_path edge cases.
+  - Response is always `200` with JSON array (`[]` when empty).
+
+## Behaviour (A5)
+- MRO_EDITOR with access can:
+  - create maintenance event (POST)
+  - list events for the aircraft (GET) and sees the created event
+- Tenant without access receives `200` and `[]`.
+
+## v0.2.35
+
+# AviationCAMO-MRO v0.2.35 — MAINTENANCE-EVENTS
+
+## Fixed
+- DB sessions are now closed per request.
+  - `apps/api/src/shared/db.py:get_db_session` changed from returning a `Session` to a FastAPI generator dependency that `yield`s a session and always calls `db.close()`.
+  - This prevents connection leaks that could cause DB endpoints to hang/time out after several calls (seen in A5 `GET /v1/maintenance-events`).
+
+## Notes
+- No API contract changes.
+- Expected A5 behaviour remains:
+  - MRO tenant with active access: can create an event and list returns that event.
+  - Tenant without access: list returns `200` and an empty list.
+
+## v0.2.36
+
+# AviationCAMO-MRO v0.2.36 — MAINTENANCE-EVENTS
+
+## Added
+- `DELETE /v1/maintenance-events/{event_id}` — usuwa zdarzenie serwisowe w trybie tenant-isolated.
+  - Uprawnienia: owner może usuwać zdarzenia dla swoich statków powietrznych; MRO może usuwać własne zdarzenia (`created_by_tenant_id`).
+- `DELETE /v1/aircraft/{aircraft_id}/maintenance-events/{event_id}` — usuwa zdarzenie serwisowe w trybie „owner lub przypisane MRO”.
+  - Uprawnienia: owner może usuwać dowolne; MRO może usuwać własne.
+
+## Updated
+- Zaktualizowano OpenAPI (`docs/02_api/openapi.yaml`) oraz wersję API do `0.2.36`.
+
+## Notes
+- Zmiana jest w pełni wstecznie kompatybilna (dodane endpointy).
+
+## v0.2.37
+
+# AviationCAMO-MRO — MAINTENANCE-EVENTS — v0.2.37
+
+## Fixes
+- Fixed API startup crash by removing a stray endpoint definition in `apps/api/src/modules/aircraft/router.py` that referenced an undefined `auth` object (previously causing `NameError: name 'auth' is not defined`).
+
+## API / Docs
+- OpenAPI spec updated to document tenant-scoped maintenance-event deletion:
+  - `DELETE /v1/maintenance-events/{event_id}`
+
+## Legacy (pre-v0.2.28)
+
+## v0.2.35 — Fix: close DB sessions per request (2026-01-06)
+### Fixed
+- `get_db_session` is now a proper FastAPI generator dependency that always closes the SQLAlchemy session.
+- Prevents connection leaks that could cause DB endpoints (including `GET /v1/maintenance-events`) to hang/time out after multiple requests.
+
+## v0.2.34 — Fix: MRO list events returns correct data (A5) (2026-01-06)
+### Fixed
+- `GET /v1/maintenance-events?aircraft_id=...` now uses a deterministic owner check query (no `db.get()`), addressing cases where MRO list unexpectedly returned an empty result.
+- For MRO tenants with active access, listing returns all events for the aircraft (access-gated). Tenants without access still receive an empty list.
+
+
+## v0.2.32 — Maintenance Events global + tenant isolation (2026-01-06)
+### Added
+- New global endpoints for Maintenance Events (A5):
+  - `POST /v1/maintenance-events`
+  - `GET /v1/maintenance-events?aircraft_id=...`
+
+### Changed
+- Tenant isolation rules for the new maintenance-events endpoints:
+  - Owner sees all events for an aircraft
+  - MRO sees events for the aircraft (access-gated)
+  - No-access tenant receives `200` + empty list
+- DB: added optional column `event_type` to `public.aircraft_maintenance_events`.
+
+
+## v0.2.31 — Aircraft Maintenance Events (2026-01-06)
+### Added
+- Aircraft: Maintenance Events (Owner tworzy, MRO czyta i może aktualizować tylko `status` + `mro_notes`)
+
+### Changed
+- Docs: zaktualizowano `docs/00_product/PO_GUIDE.md`
+- API Spec: zaktualizowano `docs/02_api/openapi.yaml`
+- BAT: nowe pliki `start_and_test_v0.2.31.bat`, `start_and_test_DIAG_v0.2.31.bat` + brak natychmiastowego zamykania konsoli
+
 
 ## v0.2.29 — PO Guide + BAT cleanup (2026-01-06)
 ### Added
@@ -229,4 +485,3 @@ Date: 2026-01-05
 ### Changed
 - BAT logger uses safe `echo(`-style output to avoid `ECHO is off.` noise in console/logs.
 - DIAG now runs via `scripts/bat/run_diag.ps1` and writes diagnostic command output to both console and log file (docker version/info, compose ps, port checks).
-

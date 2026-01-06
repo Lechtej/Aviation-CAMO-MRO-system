@@ -1,4 +1,4 @@
-# PO Guide — AviationCAMO-MRO (v0.2.30)
+# PO Guide — AviationCAMO-MRO (v0.2.34)
 
 ## 1) Co to jest (3 zdania)
 AviationCAMO-MRO to system do zarządzania obsługą techniczną floty (MRO) oraz danymi operacyjnymi (np. części, samoloty, zlecenia).  
@@ -25,7 +25,7 @@ Na produkcji wybór tenant jest naturalny: użytkownik loguje się do swojej org
 
 ### Najprościej: start 1 kliknięciem
 Uruchom plik:
-- `start_and_test_v0.2.30.bat`
+- `start_and_test_v0.2.34.bat`
 
 Co robi:
 1. Buduje i uruchamia kontenery (API, DB, auth, worker)
@@ -33,7 +33,9 @@ Co robi:
 3. Wypisuje wynik health
 
 Jeśli coś nie działa:
-- uruchom `start_and_test_DIAG_v0.2.30.bat` (pokazuje status i ostatnie logi API)
+- uruchom `start_and_test_DIAG_v0.2.34.bat` (pokazuje status i ostatnie logi API)
+
+Uwaga: w v0.2.34 pliki .bat **nie zamykają się automatycznie** — zostają otwarte, żebyś widział komunikaty.
 
 ## 5) Co zostało naprawione w tym cyklu (dla biznesu)
 Naprawiliśmy błąd krytyczny: tenant B widział rekordy utworzone przez tenant A w Inventory/Parts.  
@@ -55,3 +57,23 @@ W tej wersji dodaliśmy prostą funkcjonalność:
 3) Tenant A (owner) tworzy aircraft przez `POST /v1/aircraft` z nagłówkiem `X-Tenant-Id = <tenantA_id>`.
 4) Tenant A nadaje dostęp tenantowi B: `POST /v1/aircraft/{aircraft_id}/mro-access`.
 5) Tenant B (MRO) robi `GET /v1/aircraft` i widzi samolot (ale nie może go skasować i nie może zmienić rejestracji/typu/SN).
+
+## 7) Maintenance Events (zrobione w v0.2.34)
+Cel biznesowy: właściciel (linia lotnicza) rejestruje zdarzenia utrzymaniowe dla samolotu, a przypisane MRO mogą je przeglądać i aktualizować status / notatki MRO.
+
+### Zasady dostępu
+- **Owner tenant** może:
+  - tworzyć zdarzenia (`POST /maintenance-events`)
+  - przeglądać zdarzenia
+  - aktualizować wszystkie pola zdarzenia
+- **MRO tenant z aktywnym dostępem** może:
+  - przeglądać zdarzenia
+  - aktualizować tylko: `status`, `mro_notes` (endpoint `PUT`)
+
+### Endpointy
+- `GET /v1/aircraft/{aircraft_id}/maintenance-events` — lista zdarzeń (owner lub MRO z dostępem)
+- `POST /v1/aircraft/{aircraft_id}/maintenance-events` — tworzenie zdarzenia (tylko owner)
+- `PUT /v1/aircraft/{aircraft_id}/maintenance-events/{event_id}` — aktualizacja (owner lub MRO z dostępem; MRO tylko status/mro_notes)
+
+### Wskazówka praktyczna (token)
+Token w testach jest krótko ważny. Gdy zobaczysz błąd typu `Invalid token: Signature has expired`, pobierz nowy token i ponów zapytanie.

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AviationCAMO-MRO — UI Draft</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; max-width: 1000px; }
+    header { margin-bottom: 16px; }
+    h1 { margin: 0 0 6px 0; }
+    .muted { color: #555; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin: 12px 0; }
+    label { display: block; margin-top: 8px; }
+    input, textarea { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; }
+    button { padding: 8px 12px; margin-top: 10px; cursor: pointer; }
+    pre { background: #f7f7f7; padding: 12px; overflow: auto; }
+    a { text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AviationCAMO-MRO — UI Draft</h1>
+    <div class="muted">
+      Minimalny, statyczny draft UI do testów API (bez logowania).<br/>
+      Uruchom: <code>docker compose -f infra\docker\docker-compose.yml up -d --build</code> i wejdź na <code>http://localhost:3000</code>.
+    </div>
+  </header>
+
+  <div class="card">
+    <h2>Quick links</h2>
+    <ul>
+      <li><a href="http://localhost:8000/docs" target="_blank">API Swagger (/docs)</a></li>
+      <li><a href="http://localhost:8000/openapi.json" target="_blank">API OpenAPI (/openapi.json)</a></li>
+      <li><a href="http://localhost:8080" target="_blank">Keycloak (admin UI)</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>API tester</h2>
+    <p class="muted">
+      Wklej Bearer token (opcjonalnie) oraz endpoint do sprawdzenia. Możesz też wysłać JSON body dla POST/PUT.
+    </p>
+
+    <label>Base URL</label>
+    <input id="baseUrl" value="http://localhost:8000" />
+
+    <label>Method</label>
+    <select id="method">
+      <option>GET</option>
+      <option>POST</option>
+      <option>PUT</option>
+      <option>DELETE</option>
+    </select>
+
+    <label>Path (np. /v1/aircraft)</label>
+    <input id="path" value="/v1/aircraft" />
+
+    <label>Bearer token (opcjonalnie)</label>
+    <textarea id="token" rows="3" placeholder="eyJhbGciOi... (bez prefixu 'Bearer ')"></textarea>
+
+    <label>JSON body (opcjonalnie)</label>
+    <textarea id="body" rows="6" placeholder='{"example": true}'></textarea>
+
+    <div>
+      <button id="btnPing">Ping (/docs)</button>
+      <button id="btnSend">Send request</button>
+    </div>
+
+    <h3>Response</h3>
+    <pre id="out">(no call yet)</pre>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

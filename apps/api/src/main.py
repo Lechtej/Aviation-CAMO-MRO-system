@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, Request, Response, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.openapi.utils import get_openapi
 import yaml
@@ -14,6 +15,7 @@ from modules.logistics.router import router as logistics_router
 from modules.inventory.router import router as inventory_router
 from modules.core.tenants_router import router as tenants_router
 from modules.aircraft.router import router as aircraft_router
+from modules.maintenance_events.router import router as maintenance_events_router
 
 OPENAPI_YAML_PATH = Path("/app/openapi.yaml")
 
@@ -22,15 +24,32 @@ def load_openapi_yaml() -> dict:
 
 app = FastAPI(
     title="Aviation CAMO & MRO API",
-    version="0.2.30",
+    version="0.2.42",
     docs_url="/docs",
     redoc_url="/redoc",
+)
+
+# CORS for the UI draft served from http://localhost:3000
+# Without this, browser requests from the UI to the API will fail with CORS.
+app.add_middleware(
+    CORSMiddleware,
+    # Dev-friendly: allow browser UI served from localhost on any port.
+    # (UI draft uses :3000 by default.)
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_origin_regex=r"^http://(localhost|127\\.0\\.0\\.1)(:\\d+)?$",
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(logistics_router)
 app.include_router(inventory_router)
 app.include_router(tenants_router)
 app.include_router(aircraft_router)
+app.include_router(maintenance_events_router)
 
 _cached_schema: dict | None = None
 

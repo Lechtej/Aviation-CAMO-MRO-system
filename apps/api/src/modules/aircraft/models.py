@@ -10,6 +10,9 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
     CheckConstraint,
+    DateTime,
+    Text,
+    func,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -55,6 +58,11 @@ class Aircraft(Base):
     notes = Column(String(1024), nullable=True)
 
     mro_access = relationship("AircraftMroAccess", back_populates="aircraft", cascade="all, delete-orphan")
+    maintenance_events = relationship(
+        "AircraftMaintenanceEvent",
+        back_populates="aircraft",
+        cascade="all, delete-orphan",
+    )
 
 
 class AircraftMroAccess(Base):
@@ -74,3 +82,38 @@ class AircraftMroAccess(Base):
     active = Column(Boolean, nullable=False, default=True)
 
     aircraft = relationship("Aircraft", back_populates="mro_access")
+
+
+class AircraftMaintenanceEvent(Base):
+    """Maintenance events for an aircraft.
+
+    Stored in PUBLIC schema because multiple tenants can access the same aircraft
+    (owner + assigned MROs).
+    """
+
+    __tablename__ = "aircraft_maintenance_events"
+    __table_args__ = (
+        CheckConstraint("status IN ('OPEN','IN_PROGRESS','DONE','CANCELLED')", name="chk_aircraft_maint_status"),
+        {"schema": "public"},
+    )
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    aircraft_id = Column(UUID(as_uuid=True), ForeignKey("public.aircraft.id", ondelete="CASCADE"), nullable=False)
+
+    created_by_tenant_id = Column(UUID(as_uuid=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+
+    title = Column(String(128), nullable=False)
+    # Optional discriminator used by the global /v1/maintenance-events endpoints.
+    # Kept nullable for backward compatibility with earlier versions.
+    event_type = Column(String(64), nullable=True)
+    description = Column(Text, nullable=True)
+
+    planned_start_at = Column(DateTime(timezone=True), nullable=True)
+    planned_end_at = Column(DateTime(timezone=True), nullable=True)
+
+    status = Column(String(16), nullable=False, server_default="OPEN")
+    mro_notes = Column(Text, nullable=True)
+
+    aircraft = relationship("Aircraft", back_populates="maintenance_events")
