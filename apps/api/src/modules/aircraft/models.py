@@ -1,0 +1,76 @@
+from __future__ import annotations
+
+import uuid
+from enum import Enum
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+    CheckConstraint,
+)
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+
+from shared.orm import Base
+
+
+class AircraftStatusTech(str, Enum):
+    IN_SERVICE = "IN_SERVICE"
+    AOG = "AOG"  # Aircraft On Ground
+    MAINTENANCE = "MAINTENANCE"
+    STORED = "STORED"
+
+
+class Aircraft(Base):
+    """Global aircraft registry.
+
+    Business rules:
+    - One owner tenant (airline) => owner_tenant_id
+    - Many MRO tenants can get service access via AircraftMroAccess
+
+    Stored in public schema intentionally (shared across tenants).
+    """
+
+    __tablename__ = "aircraft"
+    __table_args__ = (
+        UniqueConstraint("owner_tenant_id", "registration", name="uq_aircraft_owner_registration"),
+        CheckConstraint(
+            "status_tech IN ('IN_SERVICE','AOG','MAINTENANCE','STORED')",
+            name="ck_aircraft_status_tech",
+        ),
+        {"schema": "public"},
+    )
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    owner_tenant_id = Column(UUID(as_uuid=True), nullable=False)
+
+    registration = Column(String(32), nullable=False)
+    aircraft_type = Column(String(64), nullable=True)
+    serial_number = Column(String(64), nullable=True)
+
+    status_tech = Column(String(16), nullable=False, default=AircraftStatusTech.IN_SERVICE.value)
+    notes = Column(String(1024), nullable=True)
+
+    mro_access = relationship("AircraftMroAccess", back_populates="aircraft", cascade="all, delete-orphan")
+
+
+class AircraftMroAccess(Base):
+    """Service access relation: which MRO tenant can work on which aircraft."""
+
+    __tablename__ = "aircraft_mro_access"
+    __table_args__ = (
+        UniqueConstraint("aircraft_id", "mro_tenant_id", name="uq_aircraft_mro_access"),
+        {"schema": "public"},
+    )
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    aircraft_id = Column(UUID(as_uuid=True), ForeignKey("public.aircraft.id", ondelete="CASCADE"), nullable=False)
+    mro_tenant_id = Column(UUID(as_uuid=True), nullable=False)
+
+    role = Column(String(32), nullable=False, default="MRO_EDITOR")
+    active = Column(Boolean, nullable=False, default=True)
+
+    aircraft = relationship("Aircraft", back_populates="mro_access")

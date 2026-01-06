@@ -13,6 +13,7 @@ from shared.db import current_schema, ensure_schema
 from modules.logistics.router import router as logistics_router
 from modules.inventory.router import router as inventory_router
 from modules.core.tenants_router import router as tenants_router
+from modules.aircraft.router import router as aircraft_router
 
 OPENAPI_YAML_PATH = Path("/app/openapi.yaml")
 
@@ -21,7 +22,7 @@ def load_openapi_yaml() -> dict:
 
 app = FastAPI(
     title="Aviation CAMO & MRO API",
-    version="0.2.28",
+    version="0.2.30",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -29,6 +30,7 @@ app = FastAPI(
 app.include_router(logistics_router)
 app.include_router(inventory_router)
 app.include_router(tenants_router)
+app.include_router(aircraft_router)
 
 _cached_schema: dict | None = None
 
