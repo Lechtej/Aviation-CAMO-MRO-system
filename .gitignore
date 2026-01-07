@@ -16,3 +16,17 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Runtime artifacts (never commit)
+logs/**
+!logs/.gitkeep
+
+data/**
+pgdata/**
+postgres-data/**
+keycloak-data/**
+volumes/**
+
+.env
+.env.*
+
