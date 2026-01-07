@@ -1,5 +1,15 @@
 # Aviation CAMO & MRO Platform (Foundation)
 
+**Version:** v0.2.44 (Github repo)
+
+## Konfiguracja ENV
+- Realne pliki `.env` nie są commitowane.
+- Szablony znajdują się w:
+  - `infra/local/.env.example`
+  - `infra/staging/.env.example`
+  - `infra/prod/.env.example`
+
+
 **Version:** v0.2.42 (MAINTENANCE-EVENTS)
 
 This repository is a *foundation skeleton* for a multi-tenant CAMO + MRO + Logistics SaaS platform.
