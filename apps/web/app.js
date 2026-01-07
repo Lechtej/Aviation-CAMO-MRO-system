@@ -1,92 +1,489 @@
-// Minimal UI helper for AviationCAMO-MRO
-// - Lets you ping the API
-// - Send arbitrary requests with optional Bearer token
+// AviationCAMO-MRO — UI v1 + Auth (Keycloak OIDC code + PKCE)
+// Views (read-only):
+// - CAMO / Aircraft (list)            -> requires CAMO roles
+// - CAMO / Maintenance Events (list)  -> requires CAMO or MRO roles (tenant access rules still apply in backend)
+// - MRO  / Maintenance Events (list)  -> requires CAMO or MRO roles
+//
+// NOTE: UI communicates ONLY via API (REST). No backend bypass.
+//
+// Auth model:
+// - Keycloak realm roles (realm_access.roles) are used for UI navigation and API RBAC.
+// - Minimal role mapping for v0.2.44:
+//     CAMO: CAMO_PLANNER, CAMO_ENGINEER (+ TENANT_ADMIN, PLATFORM_ADMIN)
+//     MRO : MAINT_PLANNER, MECHANIC, CERTIFYING_STAFF (+ TENANT_ADMIN, PLATFORM_ADMIN)
 
 (function () {
   const $ = (id) => document.getElementById(id);
 
   const baseUrlEl = $("baseUrl");
-  const pathEl = $("path");
-  const methodEl = $("method");
-  const tokenEl = $("token");
-  const bodyEl = $("body");
-  const btnSendEl = $("btnSend");
-  const outEl = $("out");
+  const btnSaveEl = $("btnSave");
+  const btnRefreshEl = $("btnRefresh");
 
-  function normalizeBaseUrl(u) {
-    return (u || "").trim().replace(/\/+$/, "");
+  const btnLoginEl = $("btnLogin");
+  const btnLogoutEl = $("btnLogout");
+  const authUserEl = $("authUser");
+
+  const viewTitleEl = $("viewTitle");
+  const viewSubEl = $("viewSub");
+  const apiDotEl = $("apiDot");
+  const apiStatusEl = $("apiStatus");
+
+  const contentMetaEl = $("contentMeta");
+  const contentBodyEl = $("contentBody");
+  const contentHintEl = $("contentHint");
+
+  const navCamoAircraft = $("nav-camo-aircraft");
+  const navCamoEvents = $("nav-camo-events");
+  const navMroEvents = $("nav-mro-events");
+
+  const DEFAULT_BASE_URL = "http://localhost:8000";
+  const LS_KEY = "aviationcamo_ui_v1";
+  const LS_AUTH_KEY = "aviationcamo_auth_v1";
+
+  // Keycloak (defaults; can be overridden via localStorage settings if needed later)
+  const KC = {
+    baseUrl: "http://localhost:8080",
+    realm: "aviation",
+    clientId: "aviation-api",
+  };
+
+  // ---------------------------
+  // Utilities
+  // ---------------------------
+  function safeJsonParse(s, fallback) {
+    try { return JSON.parse(s); } catch { return fallback; }
   }
 
-  function joinUrl(base, path) {
-    const b = normalizeBaseUrl(base);
-    const p = (path || "").trim();
-    if (!p) return b;
-    if (p.startsWith("http://") || p.startsWith("https://")) return p;
-    return b + (p.startsWith("/") ? "" : "/") + p;
+  function normalizeBaseUrl(v) {
+    const s = (v || "").trim();
+    if (!s) return DEFAULT_BASE_URL;
+    return s.replace(/\/+$/, "");
   }
 
-  function setOut(text) {
-    outEl.textContent = text;
+  function setApiStatus(ok, message) {
+    apiDotEl.classList.remove("ok", "bad");
+    if (ok === true) apiDotEl.classList.add("ok");
+    if (ok === false) apiDotEl.classList.add("bad");
+    apiStatusEl.textContent = message;
   }
 
-  function prettyJsonMaybe(text) {
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  // JWT decode (no validation; API validates signature)
+  function decodeJwt(token) {
+    if (!token || token.split(".").length < 2) return null;
     try {
-      return JSON.stringify(JSON.parse(text), null, 2);
+      const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+      const json = decodeURIComponent(atob(payload).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
+      return JSON.parse(json);
     } catch {
-      return text;
+      return null;
     }
   }
 
-  async function send() {
-    const url = joinUrl(baseUrlEl.value, pathEl.value);
-    const method = (methodEl.value || "GET").toUpperCase();
-    const token = (tokenEl.value || "").trim();
-    const rawBody = (bodyEl.value || "").trim();
+  // ---------------------------
+  // Auth (OIDC code + PKCE)
+  // ---------------------------
+  function randomString(len) {
+    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+    const arr = new Uint8Array(len);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, (x) => charset[x % charset.length]).join("");
+  }
 
-    const headers = {
-      Accept: "application/json",
+  async function sha256base64url(input) {
+    const data = new TextEncoder().encode(input);
+    const hash = await crypto.subtle.digest("SHA-256", data);
+    const bytes = Array.from(new Uint8Array(hash));
+    const b64 = btoa(String.fromCharCode.apply(null, bytes));
+    return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  function authEndpoints() {
+    const base = KC.baseUrl.replace(/\/+$/, "");
+    const realm = encodeURIComponent(KC.realm);
+    return {
+      auth: `${base}/realms/${realm}/protocol/openid-connect/auth`,
+      token: `${base}/realms/${realm}/protocol/openid-connect/token`,
+      logout: `${base}/realms/${realm}/protocol/openid-connect/logout`,
     };
-    if (token) headers.Authorization = `Bearer ${token}`;
+  }
 
-    const opts = { method, headers };
-    if (!["GET", "HEAD"].includes(method) && rawBody) {
-      headers["Content-Type"] = "application/json";
-      opts.body = rawBody;
+  function loadAuth() {
+    return safeJsonParse(localStorage.getItem(LS_AUTH_KEY) || "null", null);
+  }
+
+  function saveAuth(auth) {
+    localStorage.setItem(LS_AUTH_KEY, JSON.stringify(auth));
+  }
+
+  function clearAuth() {
+    localStorage.removeItem(LS_AUTH_KEY);
+  }
+
+  function isTokenValid(auth) {
+    if (!auth || !auth.access_token) return false;
+    if (!auth.expires_at) return true; // fallback
+    return Date.now() < auth.expires_at - 10_000; // 10s buffer
+  }
+
+  function rolesFromAuth(auth) {
+    const claims = decodeJwt(auth?.access_token) || decodeJwt(auth?.id_token) || {};
+    const ra = claims?.realm_access || {};
+    const roles = Array.isArray(ra.roles) ? ra.roles.map(String) : [];
+    return { roles: new Set(roles), claims };
+  }
+
+  function hasAny(roleSet, prefixesOrNames) {
+    for (const r of roleSet) {
+      for (const x of prefixesOrNames) {
+        if (x.endsWith("_")) {
+          if (r.startsWith(x)) return true;
+        } else {
+          if (r === x) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function canSeeCamo(roleSet) {
+    return hasAny(roleSet, ["CAMO_", "TENANT_ADMIN", "PLATFORM_ADMIN"]);
+  }
+
+  function canSeeMro(roleSet) {
+    return hasAny(roleSet, ["MAINT_", "MECHANIC", "CERTIFYING_STAFF", "TENANT_ADMIN", "PLATFORM_ADMIN"]);
+  }
+
+  function setNavVisibility(roleSet) {
+    const camo = canSeeCamo(roleSet);
+    const mro = canSeeMro(roleSet);
+
+    navCamoAircraft.style.display = camo ? "" : "none";
+    navCamoEvents.style.display = camo ? "" : "none";
+    navMroEvents.style.display = mro ? "" : "none";
+  }
+
+  function updateAuthUi() {
+    const auth = loadAuth();
+    const ok = isTokenValid(auth);
+    btnLoginEl.style.display = ok ? "none" : "";
+    btnLogoutEl.style.display = ok ? "" : "none";
+
+    if (!ok) {
+      authUserEl.textContent = "Not logged in";
+      setNavVisibility(new Set()); // hide protected nav
+      return;
     }
 
-    setOut(`→ ${method} ${url}\n\n(sending...)`);
+    const { roles, claims } = rolesFromAuth(auth);
+    const user = claims?.preferred_username || claims?.name || "user";
+    authUserEl.textContent = `${user}`;
+    setNavVisibility(roles);
+  }
+
+  async function login() {
+    const endpoints = authEndpoints();
+    const redirectUri = window.location.origin + window.location.pathname; // keep hash routes
+    const state = randomString(24);
+    const verifier = randomString(64);
+    const challenge = await sha256base64url(verifier);
+
+    // Store transient data in sessionStorage
+    sessionStorage.setItem("oidc_state", state);
+    sessionStorage.setItem("oidc_verifier", verifier);
+    sessionStorage.setItem("oidc_redirect", redirectUri);
+
+    const params = new URLSearchParams({
+      client_id: KC.clientId,
+      response_type: "code",
+      scope: "openid profile",
+      redirect_uri: redirectUri,
+      state,
+      code_challenge: challenge,
+      code_challenge_method: "S256",
+    });
+
+    window.location.href = `${endpoints.auth}?${params.toString()}`;
+  }
+
+  async function handleAuthCallbackIfPresent() {
+    const u = new URL(window.location.href);
+    const code = u.searchParams.get("code");
+    const state = u.searchParams.get("state");
+    const err = u.searchParams.get("error");
+    const errDesc = u.searchParams.get("error_description");
+
+    if (err) {
+      // Cleanup URL
+      u.searchParams.delete("error");
+      u.searchParams.delete("error_description");
+      window.history.replaceState({}, document.title, u.toString());
+      throw new Error(`OIDC error: ${err}${errDesc ? " - " + errDesc : ""}`);
+    }
+
+    if (!code) return;
+
+    const expectedState = sessionStorage.getItem("oidc_state");
+    const verifier = sessionStorage.getItem("oidc_verifier");
+    const redirectUri = sessionStorage.getItem("oidc_redirect") || (window.location.origin + window.location.pathname);
+
+    if (!expectedState || !verifier || !state || state !== expectedState) {
+      throw new Error("Invalid OIDC state");
+    }
+
+    const endpoints = authEndpoints();
+    const body = new URLSearchParams({
+      grant_type: "authorization_code",
+      client_id: KC.clientId,
+      code,
+      redirect_uri: redirectUri,
+      code_verifier: verifier,
+    });
+
+    const r = await fetch(endpoints.token, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString(),
+    });
+
+    if (!r.ok) {
+      const t = await r.text();
+      throw new Error(`Token exchange failed (${r.status}): ${t}`);
+    }
+
+    const tok = await r.json();
+    const expiresIn = Number(tok.expires_in || 0);
+    const auth = {
+      access_token: tok.access_token,
+      id_token: tok.id_token,
+      refresh_token: tok.refresh_token,
+      expires_at: Date.now() + expiresIn * 1000,
+    };
+    saveAuth(auth);
+
+    // Cleanup transient + URL params
+    sessionStorage.removeItem("oidc_state");
+    sessionStorage.removeItem("oidc_verifier");
+    sessionStorage.removeItem("oidc_redirect");
+
+    u.searchParams.delete("code");
+    u.searchParams.delete("state");
+    window.history.replaceState({}, document.title, u.toString());
+  }
+
+  async function logout() {
+    const auth = loadAuth();
+    clearAuth();
+    updateAuthUi();
+
+    // Optional: redirect to Keycloak logout (best effort)
+    try {
+      const endpoints = authEndpoints();
+      const redirectUri = window.location.origin + window.location.pathname;
+      const params = new URLSearchParams({
+        post_logout_redirect_uri: redirectUri,
+      });
+      if (auth?.id_token) params.set("id_token_hint", auth.id_token);
+      window.location.href = `${endpoints.logout}?${params.toString()}`;
+    } catch {
+      // ignore
+    }
+  }
+
+  // ---------------------------
+  // API calls
+  // ---------------------------
+  async function pingApi(baseUrl) {
+    try {
+      const r = await fetch(baseUrl + "/docs", { method: "GET" });
+      if (r.ok) return true;
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
+  async function apiFetch(baseUrl, path) {
+    const auth = loadAuth();
+    const headers = {};
+    if (isTokenValid(auth)) headers["Authorization"] = "Bearer " + auth.access_token;
+
+    const r = await fetch(baseUrl + path, { headers });
+    if (r.status === 401) {
+      throw new Error("401 Unauthorized (login required)");
+    }
+    if (r.status === 403) {
+      throw new Error("403 Forbidden (missing role)");
+    }
+    if (!r.ok) {
+      const t = await r.text();
+      throw new Error(`${r.status} ${r.statusText}: ${t}`);
+    }
+    return r.json();
+  }
+
+  // ---------------------------
+  // Views / Routing (hash routes)
+  // ---------------------------
+  const ROUTES = {
+    "#/camo/aircraft": {
+      title: "CAMO / Aircraft",
+      sub: "Lista statków powietrznych (read-only)",
+      load: async (baseUrl) => apiFetch(baseUrl, "/v1/aircraft"),
+      render: (rows) => renderTable(rows, [
+        { key: "registration", label: "Registration" },
+        { key: "type", label: "Type" },
+        { key: "status", label: "Status" },
+      ]),
+      hint: "GET /v1/aircraft",
+    },
+    "#/camo/maintenance-events": {
+      title: "CAMO / Maintenance Events",
+      sub: "Lista zdarzeń obsługowych (read-only)",
+      load: async (baseUrl) => apiFetch(baseUrl, "/v1/maintenance-events"),
+      render: (rows) => renderTable(rows, [
+        { key: "id", label: "Event ID" },
+        { key: "aircraft_id", label: "Aircraft" },
+        { key: "event_type", label: "Type" },
+        { key: "due_date", label: "Due Date" },
+        { key: "status", label: "Status" },
+      ]),
+      hint: "GET /v1/maintenance-events",
+    },
+    "#/mro/maintenance-events": {
+      title: "MRO / Maintenance Events",
+      sub: "Lista zdarzeń obsługowych (read-only)",
+      load: async (baseUrl) => apiFetch(baseUrl, "/v1/maintenance-events"),
+      render: (rows) => renderTable(rows, [
+        { key: "id", label: "Event ID" },
+        { key: "aircraft_id", label: "Aircraft" },
+        { key: "event_type", label: "Type" },
+        { key: "due_date", label: "Due Date" },
+        { key: "status", label: "Status" },
+      ]),
+      hint: "GET /v1/maintenance-events",
+    },
+  };
+
+  function renderTable(rows, columns) {
+    const arr = Array.isArray(rows) ? rows : [];
+    if (!arr.length) {
+      return `<div class="muted">Brak danych (0)</div>`;
+    }
+
+    // Build header
+    const ths = columns.map(c => `<th>${esc(c.label)}</th>`).join("");
+    const trs = arr.map((row) => {
+      const tds = columns.map(c => `<td>${esc(row?.[c.key] ?? "")}</td>`).join("");
+      return `<tr>${tds}</tr>`;
+    }).join("");
+
+    return `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>${ths}</tr></thead>
+          <tbody>${trs}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function setView(routeKey) {
+    const route = ROUTES[routeKey] || ROUTES["#/camo/aircraft"];
+    viewTitleEl.textContent = route.title;
+    viewSubEl.textContent = route.sub;
+    contentHintEl.textContent = route.hint;
+    return route;
+  }
+
+  async function refresh() {
+    const baseUrl = normalizeBaseUrl(baseUrlEl.value);
+
+    const apiOk = await pingApi(baseUrl);
+    setApiStatus(apiOk, apiOk ? "API: OK" : "API: DOWN");
+
+    const routeKey = window.location.hash || "#/camo/aircraft";
+    const route = setView(routeKey);
+
+    contentMetaEl.textContent = "";
+    contentBodyEl.innerHTML = "";
 
     try {
-      const res = await fetch(url, opts);
-      const ct = res.headers.get("content-type") || "";
-      const text = await res.text();
-      const isJson = ct.includes("application/json");
-      const payload = isJson ? prettyJsonMaybe(text) : text;
-
-      setOut(
-        [
-          `← HTTP ${res.status} ${res.statusText}`,
-          `Content-Type: ${ct || "(none)"}`,
-          `URL: ${url}`,
-          "",
-          payload || "(empty body)",
-        ].join("\n")
-      );
+      const started = performance.now();
+      const rows = await route.load(baseUrl);
+      const ms = Math.round(performance.now() - started);
+      contentMetaEl.textContent = `${Array.isArray(rows) ? rows.length : 0} rows • ${ms} ms`;
+      contentBodyEl.innerHTML = route.render(rows);
     } catch (e) {
-      setOut(`✖ Request failed\n\n${String(e)}`);
+      const msg = (e && e.message) ? e.message : String(e);
+      contentMetaEl.textContent = "error";
+      contentBodyEl.innerHTML = `
+        <div class="error-title">Nie udało się pobrać danych z API</div>
+        <div class="muted" style="margin-top:6px;">${esc(msg)}</div>
+        <div class="muted" style="margin-top:10px;">Sprawdź: login, role, tenant oraz /docs (HTTP 200).</div>
+      `;
     }
   }
 
-  btnSendEl.addEventListener("click", (ev) => {
-    ev.preventDefault();
-    send();
-  });
+  function setActiveNav() {
+    const h = window.location.hash || "#/camo/aircraft";
+    const ids = ["nav-camo-aircraft", "nav-camo-events", "nav-mro-events"];
+    ids.forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      el.classList.toggle("active", el.getAttribute("href") === h);
+    });
+  }
 
-  // Small convenience: Ctrl+Enter sends
-  document.addEventListener("keydown", (ev) => {
-    if (ev.ctrlKey && ev.key === "Enter") {
-      ev.preventDefault();
-      send();
+  function loadSettings() {
+    const s = safeJsonParse(localStorage.getItem(LS_KEY) || "{}", {});
+    baseUrlEl.value = normalizeBaseUrl(s.baseUrl || DEFAULT_BASE_URL);
+  }
+
+  function saveSettings() {
+    const baseUrl = normalizeBaseUrl(baseUrlEl.value);
+    localStorage.setItem(LS_KEY, JSON.stringify({ baseUrl }));
+  }
+
+  // ---------------------------
+  // Boot
+  // ---------------------------
+  async function boot() {
+    loadSettings();
+
+    btnSaveEl.addEventListener("click", () => {
+      saveSettings();
+      refresh();
+    });
+
+    btnRefreshEl.addEventListener("click", () => refresh());
+
+    btnLoginEl.addEventListener("click", () => login());
+    btnLogoutEl.addEventListener("click", () => logout());
+
+    window.addEventListener("hashchange", () => {
+      setActiveNav();
+      refresh();
+    });
+
+    try {
+      await handleAuthCallbackIfPresent();
+    } catch (e) {
+      // show auth error but keep UI running
+      setApiStatus(false, "Auth: ERROR");
+      contentMetaEl.textContent = "auth error";
+      contentBodyEl.innerHTML = `<div class="error-title">Błąd logowania</div><div class="muted" style="margin-top:6px;">${esc(e.message || String(e))}</div>`;
     }
-  });
+
+    updateAuthUi();
+    setActiveNav();
+    refresh();
+  }
+
+  boot();
 })();

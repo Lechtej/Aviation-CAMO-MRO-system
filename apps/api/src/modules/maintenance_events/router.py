@@ -4,6 +4,7 @@ from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from modules.core.rbac import require_camo_or_mro
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -13,7 +14,7 @@ from modules.aircraft import models as aircraft_models
 from .schemas import MaintenanceEventCreate, MaintenanceEventOut
 
 
-router = APIRouter(prefix="/v1/maintenance-events", tags=["Maintenance Events"])
+router = APIRouter(prefix="/v1/maintenance-events", tags=["Maintenance Events"], dependencies=[Depends(require_camo_or_mro)])
 
 
 def _require_tenant_id(request: Request) -> UUID:

@@ -7,6 +7,7 @@ from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from modules.core.rbac import require_camo
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -27,7 +28,7 @@ from .schemas import (
 )
 
 
-router = APIRouter(prefix="/v1/aircraft", tags=["Aircraft"])
+router = APIRouter(prefix="/v1/aircraft", tags=["Aircraft"], dependencies=[Depends(require_camo)])
 
 
 def _require_tenant_id(request: Request) -> UUID:
@@ -421,5 +422,4 @@ def update_maintenance_event(
     db.commit()
     db.refresh(ev)
     return ev
-
 

@@ -89,6 +89,40 @@
       "realmRoles": [
         "PLATFORM_ADMIN"
       ]
+    },
+    {
+      "username": "camo_user",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Camo",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "camo1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "CAMO_PLANNER"
+      ]
+    },
+    {
+      "username": "mro_user",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Mro",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "mro1234",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "MECHANIC"
+      ]
     }
   ]
 }

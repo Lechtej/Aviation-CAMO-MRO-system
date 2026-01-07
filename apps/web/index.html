@@ -3,71 +3,323 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AviationCAMO-MRO — UI Draft</title>
+  <title>AviationCAMO-MRO — UI v1 + Auth</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 24px; max-width: 1000px; }
-    header { margin-bottom: 16px; }
-    h1 { margin: 0 0 6px 0; }
-    .muted { color: #555; }
-    .card { border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin: 12px 0; }
-    label { display: block; margin-top: 8px; }
-    input, textarea { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; }
-    button { padding: 8px 12px; margin-top: 10px; cursor: pointer; }
-    pre { background: #f7f7f7; padding: 12px; overflow: auto; }
-    a { text-decoration: none; }
+    :root{
+      --bg:#0b1020;
+      --panel:#111a33;
+      --panel2:#0f1730;
+      --text:#e8ecff;
+      --muted:#aeb8e6;
+      --border:rgba(255,255,255,.12);
+      --accent:#7aa2ff;
+      --danger:#ff6b6b;
+      --ok:#3ddc97;
+      --shadow: 0 8px 30px rgba(0,0,0,.35);
+      --radius: 14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 900px at 30% 0%, #12204a, var(--bg));
+      color:var(--text);
+    }
+    .app{
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      min-height:100vh;
+    }
+    .sidebar{
+      padding:18px 14px;
+      border-right:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(17,26,51,.95), rgba(11,16,32,.95));
+      position:sticky;
+      top:0;
+      height:100vh;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.04);
+      box-shadow: var(--shadow);
+    }
+    .logo{
+      width:38px;height:38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(122,162,255,.95), rgba(61,220,151,.85));
+      display:grid; place-items:center;
+      font-weight:800;
+      color:#06102b;
+      letter-spacing:.5px;
+    }
+    .brand h1{ font-size:14px; margin:0; }
+    .brand .sub{ font-size:12px; color:var(--muted); margin-top:2px; }
+    .nav{
+      margin-top:14px;
+      padding:10px 6px;
+    }
+    .section-title{
+      font-size:12px;
+      letter-spacing:.12em;
+      color:var(--muted);
+      margin:14px 10px 8px;
+      text-transform:uppercase;
+    }
+    .nav a{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 10px;
+      margin:4px 6px;
+      border-radius: 12px;
+      color:var(--text);
+      text-decoration:none;
+      border:1px solid transparent;
+    }
+    .nav a:hover{ background: rgba(255,255,255,.06); }
+    .nav a.active{
+      background: rgba(122,162,255,.12);
+      border-color: rgba(122,162,255,.35);
+    }
+    .pill{
+      margin-left:auto;
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid var(--border);
+      padding:2px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.03);
+    }
+    .main{
+      padding:18px 18px 40px;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 14px;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.04);
+      box-shadow: var(--shadow);
+      position:sticky;
+      top:14px;
+      z-index:10;
+      backdrop-filter: blur(10px);
+    }
+    .topbar-left{
+      display:flex; align-items:center; gap:12px;
+      min-width: 300px;
+    }
+    .view-title{
+      font-size:16px;
+      margin:0;
+      line-height:1.2;
+    }
+    .view-sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+    .api-box{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    label{ font-size:12px; color:var(--muted); }
+    input{
+      height:34px;
+      padding:0 10px;
+      border-radius: 10px;
+      border:1px solid var(--border);
+      background: rgba(15,23,48,.65);
+      color: var(--text);
+      outline: none;
+      min-width: 260px;
+    }
+    button{
+      height:34px;
+      padding:0 12px;
+      border-radius: 10px;
+      border:1px solid rgba(122,162,255,.35);
+      background: rgba(122,162,255,.14);
+      color: var(--text);
+      cursor:pointer;
+      font-weight:600;
+    }
+    button:hover{ background: rgba(122,162,255,.20); }
+    button.secondary{
+      border-color: var(--border);
+      background: rgba(255,255,255,.05);
+    }
+    .status{
+      display:flex; align-items:center; gap:8px;
+      font-size:12px;
+      color:var(--muted);
+      margin-left:10px;
+      white-space:nowrap;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background: rgba(255,255,255,.25);
+      border:1px solid var(--border);
+    }
+    .dot.ok{ background: rgba(61,220,151,.85); border-color: rgba(61,220,151,.45); }
+    .dot.bad{ background: rgba(255,107,107,.85); border-color: rgba(255,107,107,.45); }
+    .content{
+      margin-top:16px;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.03);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .content-head{
+      padding:12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid var(--border);
+      background: rgba(17,26,51,.55);
+    }
+    .meta{
+      font-size:12px; color:var(--muted);
+    }
+    table{
+      width:100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th{
+      text-align:left;
+      font-size:12px;
+      letter-spacing:.06em;
+      color: var(--muted);
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      background: rgba(15,23,48,.55);
+      text-transform: uppercase;
+    }
+    tbody td{
+      padding:12px 14px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      vertical-align: top;
+    }
+    tbody tr:hover{ background: rgba(255,255,255,.04); }
+    .mono{ font-family: var(--mono); }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      font-size:12px;
+      gap:6px;
+    }
+    .empty, .error{
+      padding:16px 14px;
+      color: var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+    .error strong{ color: var(--danger); }
+    .footer{
+      margin-top:14px;
+      color: var(--muted);
+      font-size:12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .footer a{ color: var(--accent); text-decoration: none; }
+    .footer a:hover{ text-decoration: underline; }
+    @media (max-width: 980px){
+      .app{ grid-template-columns: 1fr; }
+      .sidebar{ position:relative; height:auto; }
+      input{ min-width: 180px; width: 100%; }
+      .api-box{ justify-content:flex-start; }
+      .topbar{ position:relative; top:0; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>AviationCAMO-MRO — UI Draft</h1>
-    <div class="muted">
-      Minimalny, statyczny draft UI do testów API (bez logowania).<br/>
-      Uruchom: <code>docker compose -f infra\docker\docker-compose.yml up -d --build</code> i wejdź na <code>http://localhost:3000</code>.
-    </div>
-  </header>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">A5</div>
+        <div>
+          <h1>AviationCAMO-MRO</h1>
+          <div class="sub">UI v1 (Keycloak login)</div>
+        </div>
+      </div>
 
-  <div class="card">
-    <h2>Quick links</h2>
-    <ul>
-      <li><a href="http://localhost:8000/docs" target="_blank">API Swagger (/docs)</a></li>
-      <li><a href="http://localhost:8000/openapi.json" target="_blank">API OpenAPI (/openapi.json)</a></li>
-      <li><a href="http://localhost:8080" target="_blank">Keycloak (admin UI)</a></li>
-    </ul>
-  </div>
+      <nav class="nav">
+        <div class="section-title">CAMO</div>
+        <a href="#/camo/aircraft" id="nav-camo-aircraft">
+          Aircraft <span class="pill">list</span>
+        </a>
+        <a href="#/camo/maintenance-events" id="nav-camo-events">
+          Maintenance Events <span class="pill">list</span>
+        </a>
 
-  <div class="card">
-    <h2>API tester</h2>
-    <p class="muted">
-      Wklej Bearer token (opcjonalnie) oraz endpoint do sprawdzenia. Możesz też wysłać JSON body dla POST/PUT.
-    </p>
+        <div class="section-title">MRO</div>
+        <a href="#/mro/maintenance-events" id="nav-mro-events">
+          Maintenance Events <span class="pill">list</span>
+        </a>
+      </nav>
 
-    <label>Base URL</label>
-    <input id="baseUrl" value="http://localhost:8000" />
+      <div class="footer">
+        <span class="mono" id="uiVersion">v0.2.44</span>
+        <span>•</span>
+        <a href="#" id="lnkDocs" target="_blank" rel="noreferrer">API docs</a>
+        <a href="#" id="lnkOpenApi" target="_blank" rel="noreferrer">OpenAPI</a>
+      </div>
+    </aside>
 
-    <label>Method</label>
-    <select id="method">
-      <option>GET</option>
-      <option>POST</option>
-      <option>PUT</option>
-      <option>DELETE</option>
-    </select>
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div>
+            <div class="view-title" id="viewTitle">Loading…</div>
+            <div class="view-sub" id="viewSub"> </div>
+          </div>
+          <div class="status" title="API status">
+            <span class="dot" id="apiDot"></span>
+            <span id="apiStatus">API: unknown</span>
+          </div>
+        </div>
 
-    <label>Path (np. /v1/aircraft)</label>
-    <input id="path" value="/v1/aircraft" />
+        <div class="api-box">
+          <label for="baseUrl">API Base URL</label>
+          <input id="baseUrl" placeholder="http://localhost:8000" />
+          <button id="btnSave">Save</button>
+          <button id="btnRefresh" class="secondary">Refresh</button>
+          <span class="spacer"></span>
+          <span id="authUser" class="muted" style="margin-right:10px;"></span>
+          <button id="btnLogin" class="secondary">Login</button>
+          <button id="btnLogout" class="secondary" style="display:none;">Logout</button>
+        </div>
+      </div>
 
-    <label>Bearer token (opcjonalnie)</label>
-    <textarea id="token" rows="3" placeholder="eyJhbGciOi... (bez prefixu 'Bearer ')"></textarea>
-
-    <label>JSON body (opcjonalnie)</label>
-    <textarea id="body" rows="6" placeholder='{"example": true}'></textarea>
-
-    <div>
-      <button id="btnPing">Ping (/docs)</button>
-      <button id="btnSend">Send request</button>
-    </div>
-
-    <h3>Response</h3>
-    <pre id="out">(no call yet)</pre>
+      <section class="content">
+        <div class="content-head">
+          <div class="meta" id="contentMeta"> </div>
+          <div class="meta mono" id="contentHint"> </div>
+        </div>
+        <div id="contentBody"></div>
+      </section>
+    </main>
   </div>
 
   <script src="app.js"></script>

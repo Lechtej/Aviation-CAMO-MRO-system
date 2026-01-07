@@ -13,7 +13,7 @@ if not exist "%LOGS_DIR%" mkdir "%LOGS_DIR%" >nul 2>&1
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set "TS=%%i"
 set "LOG_FILE=%LOGS_DIR%\start_and_test_%TS%.log"
 
-call :log "=== AviationCAMO-MRO start_and_test (v0.2.42) ==="
+call :log "=== AviationCAMO-MRO start_and_test (v0.2.44) ==="
 call :log "Root: %ROOT_DIR%"
 call :log "Log:  %LOG_FILE%"
 

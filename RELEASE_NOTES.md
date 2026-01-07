@@ -485,3 +485,16 @@ Date: 2026-01-05
 ### Changed
 - BAT logger uses safe `echo(`-style output to avoid `ECHO is off.` noise in console/logs.
 - DIAG now runs via `scripts/bat/run_diag.ps1` and writes diagnostic command output to both console and log file (docker version/info, compose ps, port checks).
+## v0.2.43 (2026-01-07)
+
+### Added
+- **UI v1**: lekki frontend „produktowy” (CAMO / MRO) działający pod `http://localhost:3000` (bez logowania).
+- **Aircraft (lista)**: czytelny widok tabelaryczny danych z API (`GET /v1/aircraft`).
+- **Maintenance Events (lista)**: czytelny widok tabelaryczny danych z API (`GET /v1/maintenance-events`) w kontekście CAMO i MRO.
+- UI pobiera dane **wyłącznie** z REST API (brak omijania backendu).
+
+## v0.2.44
+- UI: Keycloak login (OIDC code + PKCE) + logout.
+- UI: role-based navigation (CAMO vs MRO) based on Keycloak realm roles.
+- API: RBAC enforced for /v1/aircraft (CAMO roles) and /v1/maintenance-events (CAMO or MRO roles).
+- Keycloak: added test users camo_user (CAMO_PLANNER) and mro_user (MECHANIC).
