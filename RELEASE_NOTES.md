@@ -498,3 +498,12 @@ Date: 2026-01-05
 - UI: role-based navigation (CAMO vs MRO) based on Keycloak realm roles.
 - API: RBAC enforced for /v1/aircraft (CAMO roles) and /v1/maintenance-events (CAMO or MRO roles).
 - Keycloak: added test users camo_user (CAMO_PLANNER) and mro_user (MECHANIC).
+
+## v0.2.45 (2026-01-07)
+
+### Added
+- **OPS documentation**: production server SSH-only access, sshd hardening and deployment contract (`docs/03_ops/SERVER_AND_DEPLOYMENT.md`).
+- **PO documentation**: infrastructure & deployment summary (`docs/00_product/PO_PROD_WORKFLOW.md`).
+
+### Security
+- Documented the enforced policy: **no password SSH**, **root key-only**.

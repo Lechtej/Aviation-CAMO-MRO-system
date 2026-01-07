@@ -1,11 +1,15 @@
 # Aviation CAMO & MRO Platform (Foundation)
 
-**Version:** v0.2.44 (GitHub repo)
+**Version:** v0.2.45 (GitHub repo)
 
 This repository is a *foundation skeleton* for a multi-tenant CAMO + MRO + Logistics SaaS platform.
 No business logic is implemented yet; the goal is to provide structure, documentation, and a runnable scaffold.
 
 Staging używa overlay: `infra/staging/docker-compose.staging.yml`.
+
+## Documentation
+- OPS / Production server access & deployment: `docs/03_ops/SERVER_AND_DEPLOYMENT.md`
+- PO (non-technical) production workflow summary: `docs/00_product/PO_PROD_WORKFLOW.md`
 
 ## Konfiguracja ENV
 - Realne pliki `.env` nie są commitowane.
@@ -24,3 +28,4 @@ System uruchamiany jednym, docelowym entrypointem:
 
 ```bash
 bash scripts/start_system.sh
+```
