@@ -8,7 +8,7 @@ echo "OK."
 
 echo
 echo "[1/6] Starting system (build)..."
-docker compose up -d --build
+docker compose -f infra/docker/docker-compose.yml -f infra/staging/docker-compose.staging.yml up -d --build
 
 echo
 echo "[2/6] Waiting for services..."

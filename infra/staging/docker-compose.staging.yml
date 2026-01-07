@@ -1,0 +1,16 @@
+services:
+  db:
+    volumes:
+      - /opt/aviation-camo-mro/staging/postgres:/var/lib/postgresql/data
+
+  keycloak:
+    volumes:
+      - /opt/aviation-camo-mro/staging/keycloak:/opt/keycloak/data
+
+  api:
+    environment:
+      - ENV=staging
+
+  web:
+    environment:
+      - ENV=staging
