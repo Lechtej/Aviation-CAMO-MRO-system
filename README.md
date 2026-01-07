@@ -1,58 +1,24 @@
 # Aviation CAMO & MRO Platform (Foundation)
 
-**Version:** v0.2.44 (Github repo)
-
-## Konfiguracja ENV
-- Realne pliki `.env` nie są commitowane.
-- Szablony znajdują się w:
-  - `infra/local/.env.example`
-  - `infra/staging/.env.example`
-  - `infra/prod/.env.example`
-
-
-**Version:** v0.2.42 (MAINTENANCE-EVENTS)
+**Version:** v0.2.44 (GitHub repo)
 
 This repository is a *foundation skeleton* for a multi-tenant CAMO + MRO + Logistics SaaS platform.
 No business logic is implemented yet; the goal is to provide structure, documentation, and a runnable scaffold.
 
-## Quick start (local, Docker)
+## Konfiguracja ENV
+- Realne pliki `.env` nie są commitowane.
+- Szablony znajdują się w:
+  - `infra/local/env.example`
+  - `infra/staging/env.example`
+  - `infra/prod/env.example`
+
+## Quick start (Local / Windows)
 1. Install Docker Desktop
-2. From repository root:
-   - `docker compose -f infra/docker/docker-compose.yml up -d --build`
+2. From repository root run:
+   - `start_and_test.bat`
 
-Optional helper scripts (Windows):
-- `start_and_test.bat`
-- `start_and_test_DIAG.bat`
+## Staging / Production start (Linux)
+System uruchamiany jednym, docelowym entrypointem:
 
-Services:
-- `api` (FastAPI skeleton, health endpoint)
-- `worker` (Celery skeleton)
-- `db` (PostgreSQL)
-- `redis`
-- `keycloak` (OIDC) – for now: placeholder config
-- `web` (static UI draft)
-
-## Docs
-- Master document: `docs/master/AVIATION_CAMO_MRO_MASTER_DOC.md`
-- WBS / RBAC / ERD: `docs/00_product/`
-- API contract: `docs/02_api/openapi.yaml`
-
-
-## Runtime verification (KROK 11A)
-1. `docker compose -f infra/docker/docker-compose.yml up -d --build`
-2. Check:
-   - API health: `http://localhost:8000/health`
-   - API docs: `http://localhost:8000/docs`
-   - UI draft: `http://localhost:3000`
-   - Keycloak: `http://localhost:8080` (Realm: `aviation`)
-3. Test users (dev only):
-   - platformadmin / platformadmin
-   - tenantadmin / tenantadmin
-
-## Troubleshooting
-- If API fails with `ModuleNotFoundError: psycopg2`, update to v0.2.3+ and rebuild images.
-
-## Security (dev)
-- Keycloak realm: `aviation` (imported on startup)
-- For `/v1/*` endpoints you must send a Bearer token.
-- Debug tenant header is OFF by default (`DEBUG_TENANT_HEADER=false`).
+```bash
+bash scripts/start_system.sh
