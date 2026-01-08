@@ -6,6 +6,25 @@ File: `openapi.yaml`
 - Bearer JWT tokens are verified against Keycloak JWKS (RS256) when `OIDC_ISSUER` is set.
 - Roles are extracted from Keycloak realm roles (`realm_access.roles`).
 
+### Token lifetime
+- In the default dev realm config, `access_token` is short-lived (typically **300s**).
+- If you see `Invalid token: Signature has expired`, obtain a fresh token and retry.
+
+### Docker networking: issuer vs JWKS
+Depending on where you obtain the token from, your JWT `iss` claim will differ:
+
+- **Token acquired from inside Docker network** (calling Keycloak via service name `keycloak:8080`) → `iss = http://keycloak:8080/realms/aviation`
+- **Token acquired from the host** (calling Keycloak via port-mapping on the host, e.g. `127.0.0.1:8080`) → `iss = http://127.0.0.1:8080/realms/aviation`
+
+The API checks that `iss` matches `OIDC_ISSUER`, and fetches JWKS from `OIDC_JWKS_URL`.
+
+Recommended server/dev defaults:
+
+- `OIDC_ISSUER=http://127.0.0.1:8080/realms/aviation` (matches tokens obtained from the host)
+- `OIDC_JWKS_URL=http://keycloak:8080/realms/aviation/protocol/openid-connect/certs` (reachable from the API container)
+
+See also: `docs/03_ops/SERVER_AUTH_BOOTSTRAP.md`.
+
 ### Runtime env
 - `OIDC_ISSUER`: e.g. `http://keycloak:8080/realms/aviation`
 - `OIDC_AUDIENCE`: `aviation-api` (optional, enforced if set)

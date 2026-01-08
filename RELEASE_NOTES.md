@@ -1,5 +1,17 @@
 # AviationCAMO-MRO — Release Notes (cumulative)
 
+## v0.2.2 — packaging + docs alignment (2026-01-08)
+- Packaging: ZIP now matches GitHub repo root layout (no extra wrapper folder, single `RELEASE_NOTES.md` at repo root).
+- Docs: moved `docs/SERVER_SMOKE_TEST_KEYCLOAK_OIDC.md` into `docs/03_ops/` to keep all server/OIDC smoke-test material together.
+
+## v0.2.1 (2026-01-08) — DB baseline packaging
+
+### Docs
+- Added server-side, validated walkthrough for **Keycloak HTTP + client_credentials + PLATFORM_ADMIN + tenant bootstrap**:
+  - `docs/03_ops/SERVER_AUTH_BOOTSTRAP.md`
+
+> Note: this entry documents the **DB baseline ZIP packaging** and the verified server steps. It does not imply the application code regressed from v0.2.42.
+
 ## v0.2.42 (2026-01-06)
 
 ### Fixed
