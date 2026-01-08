@@ -4,7 +4,7 @@
 **Status:** Approved baseline  
 **Date:** 2026-01-05
 
-**Runtime Baseline:** v0.2.1 (Docker Compose verified target)  
+**Runtime Baseline:** v0.2.2 (Docker Compose verified target)  
 
 ---
 

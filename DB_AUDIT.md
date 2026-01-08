@@ -1,4 +1,4 @@
-# DB AUDIT — v0.2.1 (public + seed)
+# DB AUDIT — v0.2.2 (public + seed) (public + seed)
 
 ## Cel etapu 1
 - Dodać **publiczną warstwę danych wspólnych** (organizacje/tenanci, klienci, relacje MRO↔Airline, rejestr samolotów).
