@@ -138,6 +138,8 @@ See `docs/00_product/erd_logical.md`.
 ---
 
 ## 7. Versioning & Release Strategy
+
+- GitHub release procedure: `docs/03_ops/RELEASING_GITHUB.md`
 - Semantic Versioning
 - v0.x.y for early development
 - v1.0.0 for MVP

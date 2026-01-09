@@ -44,15 +44,11 @@ API container verifies `iss` against `OIDC_ISSUER` and fetches JWKS via `OIDC_JW
 
 ## Import-time stability (SQLAlchemy models)
 
-### Why `py_compile` is not enough
-Some failures occur during **runtime import** (e.g., missing SQLAlchemy symbols, NameError), so they will not be caught by syntax-only checks.
+- Validate runtime imports inside container:
 
-### Canonical validation (run inside Docker)
 ```bash
 cd infra/docker
-docker compose run --rm api bash -lc 'python -c "import modules.logistics.models; print(\"OK: logistics models imported\")"'
-docker compose run --rm api bash -lc 'python -c "import main; print(\"OK: main imported\")"'
+docker compose run --rm api bash -lc 'python -c "import modules.logistics.models; print(\\"OK: logistics models imported\\")"'
+docker compose run --rm api bash -lc 'python -c "import main; print(\\"OK: main imported\\")"'
 ```
 
-### Enum hardening rule
-Use `Enum as PyEnum` in model modules to avoid collisions with SQLAlchemy `Enum`.
