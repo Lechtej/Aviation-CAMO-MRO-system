@@ -1,0 +1,930 @@
+current_registration,msn,manufacturer,type,subtype,model,airline_code
+F-OJZA,,ATR,AT76,AT76,ATR P-72,reu
+F-OLRC,,BOEING,B788,788,Boeing 787-8 pax,reu
+F-OLRD,,BOEING,B77W,77W,Boeing 777-300ER pax,reu
+F-OLRE,,BOEING,B77W,77W,Boeing 777-300ER pax,reu
+F-OMER,,,,,,reu
+F-OREU,37434.0,BOEING,B77W,77W,Boeing 777-300ER pax,reu
+279,279.0,LEONARDO,A139,A139,AW-139,aca
+C-FCEU,,,,,,aca
+C-FCUG,,,,,,aca
+C-FDCA,,,,,,aca
+C-FEIQ,83.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),aca
+C-FEIX,85.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),aca
+C-FEJB,86.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),aca
+C-FEJD,90.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),aca
+C-FEJP,96.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),aca
+C-FEJY,97.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),aca
+C-FEKD,101.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),aca
+C-FEKH,102.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),aca
+C-FEKI,103.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),aca
+C-FEKJ,109.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),aca
+C-FFYG,,,,,,aca
+C-FGDT,37171.0,BOEING,B789,789,Boeing 787-9 pax,aca
+C-FGDX,35269.0,BOEING,B789,789,Boeing 787-9 pax,aca
+C-FGDZ,37173.0,BOEING,B789,789,Boeing 787-9 pax,aca
+C-FGEI,37174.0,BOEING,B789,789,Boeing 787-9 pax,aca
+C-FGEO,37180.0,BOEING,B789,789,Boeing 787-9 pax,aca
+C-FGFZ,37172.0,BOEING,B789,789,Boeing 787-9 pax,aca
+C-FGHZ,37169.0,BOEING,B789,789,Boeing 787-9 pax,aca
+C-FGJI,1787.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aca
+C-FGKH,1975.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aca
+C-FGKN,3051.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,aca
+C-FGKZ,3401.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,aca
+C-FITL,,,,,,aca
+C-FITU,,,,,,aca
+C-FITW,35298.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+C-FIUA,,,,,,aca
+C-FIUJ,,,,,,aca
+C-FIUL,35255.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+C-FIUR,,,,,,aca
+C-FIUV,35248.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+C-FIUW,35249.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+C-FIVK,,,,,,aca
+C-FIVM,35251.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+C-FIVQ,35240.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+C-FIVR,35241.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+C-FIVS,35784.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+C-FIVW,42218.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+C-FIVX,42219.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+C-FJBO,277.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),aca
+C-FJFZ,,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,aca
+C-FJJZ,15043.0,CANADAIR,CRJ7,CR7,Canadair Regional Jet 700,aca
+C-FJOU,,,,,,aca
+C-FJQZ,15498.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,aca
+C-FJZD,,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,aca
+C-FJZS,62400.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+C-FKAU,62401.0,BOEING,B77W,77W,Boeing 777-300ER pax,aca
+I-ADJK,19000245.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJM,19000258.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJN,19000270.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJO,19000280.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJP,19000578.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJQ,19000587.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJR,19000595.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJT,19000606.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJU,19000290.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJV,19000308.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJY,19000300.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJX,19000305.0,EMBRAER,E195,E95,Embraer 195,dla
+I-ADJW,19000297.0,EMBRAER,E195,E95,Embraer 195,dla
+I-JENB,,,,,,dla
+I-JEND,,,,,,dla
+I-JENE,,,,,,dla
+4O-AOB,,,,,,mne
+C-FANB,25764.0,BOEING,B734,73Q,Boeing 737-400 Combi,ant
+C-FANF,27417.0,BOEING,B735,73E,Boeing 737-500 (winglets)pax,ant
+C-FVGP,,,,,,ant
+C-GANH,27153.0,BOEING,B735,73E,Boeing 737-500 (winglets)pax,ant
+C-GANJ,,BOEING,B735,73E,Boeing 737-500 (winglets)pax,ant
+C-GVGX,264.0,ATR,AT43,AT4,Aerospatiale/Alenia ATR 42-300 / 320,ant
+F-OMUA,39297.0,BOEING,B789,789,Boeing 787-9 pax,tht
+F-ONUI,42116.0,BOEING,B789,789,Boeing 787-9 pax,tht
+F-OTOA,,BOEING,B789,789,Boeing 787-9 pax,tht
+F-OVAA,,BOEING,B789,789,Boeing 787-9 pax,tht
+CS-TSW,,,,,,mmz
+TF-FIC,30735.0,BOEING,B752,75W,Boeing 757-200 (winglets) pax,ice
+TF-FIK,26254.0,BOEING,B752,75W,Boeing 757-200 (winglets) pax,ice
+TF-ISO,29388.0,BOEING,B763,76Y,Boeing 767-300 Freighter,ice
+TF-ISR,26248.0,BOEING,B752,75W,Boeing 757-200 (winglets) pax,ice
+TF-ISW,28745.0,BOEING,B763,76Y,Boeing 767-300 Freighter,ice
+TF-FIN,28989.0,BOEING,B752,75W,Boeing 757-200 (winglets) pax,ice
+TF-FXG,,DE HAVILLAND CANADA,DH8B,DH2,De Havilland Canada DHC-8-200 Dash 8 / 8Q,ice
+TF-FXK,,DE HAVILLAND CANADA,DH8B,DH2,De Havilland Canada DHC-8-200 Dash 8 / 8Q,ice
+TF-LLL,,,,,,ice
+TF-FXI,4033.0,DE HAVILLAND CANADA,DH8D,DH4,De Havilland Canada DHC-8-400 Dash 8Q,ice
+TF-FXA,4022.0,DE HAVILLAND CANADA,DH8D,DH4,De Havilland Canada DHC-8-400 Dash 8Q,ice
+TF-ISP,,,,,,ice
+TF-ICE,44353.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,ice
+TF-ICY,44354.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,ice
+TF-ICU,44355.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,ice
+TF-FXH,,DE HAVILLAND CANADA,DH8B,DH2,De Havilland Canada DHC-8-200 Dash 8 / 8Q,ice
+TF-ICA,44357.0,BOEING,B39M,7M9,Boeing 737 MAX 9 pax,ice
+TF-ICN,44356.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,ice
+TF-ICO,44358.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,ice
+TF-ICB,,,,,,ice
+TF-ICC,,,,,,ice
+TF-ICP,,,,,,ice
+TF-ICL,,,,,,ice
+TF-ICM,,,,,,ice
+TF-ICR,,,,,,ice
+TF-ICD,,,,,,ice
+TF-ICS,,,,,,ice
+TF-ICF,,,,,,ice
+TF-ICG,,,,,,ice
+TF-ICI,,,,,,ice
+TF-ICH,,,,,,ice
+TF-FXE,,,,,,ice
+PH-EXF,19000690.0,EMBRAER,E190,E90,Embraer 190,klc
+PH-EXI,17000578.0,EMBRAER,E75L,E75,Embraer 175 (Short wing),klc
+PH-EXR,17000697.0,EMBRAER,E75L,E75,Embraer 175 (Short wing),klc
+LZ-EAH,,,,,,lot
+SP-LDF,17000035.0,EMBRAER,E170,E70,Embraer 170,lot
+SP-LDH,17000069.0,EMBRAER,E170,E70,Embraer 170,lot
+SP-LDI,17000073.0,EMBRAER,E170,E70,Embraer 170,lot
+SP-LIC,17000134.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),lot
+SP-LID,17000136.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),lot
+SP-LII,17000290.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),lot
+SP-LIL,17000306.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),lot
+SP-LIM,17000311.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),lot
+SP-LIN,17000313.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),lot
+SP-LIO,17000321.0,EMBRAER,E75S,E75,Embraer 175 (Long Wing),lot
+SP-LIR,,,,,,lot
+SP-LIQ,,,,,,lot
+SP-LMA,19000761.0,EMBRAER,E190,E90,Embraer 190,lot
+SP-LMB,,EMBRAER,E190,E90,Embraer 190,lot
+SP-LMC,19000763.0,EMBRAER,E190,E90,Embraer 190,lot
+SP-LMD,,EMBRAER,E190,E90,Embraer 190,lot
+SP-LME,,,,,,lot
+SP-LMF,,,,,,lot
+SP-LMH,,,,,,lot
+SP-LNB,19000444.0,EMBRAER,E195,E95,Embraer 195,lot
+SP-LNC,19000462.0,EMBRAER,E195,E95,Embraer 195,lot
+SP-LND,19000516.0,EMBRAER,E195,E95,Embraer 195,lot
+SP-LNE,19000583.0,EMBRAER,E195,E95,Embraer 195,lot
+SP-LNF,19000596.0,EMBRAER,E195,E95,Embraer 195,lot
+SP-LNG,19000237.0,EMBRAER,E195,E95,Embraer 195,lot
+SP-LNH,,EMBRAER,E195,E95,Embraer 195,lot
+SP-LNL,19000382.0,EMBRAER,E195,E95,Embraer 195,lot
+SP-LNM,19000669.0,EMBRAER,E195,E95,Embraer 195,lot
+SP-LNN,19000413.0,EMBRAER,E195,E95,Embraer 195,lot
+SP-LNO,19000084.0,EMBRAER,E195,E95,Embraer 195,lot
+SP-LRA,35938.0,BOEING,B788,788,Boeing 787-8 pax,lot
+SP-LRC,35940.0,BOEING,B788,788,Boeing 787-8 pax,lot
+SP-LRD,35941.0,BOEING,B788,788,Boeing 787-8 pax,lot
+SP-LRH,35943.0,BOEING,B788,788,Boeing 787-8 pax,lot
+SP-LSA,38083.0,BOEING,B789,789,Boeing 787-9 pax,lot
+SP-LSB,38084.0,BOEING,B789,789,Boeing 787-9 pax,lot
+SP-LSC,,BOEING,B789,789,Boeing 787-9 pax,lot
+SP-LSE,,BOEING,B789,789,Boeing 787-9 pax,lot
+SP-LSF,62172.0,BOEING,B789,789,Boeing 787-9 pax,lot
+SP-LSG,,BOEING,B789,789,Boeing 787-9 pax,lot
+SP-LWA,30682.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,lot
+SP-LWB,32800.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,lot
+SP-LWC,30691.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,lot
+SP-LWF,36825.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,lot
+SP-LWG,36827.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,lot
+SP-LVA,64067.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,lot
+SP-LVB,64068.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,lot
+SP-LVC,43347.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,lot
+SP-LVD,64069.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,lot
+I-ADJZ,,,,,,dlh
+D-ABPA,,,,,,dlh
+D-ABPB,,,,,,dlh
+D-ABPC,,,,,,dlh
+D-ABPD,,,,,,dlh
+D-ABTK,29871.0,BOEING,B744,74Y,Boeing 747-400 Freighter,dlh
+D-ABTL,,,,,,dlh
+D-ABVU,,,,,,dlh
+D-ABVW,,,,,,dlh
+D-ABVX,,,,,,dlh
+D-ABVZ,,,,,,dlh
+D-ABYD,37829.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYF,37830.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYG,37831.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYH,37832.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYI,37833.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYJ,37834.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYK,37835.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYL,37836.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYM,37837.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYN,37838.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYP,,,,,,dlh
+D-ABYQ,21591.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYR,21643.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYS,37843.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYT,37844.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ABYU,37845.0,BOEING,B748,748,Boeing 747-8 pax,dlh
+D-ACNB,15230.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNC,15236.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACND,15238.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNE,15241.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNF,15243.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNH,15247.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNI,15248.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNJ,15249.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNK,15251.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNL,15252.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNM,15253.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNO,15255.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNP,15259.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNQ,15260.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNR,15263.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNT,15264.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNU,15267.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNV,15268.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNW,15269.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-ACNX,15270.0,CANADAIR,CRJ9,CRA,Canadair Regional Jet 705,dlh
+D-AIBA,4141.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),dlh
+D-AIBB,4182.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),dlh
+D-AIBC,4332.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),dlh
+I-NEOU,29887.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,nos
+I-NEOZ,34257.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,nos
+EC-MII,1691.0,AIRBUS,A333,333,Airbus A330-300,nos
+G-VYGK,1498.0,AIRBUS,A332,33X,Airbus A330-200 Freighter,nos
+TC-MGG,,,,,,nos
+EI-NEO,38785.0,BOEING,B789,789,Boeing 787-9 pax,nos
+EI-NEU,38794.0,BOEING,B789,789,Boeing 787-9 pax,nos
+EI-NEW,,BOEING,B789,789,Boeing 787-9 pax,nos
+EI-RZA,62869.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,nos
+EI-RZC,,,,,,nos
+EI-RZB,43920.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,nos
+EI-NUA,65314.0,BOEING,B789,789,Boeing 787-9 pax,nos
+EI-NYE,38756.0,BOEING,B789,789,Boeing 787-9 pax,nos
+EI-RZD,43582.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,nos
+EI-HIL,,,,,,nos
+EI-HIM,,,,,,nos
+EI-RZE,,,,,,nos
+HA-LKG,32362.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,tvs
+SP-TVZ,29643.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,tvs
+OK-TVF,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,tvs
+OK-JRE,,,,,,tvs
+OK-SWE,,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,tvs
+OK-TSO,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,tvs
+OK-TSU,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,tvs
+OK-JRS,,CESSNA,C680,C680,Citation Sovereign,tvs
+OK-TSF,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,tvs
+OK-TSI,,BOEING,B739,73J,Boeing 737-900 (winglets) pax,tvs
+OK-IOO,,,,,,tvs
+OK-SWA,,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,tvs
+OK-SWD,43557.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,tvs
+OK-SWH,,,,,,tvs
+OK-SWJ,,,,,,tvs
+VT-GSI,,,,,,sdg
+VT-GSJ,,,,,,sdg
+SP-MRG,,,,,,iga
+OO-JAX,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,tfl
+OO-JDL,34425.0,BOEING,B788,788,Boeing 787-8 pax,tfl
+OO-MAX,,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,tfl
+PH-TFK,36427.0,BOEING,B788,788,Boeing 787-8 pax,tfl
+PH-TFL,37228.0,BOEING,B788,788,Boeing 787-8 pax,tfl
+PH-TFM,36429.0,BOEING,B788,788,Boeing 787-8 pax,tfl
+PH-LAU,,DASSAULT,F900,F900,Falcon 900,tfl
+PH-TFO,,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,tfl
+PH-TFP,,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,tfl
+PH-TFR,,,,,,tfl
+PH-TFT,,,,,,tfl
+PH-TFU,,,,,,tfl
+TC-GCA,,,,,,thy
+TC-JCI,1442.0,AIRBUS,A332,33X,Airbus A330-200 Freighter,thy
+TC-JDO,,AIRBUS,A332,33X,Airbus A330-200 Freighter,thy
+TC-JDP,1092.0,AIRBUS,A332,33X,Airbus A330-200 Freighter,thy
+TC-JDR,,AIRBUS,A332,33X,Airbus A330-200 Freighter,thy
+TC-JDS,,AIRBUS,A332,33X,Airbus A330-200 Freighter,thy
+TC-JHL,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,thy
+TC-JHM,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,thy
+TC-JHN,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,thy
+TC-JHO,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,thy
+TC-JHP,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,thy
+TC-JHS,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,thy
+TC-JHT,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,thy
+TC-JHU,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,thy
+TC-JHV,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,thy
+TC-JHY,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,thy
+TC-JHZ,42004.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,thy
+TC-JIO,,,,,,thy
+TC-JIP,,,,,,thy
+TC-JIS,,,,,,thy
+TC-JIT,,,,,,thy
+TC-JJF,40708.0,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJG,,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJI,,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJJ,,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJK,40711.0,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJL,40793.0,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJN,,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJO,,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJP,40797.0,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJR,44116.0,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJS,44117.0,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJT,44118.0,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJU,60401.0,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJV,44119.0,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJY,44120.0,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JJZ,44122.0,BOEING,B77W,77W,Boeing 777-300ER pax,thy
+TC-JLS,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),thy
+TC-JLT,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),thy
+TC-JLU,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),thy
+TC-JLV,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),thy
+TC-JLY,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),thy
+TC-JMH,,,,,,thy
+TC-JMI,,AIRBUS,A321,321,Airbus A321-100/200 Ceo,thy
+TC-JMK,,,,,,thy
+TC-JML,,AIRBUS,A321,321,Airbus A321-100/200 Ceo,thy
+TC-JNB,704.0,AIRBUS,A332,33X,Airbus A330-200 Freighter,thy
+TC-JNC,742.0,AIRBUS,A332,33X,Airbus A330-200 Freighter,thy
+TC-JND,,AIRBUS,A332,33X,Airbus A330-200 Freighter,thy
+TC-JNE,,AIRBUS,A332,33X,Airbus A330-200 Freighter,thy
+SX-DGA,,AIRBUS,A321,321,Airbus A321-100/200 Ceo,aee
+SX-DGB,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DGD,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DGE,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DGI,,,,,,aee
+SX-DGY,6611.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DGZ,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DNB,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DNC,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DND,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DNG,,AIRBUS,A321,321,Airbus A321-100/200 Ceo,aee
+SX-DNH,,AIRBUS,A321,321,Airbus A321-100/200 Ceo,aee
+SX-DVH,3066.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVI,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVJ,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVL,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVM,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVN,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVQ,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVR,3714.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVS,3709.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVV,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVX,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVY,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aee
+SX-DVZ,,AIRBUS,A321,321,Airbus A321-100/200 Ceo,aee
+SX-NEB,,AIRBUS,A20N,32N,Airbus A320-200 Neo,aee
+SX-NEF,,,,,,aee
+SX-NEI,,,,,,aee
+SX-NEJ,,,,,,aee
+SX-NEM,,,,,,aee
+SX-OAY,,,,,,aee
+SX-OAZ,,,,,,aee
+SX-OBI,,,,,,aee
+SX-OBM,,,,,,aee
+SX-OBN,,,,,,aee
+SX-OBP,,,,,,aee
+SX-OBQ,,,,,,aee
+SX-OBR,,,,,,aee
+F-GKXG,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXH,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXI,,,,,,afr
+F-GKXJ,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXL,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXM,,,,,,afr
+F-GKXN,3008.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXO,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXP,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXQ,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXR,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXS,,,,,,afr
+F-GKXT,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXU,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXV,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXY,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GKXZ,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),afr
+F-GMZC,,AIRBUS,A321,321,Airbus A321-100/200 Ceo,afr
+F-GMZD,,AIRBUS,A321,321,Airbus A321-100/200 Ceo,afr
+F-GRXB,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),afr
+F-GRXF,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),afr
+F-GSPA,29002.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPD,,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPE,29006.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPF,29007.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPG,27609.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPI,29008.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPJ,29009.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPK,,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPL,,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPM,30456.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPN,29011.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPO,,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPP,30615.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPQ,28682.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPU,32309.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPX,,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPY,32305.0,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSPZ,,BOEING,B772,77L,Boeing 777-200LR pax,afr
+F-GSQA,,BOEING,B77W,77W,Boeing 777-300ER pax,afr
+F-GSQB,32724.0,BOEING,B77W,77W,Boeing 777-300ER pax,afr
+F-GSQC,,BOEING,B77W,77W,Boeing 777-300ER pax,afr
+F-GSQD,,BOEING,B77W,77W,Boeing 777-300ER pax,afr
+F-GSQE,,BOEING,B77W,77W,Boeing 777-300ER pax,afr
+F-GSQG,,BOEING,B77W,77W,Boeing 777-300ER pax,afr
+F-GSQH,32711.0,BOEING,B77W,77W,Boeing 777-300ER pax,afr
+F-GSQI,32725.0,BOEING,B77W,77W,Boeing 777-300ER pax,afr
+F-GSQJ,32852.0,BOEING,B77W,77W,Boeing 777-300ER pax,afr
+F-GSQK,32845.0,BOEING,B77W,77W,Boeing 777-300ER pax,afr
+F-GSQL,,BOEING,B77W,77W,Boeing 777-300ER pax,afr
+F-GZHS,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,fpo
+F-GZTJ,,BOEING,B734,73Q,Boeing 737-400 Combi,fpo
+F-GZTP,,BOEING,B737,73W,Boeing 737-700 (winglets) pax,fpo
+F-HIQB,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,fpo
+F-HIQC,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,fpo
+F-HIQD,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,fpo
+F-HIQE,,,,,,fpo
+F-HIQF,,,,,,fpo
+F-HIQH,,,,,,fpo
+F-HIXB,,,,,,fpo
+EI-HAC,,,,,,fpo
+I-ADJL,19000256.0,EMBRAER,E195,E95,Embraer 195,aua
+I-ADJS,19000597.0,EMBRAER,E195,E95,Embraer 195,aua
+OE-LPA,,BOEING,B772,77L,Boeing 777-200LR pax,aua
+OE-LBP,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LBD,,AIRBUS,A321,321,Airbus A321-100/200 Ceo,aua
+OE-LBE,,AIRBUS,A321,321,Airbus A321-100/200 Ceo,aua
+OE-LAZ,,BOEING,B763,76Y,Boeing 767-300 Freighter,aua
+OE-LBQ,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LBR,,,,,,aua
+OE-LBS,,,,,,aua
+OE-LAE,,BOEING,B763,76Y,Boeing 767-300 Freighter,aua
+OE-LBT,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LBF,,AIRBUS,A321,321,Airbus A321-100/200 Ceo,aua
+OE-LBU,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LPD,,,,,,aua
+OE-LXA,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LXB,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LXC,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LXD,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LXE,,,,,,aua
+OE-LBV,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LZE,,,,,,aua
+OE-LZD,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LZC,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LZA,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LZF,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LBW,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LBI,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LBJ,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LBK,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LBM,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LPE,27607.0,BOEING,B772,77L,Boeing 777-200LR pax,aua
+OE-LWA,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWC,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWD,19000411.0,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWE,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWF,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWG,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWH,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWI,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWJ,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWK,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWL,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWN,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWO,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWP,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LWQ,,EMBRAER,E195,E95,Embraer 195,aua
+OE-LBY,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),aua
+OE-LBZ,,,,,,aua
+OE-LPF,28692.0,BOEING,B772,77L,Boeing 777-200LR pax,aua
+OO-SBA,,,,,,bel
+OO-SBB,,,,,,bel
+OO-SFB,915.0,AIRBUS,A333,333,Airbus A330-300,bel
+OO-SFC,895.0,AIRBUS,A333,333,Airbus A330-300,bel
+OO-SFD,,,,,,bel
+OO-SFE,1010.0,AIRBUS,A333,333,Airbus A330-300,bel
+OO-SFF,1132.0,AIRBUS,A333,333,Airbus A330-300,bel
+OO-SFG,983.0,AIRBUS,A333,333,Airbus A330-300,bel
+OO-SFH,679.0,AIRBUS,A333,333,Airbus A330-300,bel
+OO-SFJ,701.0,AIRBUS,A333,333,Airbus A330-300,bel
+OO-SNB,1493.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+OO-SNF,2810.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+OO-SNH,2207.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+OO-SNI,1983.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+OO-SNJ,3161.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+OO-SNK,3373.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+OO-SNL,1961.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+OO-SNM,2003.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+OO-SNN,4269.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+OO-SNO,,,,,,bel
+OO-SNP,,,,,,bel
+OO-SNQ,,,,,,bel
+OO-SSA,2392.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),bel
+OO-SSB,2400.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),bel
+OO-SSF,2763.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),bel
+OO-SSJ,1759.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),bel
+OO-SSN,1963.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),bel
+OO-SSO,2287.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),bel
+OO-SSR,4275.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),bel
+OO-SSU,2230.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),bel
+OO-SSW,3255.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),bel
+OO-SSX,2260.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),bel
+OO-SSY,,,,,,bel
+OO-TCH,1929.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+OO-TCQ,2114.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+OO-TCV,1968.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),bel
+G-EZIY,,,,,,ezy
+G-EZAO,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZAU,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZAV,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZAX,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZBH,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZBI,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZBO,3082.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZBR,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZBT,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZBU,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZBV,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZBW,3134.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZBX,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZBY,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZBZ,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-BKCC,,PIPER,P28A,P28A,PA-28-181 Archer DLX,ezy
+G-EZDA,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZDH,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZDJ,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZDK,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZDL,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZDM,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZDN,3608.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZDV,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZDX,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZTA,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZTB,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZTC,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZFI,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZTD,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZTG,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZTH,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZTJ,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZTK,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZTM,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZTN,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZTL,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZFR,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZTV,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZTX,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZFU,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZFV,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-EZFW,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ezy
+G-NXOE,,REIMS,C172,C172,Skyhawk,ezy
+G-EZTZ,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZTY,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZUA,4588.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZUC,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+G-EZUF,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ezy
+SP-ENG,32365.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ENL,32366.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ENM,32367.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ENN,32368.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ENU,30675.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ENW,28073.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ENX,30627.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ENV,33014.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ENQ,29036.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ESA,30680.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ESB,30692.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ESC,29933.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ESE,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ESG,30690.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ESH,35287.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ESI,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-ESK,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ent
+SP-EXA,64295.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,ent
+SP-EXB,64296.0,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,ent
+SP-EXC,,,,,,ent
+SP-EXE,,,,,,ent
+SP-EXF,,,,,,ent
+D-ABGJ,3415.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-ABGN,3661.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-ABGQ,3700.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-ABHG,2867.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-ABNH,,,,,,ewg
+D-ABNL,1852.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-ABNN,,,,,,ewg
+D-ABNU,2591.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-ABZE,3464.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-ABZI,3328.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-ABZK,3213.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-ABZL,3178.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-ABZN,3080.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEEA,,,,,,ewg
+D-AEEB,,,,,,ewg
+D-AEEC,,,,,,ewg
+D-AEED,,,,,,ewg
+D-AENC,,,,,,ewg
+D-AENE,,,,,,ewg
+D-AENF,,,,,,ewg
+D-AENG,,,,,,ewg
+D-AENH,,,,,,ewg
+D-AEWJ,7216.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWK,7261.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWL,7263.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWM,7259.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWN,7393.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWO,7394.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWP,7377.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWQ,7398.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWR,7412.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWS,7439.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWT,7534.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWU,7513.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWV,7545.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AEWW,7615.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ewg
+D-AGWA,2813.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWB,2833.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWC,2976.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWD,3011.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWE,3128.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWF,3172.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWG,3193.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWH,3352.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWK,3500.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWL,3534.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWM,3839.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWN,3841.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWU,5457.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+D-AGWV,5467.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),ewg
+EC-JDR,2488.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,fin
+EC-JLI,2563.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,fin
+OH-ATE,,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-ATF,,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-ATG,,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-ATH,,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-ATI,,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-ATJ,792.0,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-ATK,,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-ATL,,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-ATM,,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-ATN,959.0,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-ATO,,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-ATP,,ATR,AT75,AT75,ATR-72-212A (500),fin
+OH-LKE,,EMBRAER,E190,E90,Embraer 190,fin
+OH-LKF,19000066.0,EMBRAER,E190,E90,Embraer 190,fin
+OH-LKG,19000079.0,EMBRAER,E190,E90,Embraer 190,fin
+OH-LKH,19000086.0,EMBRAER,E190,E90,Embraer 190,fin
+OH-LKI,19000117.0,EMBRAER,E190,E90,Embraer 190,fin
+OH-LKK,19000127.0,EMBRAER,E190,E90,Embraer 190,fin
+OH-LKM,19000160.0,EMBRAER,E190,E90,Embraer 190,fin
+OH-LKN,19000252.0,EMBRAER,E190,E90,Embraer 190,fin
+OH-LKO,19000267.0,EMBRAER,E190,E90,Embraer 190,fin
+OH-LKP,19000416.0,EMBRAER,E190,E90,Embraer 190,fin
+OH-LKR,19000436.0,EMBRAER,E190,E90,Embraer 190,fin
+OH-LTO,,,,,,fin
+OH-LTP,,,,,,fin
+OH-LTT,1088.0,AIRBUS,A333,333,Airbus A330-300,fin
+OH-LVC,,,,,,fin
+OH-LVD,,,,,,fin
+OH-LVH,1184.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),fin
+OH-LVI,1364.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),fin
+OH-LVL,2266.0,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),fin
+OH-LWA,18.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWB,19.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWC,20.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWD,22.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWE,23.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWF,28.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWG,51.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWI,104.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWK,113.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWL,134.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWM,264.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWN,273.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWO,300.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWP,392.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWR,410.0,AIRBUS,A359,359,Airbus A350-900,fin
+OH-LWS,,,,,,fin
+OH-LXA,1405.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),fin
+EC-JFH,2104.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ibs
+EC-JFG,2143.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ibs
+EC-LAA,2678.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ibs
+EC-LUS,5501.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ibs
+EC-LVQ,5590.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ibs
+EC-LYM,5815.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ibs
+EC-MUF,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),ibs
+EC-NIA,,AIRBUS,A21N,32Q,Airbus A321-200 Neo,ibs
+EC-NIF,10025.0,AIRBUS,A21N,32Q,Airbus A321-200 Neo,ibs
+EC-NJI,10071.0,AIRBUS,A21N,32Q,Airbus A321-200 Neo,ibs
+EC-NST,,,,,,ibs
+EC-NUD,,,,,,ibs
+EC-OAS,,,,,,ibs
+G-GDFK,,,,,,exs
+G-GDFN,29332.0,BOEING,B733,73Y,Boeing 737-300 Freighter,exs
+G-GDFJ,28229.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-GDFO,28740.0,BOEING,B733,73Y,Boeing 737-300 Freighter,exs
+G-GDFC,28375.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-GDFD,27982.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-GDFF,28385.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-GDFG,,,,,,exs
+G-GDFL,,,,,,exs
+G-GDFM,,,,,,exs
+G-GDFP,28177.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-GDFR,30421.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-GDFV,28821.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-GDFS,32243.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-GDFX,27987.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-GDFY,30278.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-GDFZ,30276.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-HLYA,,,,,,exs
+G-JZHB,28623.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHC,30593.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-GDFU,30416.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHA,30417.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHD,34706.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-VYGM,1601.0,AIRBUS,A332,33X,Airbus A330-200 Freighter,exs
+G-JZHF,28378.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHH,28536.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHG,28388.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHM,63570.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHP,63147.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHR,63148.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHS,63149.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHU,63151.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHV,63152.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHW,63153.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHX,63154.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHY,63155.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHZ,63156.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHJ,63144.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHK,63145.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZHL,63568.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZBI,63166.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZBJ,63165.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZBK,63167.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZBL,63169.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZBM,63170.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZBN,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZBH,63163.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZBA,63157.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZBB,63158.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+G-JZBD,63159.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,exs
+D-CSUS,,,,,,ryr
+D-IGRK,,,,,,ryr
+SP-RKB,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKC,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKD,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKE,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKF,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKG,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKH,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKK,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKL,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKM,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKN,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKO,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKP,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKR,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKS,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKT,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKU,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKW,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKZ,,,,,,ryr
+SP-RKV,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RKQ,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSA,44686.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSC,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSD,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSE,44839.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSG,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSH,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSI,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSK,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSL,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSM,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSN,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSO,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSP,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSR,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RST,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSU,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSW,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSZ,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSV,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RSQ,,BOEING,B738,73H,Boeing 737-800 (winglets) pax,ryr
+SP-RUM,,,,,,ryr
+SP-RZA,,BOEING,B38M,7M8,Boeing 737 MAX 8 pax,ryr
+SP-RZB,,,,,,ryr
+SP-RZC,,,,,,ryr
+SP-RZD,,,,,,ryr
+SP-RZE,,,,,,ryr
+SP-RZF,,,,,,ryr
+OY-JZN,34689.0,BOEING,B738,73H,Boeing 737-800 (winglets) pax,sas
+OY-JZP,,,,,,sas
+OY-KAP,,,,,,sas
+OY-KAR,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),sas
+OY-KAS,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),sas
+OY-KBO,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),sas
+OY-KBP,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),sas
+OY-KBR,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),sas
+OY-KBT,,AIRBUS,A319,32D,Airbus A319 Ceo (Sharklets),sas
+LN-RKT,1697.0,AIRBUS,A333,333,Airbus A330-300,sas
+LN-RKS,,AIRBUS,A333,333,Airbus A330-300,sas
+LN-RKO,,AIRBUS,A333,333,Airbus A330-300,sas
+LN-RKM,,AIRBUS,A333,333,Airbus A330-300,sas
+LN-RGO,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+LN-RGN,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+LN-RGM,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+LN-RGL,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+LN-RKU,,AIRBUS,A333,333,Airbus A330-300,sas
+SE-DMO,,AIRBUS,A21N,32Q,Airbus A321-200 Neo,sas
+SE-DMR,,,,,,sas
+SE-DMS,,,,,,sas
+SE-DOX,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-DOY,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-DOZ,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-MKA,1276.0,ATR,AT76,AT76,ATR P-72,sas
+SE-MKB,1308.0,ATR,AT76,AT76,ATR P-72,sas
+SE-MKC,1313.0,ATR,AT76,AT76,ATR P-72,sas
+SE-MKD,1331.0,ATR,AT76,AT76,ATR P-72,sas
+SE-MKE,,ATR,AT76,AT76,ATR P-72,sas
+SE-MKF,1357.0,ATR,AT76,AT76,ATR P-72,sas
+SE-MKG,1354.0,ATR,AT76,AT76,ATR P-72,sas
+SE-MKH,1372.0,ATR,AT76,AT76,ATR P-72,sas
+SE-MKI,1379.0,ATR,AT76,AT76,ATR P-72,sas
+SE-MKL,1574.0,ATR,AT76,AT76,ATR P-72,sas
+SE-MKN,,,,,,sas
+SE-MKO,,,,,,sas
+SE-REH,,AIRBUS,A333,333,Airbus A330-300,sas
+SE-ROA,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-ROB,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-ROC,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-ROD,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-ROE,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-ROF,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-ROG,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-ROI,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-ROJ,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-ROK,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-ROM,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-RON,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+SE-ROO,,AIRBUS,A20N,32N,Airbus A320-200 Neo,sas
+EC-JSY,2785.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-JTR,2798.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-JYX,2962.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-JZI,2988.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-KDH,3083.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-KDG,3095.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-KCU,3109.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-KDT,,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-KDX,3151.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-KHN,3203.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-KJD,3237.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-KLB,3321.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-KLT,3376.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-KRH,3529.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LAB,2761.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LLJ,4661.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LOB,4849.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LOC,4855.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LOP,4937.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LUN,5479.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LUO,5530.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LVO,5533.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LVP,5587.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LVU,5616.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LVS,5599.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LVT,5612.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LVV,5620.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MAH,6039.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MAI,6045.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MAO,6081.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MAN,6079.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-LZN,5925.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MBD,3444.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MBE,3476.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MBS,6123.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MBT,6128.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MBY,4674.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MDZ,6377.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MEA,6400.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MEL,6450.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MEQ,6483.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MER,6510.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MES,6518.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MFK,6535.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MFL,6557.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MFM,6571.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MFN,6594.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MGE,6607.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),vlg
+EC-MGY,6638.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,vlg
+EC-MGZ,6660.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,vlg
+HA-LTF,8328.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,wzz
+HA-LVD,8882.0,AIRBUS,A21N,32Q,Airbus A321-200 Neo,wzz
+HA-LVE,,AIRBUS,A21N,32Q,Airbus A321-200 Neo,wzz
+HA-LVH,9164.0,AIRBUS,A21N,32Q,Airbus A321-200 Neo,wzz
+HA-LVI,9333.0,AIRBUS,A21N,32Q,Airbus A321-200 Neo,wzz
+HA-LVJ,10257.0,AIRBUS,A21N,32Q,Airbus A321-200 Neo,wzz
+HA-LVK,9444.0,AIRBUS,A21N,32Q,Airbus A321-200 Neo,wzz
+HA-LVP,10227.0,AIRBUS,A21N,32Q,Airbus A321-200 Neo,wzz
+HA-LVT,10424.0,AIRBUS,A21N,32Q,Airbus A321-200 Neo,wzz
+HA-LWV,5660.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),wzz
+HA-LXH,7217.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,wzz
+HA-LXJ,7316.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,wzz
+HA-LXO,7562.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,wzz
+HA-LXR,7647.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,wzz
+HA-LXS,7702.0,AIRBUS,A321,321,Airbus A321-100/200 Ceo,wzz
+HA-LYL,6489.0,AIRBUS,A320,32A,Airbus A320-200 Ceo (Sharklets),wzz
+HA-LZI,,,,,,wzz
+HA-LZK,,,,,,wzz
+HA-LZL,,,,,,wzz
+HA-LZM,,,,,,wzz
+HA-LZR,,,,,,wzz
+HA-LZU,,,,,,wzz
+HA-LZY,,,,,,wzz
+9H-WAF,,,,,,wzz
+9H-WAG,,,,,,wzz
+9H-WAI,,,,,,wzz
+9H-WAL,,,,,,wzz
+9H-WAO,,,,,,wzz
+9H-WAQ,,,,,,wzz
+9H-WAY,,,,,,wzz
+9H-WAZ,,,,,,wzz
+9H-WBZ,,,,,,wzz
+9H-WBI,,,,,,wzz
+9H-WBU,,,,,,wzz
+9H-WDH,,,,,,wzz
+9H-WDK,,,,,,wzz
+9H-WDP,,,,,,wzz
+9H-WDQ,,,,,,wzz
+9H-WDR,,,,,,wzz
+9H-WDG,,,,,,wzz
+9H-WDS,,,,,,wzz
+9H-WDT,,,,,,wzz
+9H-WDV,,,,,,wzz

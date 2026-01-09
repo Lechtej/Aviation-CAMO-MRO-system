@@ -1,0 +1,33 @@
+airline_code,airline_name,airline_iata,airline_icao
+aca,Air Canada,AC,ACA
+aee,Aegean Airlines,A3,AEE
+afr,Air France,AF,AFR
+ant,Air North,4N,ANT
+aua,Austrian Airlines,OS,AUA
+bel,Brussels Airlines,SN,BEL
+dla,Air Dolomiti,EN,DLA
+dlh,Lufthansa,LH,DLH
+ent,Enter Air,E4*,ENT
+ewg,Eurowings,EW,EWG
+exs,Jet2.com,LS,EXS
+ezy,EasyJet,U2,EZY
+fin,Finnair,AY,FIN
+fpo,ASL Airlines France,5O,FPO
+ibs,Iberia Express,I2,IBS
+ice,Icelandair,FI,ICE
+iga,SkyTaxi,TE*,IGA
+klc,KLM Cityhopper,WA,KLC
+lot,LOT Polish Airlines,LO,LOT
+mmz,euroAtlantic Airways,YU,MMZ
+mne,Air Montenegro,4O,MNE
+nos,NEOS,NO,NOS
+reu,Air Austral,UU,REU
+ryr,Ryanair,FR,RYR
+sas,Scandinavian Airlines (SAS),SK,SAS
+sdg,Star Air,S5,SDG
+tfl,TUI fly,OR,TFL
+tht,Air Tahiti Nui,TN,THT
+thy,Turkish Airlines,TK,THY
+tvs,Smartwings,QS,TVS
+vlg,Vueling Airlines,VY,VLG
+wzz,Wizz Air,W6,WZZ

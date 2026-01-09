@@ -34,3 +34,38 @@ Expected (Fleet_ALL):
 - LOTAMS: 316
 - LST: 613
 - unknown: 0
+
+## Import stabilization note (2026-01-09)
+
+During real import execution, the dataset contained at least one **duplicate MSN** while `public.aircraft` enforces uniqueness for non-null MSN (`ux_aircraft_msn_not_null`).
+This causes `load_from_csv.sql` to fail on aircraft merge unless the input is deduplicated.
+
+### Observed final counts (Postgres, public schema)
+After applying dedup and re-running the import:
+- `public.aircraft` = **928**
+- `public.aircraft_mro_access` = **928**
+- `orphan_access` (access without aircraft) = **0**
+
+### Dedup rule used
+Generate `aircraft_dedup.csv` from `aircraft.csv`:
+- primary key: `msn` **when present**
+- fallback key: `current_registration` (when `msn` is empty)
+
+Result: `src_rows=929` → `dedup_rows=928`.
+
+### Safe Docker-based import (Windows PowerShell)
+When using Docker Compose DB container, avoid relying on `:'csvdir'` by rewriting paths inside the SQL to point at the container directory (example: `/tmp/import_staging`).
+
+Validated sequence (high-signal):
+1. Copy CSV files into DB container under `/tmp/import_staging/`.
+2. Rewrite `\copy` paths in `load_from_csv.sql` to use `/tmp/import_staging/...`.
+3. If import fails on MSN uniqueness: generate `/tmp/import_staging/aircraft_dedup.csv` and switch `stg_aircraft` source to the dedup file.
+4. Run:
+   - `psql -v ON_ERROR_STOP=1 -f /tmp/import_staging/load_from_csv.sql`
+5. Validate:
+   - `SELECT COUNT(*) FROM public.aircraft;` → 928
+   - `SELECT COUNT(*) FROM public.aircraft_mro_access;` → 928
+   - `SELECT COUNT(*) FROM public.aircraft_mro_access ama LEFT JOIN public.aircraft a ON a.id=ama.aircraft_id WHERE a.id IS NULL;` → 0
+
+### Recommended follow-up
+If business requires keeping 929 aircraft rows, revise the MSN uniqueness strategy (e.g., conditional unique, data cleansing, or conflict resolution policy) and re-run import.

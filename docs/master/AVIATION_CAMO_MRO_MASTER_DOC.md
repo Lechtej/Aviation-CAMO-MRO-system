@@ -148,3 +148,6 @@ See `docs/00_product/erd_logical.md`.
 ---
 
 **End of Document**
+
+## Data import
+- PGL Fleet Import: see `docs/01_architecture/database_pgl_import.md` and `db/import/`.
