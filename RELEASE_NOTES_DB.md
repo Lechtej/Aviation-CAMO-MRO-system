@@ -28,3 +28,10 @@
   - `public.aircraft` = 928
   - `public.aircraft_mro_access` = 928
   - `orphan_access` = 0
+
+## v0.2.4 — RBAC Catalog (roles + permissions)
+
+- DB: added RBAC catalog tables in `public` schema:
+  - `auth_roles`, `auth_permissions`, `auth_role_permissions`
+- DB Seed: added `seed_public_auth_rbac_catalog_v0.2.4.sql` (idempotent)
+- Docs: updated RBAC matrix with DB-backed catalog contract (Keycloak role codes must match DB `auth_roles.code`)

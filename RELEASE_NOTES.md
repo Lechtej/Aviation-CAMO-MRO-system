@@ -524,3 +524,7 @@ Date: 2026-01-05
 
 ### Security
 - Documented the enforced policy: **no password SSH**, **root key-only**.
+
+## v0.2.3.2 (2026-01-09)
+- DB Import: added server-compatible import SQL (Hetzner/prod schema) and verification script.
+- Docs: extended DB import documentation with server deployment path and schema mapping (no history removal).

@@ -22,3 +22,29 @@
 ## Notes
 - RBAC is action-based (permissions), not screen-based.
 - All sign-off actions must be auditable.
+
+## v0.2.4 — DB-backed RBAC Catalog (authoritative)
+
+**Source of truth: Postgres (public schema)**  
+Roles and permissions are seeded to DB and can be used by the API for authorization checks.
+
+### Catalog tables
+- `public.auth_roles` — role catalog (code, scope, description)
+- `public.auth_permissions` — permission catalog (code, domain, description)
+- `public.auth_role_permissions` — many-to-many mapping
+
+### Permission naming convention
+- Format: `<domain>.<area>.<action>` (lowercase, dot-separated)
+- Examples:
+  - `tenant.users.assign_roles`
+  - `camo.work_packages.release`
+  - `mro.certification.sign_crs`
+  - `inv.stock.adjust`
+
+### Keycloak alignment (contract)
+Keycloak role codes **must match** `public.auth_roles.code` (exact string match).  
+JWT → API should carry `realm_access.roles[]` and the API maps them to `auth_roles` → permissions.
+
+### Notes
+- Contextual access (e.g. per-aircraft/MRO relationship) remains separate from this global catalog.
+- Sign-off actions (CRS/RTS) require dedicated permissions and must be auditable (event log).
