@@ -1,5 +1,9 @@
 # AviationCAMO-MRO — Release Notes (cumulative)
 
+## v0.2.3 — API import-time stabilization + Enum hardening (2026-01-09)
+- Docs: added canonical runtime import validation (container-level `import main`).
+- API: documented Enum hardening rule (`Enum as PyEnum`) to prevent collisions with SQLAlchemy `Enum`.
+
 ## v0.2.2 — packaging + docs alignment (2026-01-08)
 - README/docs: ujednolicone odniesienia wersji do v0.2.2 (ZIP snapshot)
 - Packaging: ZIP now matches GitHub repo root layout (no extra wrapper folder, single `RELEASE_NOTES.md` at repo root).

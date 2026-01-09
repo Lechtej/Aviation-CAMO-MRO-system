@@ -31,3 +31,35 @@ System uruchamiany jednym, docelowym entrypointem:
 ```bash
 bash scripts/start_system.sh
 ```
+
+## API import-time stability (SQLAlchemy models)
+### Scope
+This section documents **import-time (runtime) stability** for FastAPI + SQLAlchemy models.
+Some failures occur **during module import**, so static compilation checks are insufficient.
+
+### Canonical validation (MANDATORY)
+Run inside the API container:
+
+```bash
+cd infra/docker
+docker compose run --rm api bash -lc 'python -c "import modules.logistics.models; print(\"OK: logistics models imported\")"'
+docker compose run --rm api bash -lc 'python -c "import main; print(\"OK: main imported\")"'
+```
+
+### Success criteria
+- `docker compose ps` → `api` is **Up** (no restart-loop)
+- API logs contain **no traceback**
+- `GET /health` → **200**
+
+### Enum hardening rule (anti-regression)
+Avoid name collisions between Python `enum.Enum` and SQLAlchemy `Enum`:
+- Use explicit alias in model files:
+
+```python
+from enum import Enum as PyEnum
+
+class PartType(str, PyEnum):
+    ...
+```
+
+Do **not** use bare `Enum` in SQLAlchemy model modules.

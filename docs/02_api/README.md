@@ -41,3 +41,18 @@ See also: `docs/03_ops/SERVER_AUTH_BOOTSTRAP.md`.
 ## Dev issuer/JWKS note (Windows Docker Desktop)
 If you obtain tokens from `http://localhost:8080`, Keycloak sets `iss` to `http://localhost:8080/...`.
 API container verifies `iss` against `OIDC_ISSUER` and fetches JWKS via `OIDC_JWKS_URL` (use `host.docker.internal`).
+
+## Import-time stability (SQLAlchemy models)
+
+### Why `py_compile` is not enough
+Some failures occur during **runtime import** (e.g., missing SQLAlchemy symbols, NameError), so they will not be caught by syntax-only checks.
+
+### Canonical validation (run inside Docker)
+```bash
+cd infra/docker
+docker compose run --rm api bash -lc 'python -c "import modules.logistics.models; print(\"OK: logistics models imported\")"'
+docker compose run --rm api bash -lc 'python -c "import main; print(\"OK: main imported\")"'
+```
+
+### Enum hardening rule
+Use `Enum as PyEnum` in model modules to avoid collisions with SQLAlchemy `Enum`.
