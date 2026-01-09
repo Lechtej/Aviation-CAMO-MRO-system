@@ -1,19 +1,15 @@
 -- load_from_csv_server.sql
--- Purpose: Import PGL fleet CSVs into SERVER schema (current prod DB on Hetzner).
--- Notes:
--- - Server DB schema differs from local dev schema (aircraft.registration vs current_registration, etc.).
--- - Uses pgcrypto/gen_random_uuid() for UUIDs.
--- - Expects CSVs in directory set by :csvdir (default: /tmp/import_staging).
-
-\set ON_ERROR_STOP on
-\set csvdir '/tmp/import_staging'
+-- Purpose: Import PGL fleet dataset CSVs into *server schema* (public schema layout on prod)
+-- Target tables (public schema): tenants, aircraft, aircraft_mro_access
+-- Source CSVs expected inside DB container: /tmp/import_staging/*.csv
+-- Idempotency: safe to re-run (uses ON CONFLICT upserts)
 
 BEGIN;
 
--- UUID generator
+-- UUID generator (needed for gen_random_uuid())
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- === STAGING TABLES (server) ===
+-- ==== STAGING TABLES (server import) ====
 DROP TABLE IF EXISTS public._stg_airline_customers;
 CREATE TABLE public._stg_airline_customers (
   airline_code text,
@@ -28,7 +24,6 @@ CREATE TABLE public._stg_mro_customers (
   airline_code text
 );
 
--- Source aircraft.csv columns: current_registration, msn, manufacturer, type, subtype, model, airline_code
 DROP TABLE IF EXISTS public._stg_aircraft;
 CREATE TABLE public._stg_aircraft (
   current_registration text,
@@ -40,76 +35,80 @@ CREATE TABLE public._stg_aircraft (
   airline_code text
 );
 
--- Source aircraft_mro_access.csv columns: current_registration, mro_code
 DROP TABLE IF EXISTS public._stg_aircraft_mro_access;
 CREATE TABLE public._stg_aircraft_mro_access (
   aircraft_registration text,
   mro_code text
 );
 
-\copy public._stg_airline_customers FROM :'csvdir'/airline_customers.csv WITH (FORMAT csv, HEADER true, ENCODING 'UTF8');
-\copy public._stg_mro_customers     FROM :'csvdir'/mro_customers.csv     WITH (FORMAT csv, HEADER true, ENCODING 'UTF8');
-\copy public._stg_aircraft          FROM :'csvdir'/aircraft_dedup.csv    WITH (FORMAT csv, HEADER true, ENCODING 'UTF8');
-\copy public._stg_aircraft_mro_access FROM :'csvdir'/aircraft_mro_access.csv WITH (FORMAT csv, HEADER true, ENCODING 'UTF8');
+-- ==== COPY CSV -> STAGING ====
+\copy public._stg_airline_customers FROM '/tmp/import_staging/airline_customers.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8');
+\copy public._stg_mro_customers     FROM '/tmp/import_staging/mro_customers.csv'      WITH (FORMAT csv, HEADER true, ENCODING 'UTF8');
+\copy public._stg_aircraft          FROM '/tmp/import_staging/aircraft.csv'           WITH (FORMAT csv, HEADER true, ENCODING 'UTF8');
+\copy public._stg_aircraft_mro_access FROM '/tmp/import_staging/aircraft_mro_access.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8');
 
--- === TENANTS (server table has: id, code, name, schema_name, created_at) ===
--- 1) Ensure airline tenants exist (exclude 'lot' per dataset convention)
+-- ==== TENANTS UPSERTS ====
+-- 1) Ensure airline tenants exist (exclude 'lot' because it is platform/CAMO tenant in our baseline)
 INSERT INTO public.tenants (id, code, name, schema_name)
 SELECT gen_random_uuid(), s.airline_code, s.airline_name, 't_'||s.airline_code
 FROM public._stg_airline_customers s
 LEFT JOIN public.tenants t ON t.code = s.airline_code
 WHERE t.id IS NULL AND s.airline_code <> 'lot'
 ON CONFLICT (code) DO UPDATE SET
-  name = EXCLUDED.name,
+  name        = EXCLUDED.name,
   schema_name = EXCLUDED.schema_name;
 
--- 2) Ensure MRO tenants exist (name defaults to code)
+-- 2) Ensure MRO tenants exist (if they are missing in DB)
 INSERT INTO public.tenants (id, code, name, schema_name)
 SELECT gen_random_uuid(), s.mro_code, upper(s.mro_code), 't_'||s.mro_code
-FROM public._stg_mro_customers s
+FROM (SELECT DISTINCT mro_code FROM public._stg_mro_customers WHERE mro_code IS NOT NULL AND btrim(mro_code) <> '') s
 LEFT JOIN public.tenants t ON t.code = s.mro_code
 WHERE t.id IS NULL
-ON CONFLICT (code) DO UPDATE SET
-  name = EXCLUDED.name,
-  schema_name = EXCLUDED.schema_name;
+ON CONFLICT (code) DO NOTHING;
 
--- === AIRCRAFT (server table columns) ===
--- Table: public.aircraft(id, owner_tenant_id, registration, aircraft_type, serial_number, status_tech, notes)
-INSERT INTO public.aircraft (
-  id,
-  owner_tenant_id,
-  registration,
-  aircraft_type,
-  serial_number,
-  status_tech,
-  notes
-)
+-- 3) Contract-level MRO ↔ airline customers (optional table; only if it exists)
+DO $$
+BEGIN
+  IF to_regclass('public.mro_customers') IS NOT NULL THEN
+    INSERT INTO public.mro_customers (mro_tenant_id, customer_tenant_id)
+    SELECT m.id, c.id
+    FROM public._stg_mro_customers s
+    JOIN public.tenants m ON m.code = s.mro_code
+    JOIN public.tenants c ON c.code = s.airline_code
+    ON CONFLICT (mro_tenant_id, customer_tenant_id) DO NOTHING;
+  END IF;
+END $$;
+
+-- ==== AIRCRAFT UPSERT (server schema) ====
+-- Map CSV -> server columns:
+-- - registration  <- current_registration
+-- - serial_number <- msn
+-- - aircraft_type <- model/subtype/type (best available)
+-- - status_tech   <- 'IN_SERVICE'
+INSERT INTO public.aircraft (id, owner_tenant_id, registration, aircraft_type, serial_number, status_tech, notes)
 SELECT
   gen_random_uuid(),
   t.id,
   a.current_registration,
-  COALESCE(NULLIF(a.model,''), NULLIF(a.subtype,''), NULLIF(a.type,'')),
-  NULLIF(a.msn,''),
+  LEFT(COALESCE(NULLIF(a.model,''), NULLIF(a.subtype,''), NULLIF(a.type,'')), 64),
+  LEFT(NULLIF(a.msn,''), 64),
   'IN_SERVICE',
-  NULLIF(
-    concat_ws(' | ',
-      NULLIF(a.manufacturer,''),
-      NULLIF(a.type,''),
-      NULLIF(a.subtype,''),
-      NULLIF(a.model,'')
-    ),
-    ''
-  )
+  LEFT(CONCAT_WS(' | ',
+        NULLIF(a.manufacturer,''),
+        NULLIF(a.type,''),
+        NULLIF(a.subtype,''),
+        NULLIF(a.model,'')
+      ), 1024)
 FROM public._stg_aircraft a
 JOIN public.tenants t ON t.code = a.airline_code
+WHERE a.current_registration IS NOT NULL AND btrim(a.current_registration) <> ''
 ON CONFLICT (owner_tenant_id, registration) DO UPDATE SET
-  aircraft_type = COALESCE(EXCLUDED.aircraft_type, public.aircraft.aircraft_type),
-  serial_number = COALESCE(EXCLUDED.serial_number, public.aircraft.serial_number),
-  status_tech   = COALESCE(EXCLUDED.status_tech, public.aircraft.status_tech),
-  notes         = COALESCE(EXCLUDED.notes, public.aircraft.notes);
+  aircraft_type  = COALESCE(EXCLUDED.aircraft_type, public.aircraft.aircraft_type),
+  serial_number  = COALESCE(EXCLUDED.serial_number, public.aircraft.serial_number),
+  notes          = COALESCE(EXCLUDED.notes, public.aircraft.notes);
 
--- === AIRCRAFT ↔ MRO ACCESS (server) ===
--- Table: public.aircraft_mro_access(id, aircraft_id, mro_tenant_id, role, active)
+-- ==== AIRCRAFT ↔ MRO ACCESS (server schema) ====
+-- Join by registration + owner_tenant_id (airline_code) and mro_code
 INSERT INTO public.aircraft_mro_access (id, aircraft_id, mro_tenant_id, role, active)
 SELECT
   gen_random_uuid(),
@@ -118,13 +117,19 @@ SELECT
   'MAINTENANCE',
   true
 FROM public._stg_aircraft_mro_access s
-JOIN public.aircraft ac ON ac.registration = s.aircraft_registration
-JOIN public.tenants  mro ON mro.code = s.mro_code
+JOIN public._stg_aircraft a
+  ON a.current_registration = s.aircraft_registration
+JOIN public.tenants owner
+  ON owner.code = a.airline_code
+JOIN public.aircraft ac
+  ON ac.owner_tenant_id = owner.id AND ac.registration = s.aircraft_registration
+JOIN public.tenants mro
+  ON mro.code = s.mro_code
 ON CONFLICT (aircraft_id, mro_tenant_id) DO UPDATE SET
   active = true,
   role   = EXCLUDED.role;
 
--- cleanup staging
+-- ==== CLEANUP STAGING ====
 DROP TABLE public._stg_airline_customers;
 DROP TABLE public._stg_mro_customers;
 DROP TABLE public._stg_aircraft;

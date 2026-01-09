@@ -1,4 +1,4 @@
-﻿{
+{
   "realm": "aviation",
   "enabled": true,
   "displayName": "Aviation CAMO & MRO",
@@ -6,6 +6,7 @@
     {
       "clientId": "aviation-api",
       "enabled": true,
+      "sslRequired": "NONE",
       "protocol": "openid-connect",
       "publicClient": true,
       "standardFlowEnabled": true,

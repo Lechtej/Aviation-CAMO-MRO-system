@@ -36,13 +36,13 @@
   const navCamoEvents = $("nav-camo-events");
   const navMroEvents = $("nav-mro-events");
 
-  const DEFAULT_BASE_URL = (location.origin || "http://localhost:3000").replace(":3000", ":8000");
+  const DEFAULT_BASE_URL = "http://localhost:8000";
   const LS_KEY = "aviationcamo_ui_v1";
   const LS_AUTH_KEY = "aviationcamo_auth_v1";
 
   // Keycloak (defaults; can be overridden via localStorage settings if needed later)
   const KC = {
-    baseUrl: (location.origin || "http://localhost:3000").replace(":3000", ":8080"),
+    baseUrl: "http://localhost:8080",
     realm: "aviation",
     clientId: "aviation-api",
   };
@@ -300,7 +300,7 @@
   // ---------------------------
   async function pingApi(baseUrl) {
     try {
-      const r = await fetch(baseUrl + "/openapi.json", { method: "GET" });
+      const r = await fetch(baseUrl + "/docs", { method: "GET" });
       if (r.ok) return true;
       return false;
     } catch {

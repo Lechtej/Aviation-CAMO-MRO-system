@@ -42,7 +42,7 @@
 
   // Keycloak (defaults; can be overridden via localStorage settings if needed later)
   const KC = {
-    baseUrl: (location.origin || "http://localhost:3000").replace(":3000", ":8080"),
+    baseUrl: "http://localhost:8080",
     realm: "aviation",
     clientId: "aviation-api",
   };
