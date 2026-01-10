@@ -98,3 +98,26 @@ HTTP 200 = OK
   **TODO**: dodać standardowe health-check endpoints (Kubernetes / monitoring)
 - `admin-cli` wymaga jawnego `directAccessGrantsEnabled=true` po imporcie realm
 - `start-dev` – przed produkcją przejść na `start --optimized`
+
+
+## 2026-01-10 — UI HTTPS (SPA) operational notes
+
+### UI config (static `app.js`)
+Production UI uses hardcoded defaults inside `apps/web/app.js`:
+- `DEFAULT_BASE_URL = "https://api.forgemotionsystems.com"`
+- `KC.baseUrl = "https://auth.forgemotionsystems.com"`
+- `KC.realm = "aviation"`
+- `KC.clientId = "aviation-api"`
+
+If UI serves stale `app.js` (still points to localhost), validate:
+- `curl -s https://app.forgemotionsystems.com/app.js | grep -E "DEFAULT_BASE_URL|KC\.baseUrl"`
+
+### Container reality check (where code actually runs)
+Some containers ship code into `/app/...` at image build time.
+If you edit repo files on host and changes are not visible in runtime:
+- verify the live file inside container
+- then rebuild the image OR apply a temporary hotfix via `docker cp` (unblock only)
+
+Recommended long-term:
+- rebuild `docker-api` and `docker-web` images from the updated repo to make changes persistent across restarts/redeploys.
+

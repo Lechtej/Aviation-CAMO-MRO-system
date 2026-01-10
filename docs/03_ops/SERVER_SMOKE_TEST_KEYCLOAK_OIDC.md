@@ -94,3 +94,57 @@ POST /v1/logistics/_admin/bootstrap
 
 ## Known issue
 POST /v1/logistics/movements → 404 Not Found
+
+
+## STATUS FREEZE (2026-01-10) — UI over HTTPS (OIDC code+PKCE) + API calls (read-only)
+
+### Endpoints (prod)
+- UI: https://app.forgemotionsystems.com
+- API: https://api.forgemotionsystems.com
+- Keycloak: https://auth.forgemotionsystems.com
+- OIDC issuer: https://auth.forgemotionsystems.com/realms/aviation
+
+### UI auth flow (SPA)
+- Protocol: Authorization Code + PKCE (S256)
+- Token storage: `localStorage["aviationcamo_auth_v1"]`
+- Expected redirect_uri: `https://app.forgemotionsystems.com/`
+
+### Keycloak client settings (minimum)
+Client: `aviation-api` (realm: `aviation`)
+- Valid Redirect URIs:
+  - `https://app.forgemotionsystems.com/`
+  - `https://app.forgemotionsystems.com/*`
+- Web Origins:
+  - `https://app.forgemotionsystems.com`
+
+### Production CORS requirement (browser)
+API must allow origin:
+- `https://app.forgemotionsystems.com`
+
+Note:
+- verify with preflight (OPTIONS) against `/v1/aircraft` using that origin.
+
+### Tenant context requirement (current)
+Tenant-scoped endpoints (e.g. `/v1/aircraft`) require tenant context to be resolved.
+Resolution rules are documented in:
+- `docs/02_api/TENANT_CONTEXT.md`
+
+### Smoke-test checklist (PASS/FAIL)
+1) UI secure context:
+   - `window.isSecureContext === true` (browser console)
+2) PKCE availability:
+   - `crypto.subtle.digest` exists
+3) Login redirect:
+   - host `auth.forgemotionsystems.com`
+   - `code_challenge_method=S256`
+4) After login:
+   - `localStorage["aviationcamo_auth_v1"].access_token` exists
+5) API connectivity:
+   - `GET /docs` → 200 (UI shows API OK)
+6) Auth:
+   - `GET /v1/roles` with Bearer → 200
+7) Tenant:
+   - `GET /v1/aircraft`:
+     - without tenant context → may be 403
+     - with tenant context (claim or `X-Tenant-Id`) → 200
+

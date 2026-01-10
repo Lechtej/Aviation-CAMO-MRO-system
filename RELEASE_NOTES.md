@@ -1,5 +1,33 @@
 # AviationCAMO-MRO — Release Notes (cumulative)
 
+
+## v0.2.44 (2026-01-10) — UI HTTPS run (OIDC code+PKCE) + CORS(prod) + tenant-context decision pending
+
+### Added / Documented
+- Production HTTPS endpoints (Caddy reverse proxy):
+  - UI: https://app.forgemotionsystems.com
+  - API: https://api.forgemotionsystems.com
+  - Keycloak: https://auth.forgemotionsystems.com
+- OIDC discovery verified:
+  - issuer: https://auth.forgemotionsystems.com/realms/aviation
+
+### Fixed (prod unblockers)
+- UI draft now points to production endpoints:
+  - `DEFAULT_BASE_URL = "https://api.forgemotionsystems.com"`
+  - `KC.baseUrl = "https://auth.forgemotionsystems.com"`
+- API CORS now allows browser origin:
+  - `https://app.forgemotionsystems.com`
+- Keycloak login redirect now targets `https://app.forgemotionsystems.com/` (no localhost).
+
+### Known / Next
+- Tenant context is required for tenant-scoped endpoints (e.g. `/v1/aircraft`).
+  Current tenant resolution rules are documented in:
+  - `docs/02_api/TENANT_CONTEXT.md`
+  Next step is to pick and implement one model:
+  - `tenant_id` claim in JWT (recommended for prod) OR
+  - `X-Tenant-Id` header from UI for PLATFORM_ADMIN (admin tooling)
+
+
 ## v0.2.3.1 (2026-01-09) — Docs reconstruction + GitHub releasing + API import-time hardening notes
 - Docs: restored full historical `RELEASE_NOTES.md` and documentation set from last pre-release-cleanup ZIP.
 - Docs: added GitHub release procedure (ZIP-first, tags, single changelog).
