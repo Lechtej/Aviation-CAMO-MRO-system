@@ -35,3 +35,13 @@
   - `auth_roles`, `auth_permissions`, `auth_role_permissions`
 - DB Seed: added `seed_public_auth_rbac_catalog_v0.2.4.sql` (idempotent)
 - Docs: updated RBAC matrix with DB-backed catalog contract (Keycloak role codes must match DB `auth_roles.code`)
+
+## v0.2.4 — RBAC SERVER SYNC
+
+- Migration applied on SERVER: `db/migrations/public/0003_public_auth_rbac.sql`
+- Seed applied on SERVER: `db/seed/seed_public_auth_rbac_catalog_v0.2.4.sql`
+- Resulting counts (SERVER):
+  - roles = 68
+  - permissions = 221
+  - mappings = 1116
+

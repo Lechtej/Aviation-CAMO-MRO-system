@@ -1,33 +1,5 @@
 # AviationCAMO-MRO — Release Notes (cumulative)
 
-
-## v0.2.44 (2026-01-10) — UI HTTPS run (OIDC code+PKCE) + CORS(prod) + tenant-context decision pending
-
-### Added / Documented
-- Production HTTPS endpoints (Caddy reverse proxy):
-  - UI: https://app.forgemotionsystems.com
-  - API: https://api.forgemotionsystems.com
-  - Keycloak: https://auth.forgemotionsystems.com
-- OIDC discovery verified:
-  - issuer: https://auth.forgemotionsystems.com/realms/aviation
-
-### Fixed (prod unblockers)
-- UI draft now points to production endpoints:
-  - `DEFAULT_BASE_URL = "https://api.forgemotionsystems.com"`
-  - `KC.baseUrl = "https://auth.forgemotionsystems.com"`
-- API CORS now allows browser origin:
-  - `https://app.forgemotionsystems.com`
-- Keycloak login redirect now targets `https://app.forgemotionsystems.com/` (no localhost).
-
-### Known / Next
-- Tenant context is required for tenant-scoped endpoints (e.g. `/v1/aircraft`).
-  Current tenant resolution rules are documented in:
-  - `docs/02_api/TENANT_CONTEXT.md`
-  Next step is to pick and implement one model:
-  - `tenant_id` claim in JWT (recommended for prod) OR
-  - `X-Tenant-Id` header from UI for PLATFORM_ADMIN (admin tooling)
-
-
 ## v0.2.3.1 (2026-01-09) — Docs reconstruction + GitHub releasing + API import-time hardening notes
 - Docs: restored full historical `RELEASE_NOTES.md` and documentation set from last pre-release-cleanup ZIP.
 - Docs: added GitHub release procedure (ZIP-first, tags, single changelog).
@@ -556,3 +528,16 @@ Date: 2026-01-05
 ## v0.2.3.2 (2026-01-09)
 - DB Import: added server-compatible import SQL (Hetzner/prod schema) and verification script.
 - Docs: extended DB import documentation with server deployment path and schema mapping (no history removal).
+
+## v0.2.4 — SERVER RBAC SYNC
+
+### Database
+- Applied RBAC schema migration (public.auth_*) on SERVER.
+- Seeded RBAC catalog v0.2.4 (roles, permissions, mappings).
+- Server DB aligned with LOCAL after AUTH/RBAC freeze.
+
+### API validation
+- /v1/tenants: no token → 401
+- /v1/tenants: PLATFORM_ADMIN → 200 OK
+- API logs: no DB relation errors (UndefinedTable / relation does not exist / permission denied)
+
