@@ -40,3 +40,13 @@
 ## Uwaga o brakującej flocie
 Arkusz `Fleet` w dostarczonym XLSX był pusty — wykorzystano `Fleet_SAMPLE`.
 Jeśli później wypełnisz `Fleet`, przygotujemy kolejną paczkę seed v0.2.2 z pełnym importem.
+
+
+---
+## ADDENDUM 2026-01 – PROD Auth & Multi-Tenancy (B1)
+
+- Schema-per-tenant model **B1** adopted.
+- Central ACL: `public.aircraft_mro_access`.
+- `public.tenants.schema_name` is routing key.
+- Keycloak is source of roles; DB maps permissions.
+- `tenant_id` claim mandatory in access token (PROD).

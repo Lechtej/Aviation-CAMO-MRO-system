@@ -73,3 +73,13 @@ curl.exe -i -s --max-time 10 "http://localhost:8000/v1/tenants" -H "Authorizatio
 ## Notes
 - Ten dokument to baseline produktowy (MVP). Implementacja w DB: `db/migrations/public/0003_public_auth_rbac.sql`
 - Seed katalogu ról/uprawnień: `db/seed/seed_public_auth_rbac_catalog_v0.2.4.sql`
+
+
+---
+## ADDENDUM 2026-01 – PROD Auth & Multi-Tenancy (B1)
+
+- Schema-per-tenant model **B1** adopted.
+- Central ACL: `public.aircraft_mro_access`.
+- `public.tenants.schema_name` is routing key.
+- Keycloak is source of roles; DB maps permissions.
+- `tenant_id` claim mandatory in access token (PROD).

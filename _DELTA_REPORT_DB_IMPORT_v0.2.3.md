@@ -20,3 +20,13 @@ Delta source: `Aviation-AMO-MRO-system repo lokalne przed commit ze zmianami w b
 
 ## No deletions
 - No files removed from the WWW-clean base; documentation history preserved.
+
+
+---
+## ADDENDUM 2026-01 – PROD Auth & Multi-Tenancy (B1)
+
+- Schema-per-tenant model **B1** adopted.
+- Central ACL: `public.aircraft_mro_access`.
+- `public.tenants.schema_name` is routing key.
+- Keycloak is source of roles; DB maps permissions.
+- `tenant_id` claim mandatory in access token (PROD).

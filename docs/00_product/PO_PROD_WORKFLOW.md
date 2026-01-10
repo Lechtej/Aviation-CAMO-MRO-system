@@ -24,3 +24,13 @@ We moved away from the Hetzner web console and introduced a **secure, repeatable
 2. Standardize docker-compose production deployment
 3. Finish FastAPI ↔ Keycloak (OIDC) integration end-to-end
 4. Add reverse proxy / HTTPS for public access
+
+
+---
+## ADDENDUM 2026-01 – PROD Auth & Multi-Tenancy (B1)
+
+- Schema-per-tenant model **B1** adopted.
+- Central ACL: `public.aircraft_mro_access`.
+- `public.tenants.schema_name` is routing key.
+- Keycloak is source of roles; DB maps permissions.
+- `tenant_id` claim mandatory in access token (PROD).

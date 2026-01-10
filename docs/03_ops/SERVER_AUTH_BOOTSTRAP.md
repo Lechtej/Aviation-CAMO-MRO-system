@@ -323,3 +323,13 @@ If it returns `404 Not Found`:
 - confirm the path exists in the running API spec: `curl -sS http://127.0.0.1:8000/openapi.json | grep -n '"/v1/logistics/movements"'`
 - check API logs: `docker logs docker-api-1 --tail=200`
 - this may indicate the route is present in OpenAPI but the router is not mounted, feature-flagged, or pending implementation.
+
+
+---
+## ADDENDUM 2026-01 – PROD Auth & Multi-Tenancy (B1)
+
+- Schema-per-tenant model **B1** adopted.
+- Central ACL: `public.aircraft_mro_access`.
+- `public.tenants.schema_name` is routing key.
+- Keycloak is source of roles; DB maps permissions.
+- `tenant_id` claim mandatory in access token (PROD).
