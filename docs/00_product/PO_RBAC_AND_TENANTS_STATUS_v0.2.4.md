@@ -98,3 +98,69 @@ Generated: 2026-01-10T12:52:29.107065Z
 2) **Rozdzielić uprawnienia read vs write** w logistyce (np. `STORES_RECEIVING`, `STORES_ISSUING`).  
 3) Dodać testy automatyczne „RBAC matrix” (smoke) do pipeline (minimum: 10–15 krytycznych endpointów).  
 4) Dla produkcji: rozważyć wyłączenie Direct Access Grants, jeśli UI przechodzi na standard OIDC code flow.
+
+## ADDENDUM (2026-01-11) — EPIC1 DESIGN: Work Orders + Tasks + TaskCards (contract + RBAC)
+
+### Scope
+Design-only (no DB migrations in this step). This addendum defines the implementation-ready contract
+for EPIC1 (CAMO→MRO Work Orders) to be implemented after B1.
+
+### Domain objects (EPIC1)
+- WorkOrder (WO header) → 1..N Tasks → 0..N TaskCards (per Task).
+- TaskCards are procedures/instructions (AMM/MPD/CMM/SB/Internal). Import from OEM files is planned (design-only).
+
+### Workflow (statuses)
+WorkOrder:
+- DRAFT → SENT → ACCEPTED → IN_PROGRESS → READY_FOR_CRS → CLOSED
+- READY_FOR_CRS used only if requires_crs=true
+- CLOSED requires all tasks DONE
+
+Task:
+- OPEN → IN_PROGRESS → DONE
+- OPEN|IN_PROGRESS → BLOCKED → IN_PROGRESS|DONE (BLOCKED requires blocked_reason)
+
+### RBAC model (permission-based, DB)
+Verified on PROD server DB:
+- Existing MRO permissions: mro.work_orders.* and mro.task_cards.*
+- No CAMO work order permissions yet (camo.%work_order% empty)
+
+#### EPIC1 permissions to add
+CAMO:
+- camo.work_orders.view
+- camo.work_orders.create
+- camo.work_orders.update (DRAFT only)
+- camo.work_orders.send
+- camo.work_orders.commit_workscope
+- camo.work_orders.close (requires_crs=false)
+
+MRO:
+- mro.work_orders.accept
+- mro.work_orders.ready_for_crs (requires_crs=true)
+
+STORE/INV (design-only):
+- inv.work_orders.commit_workscope
+- inv.work_orders.reserve
+- inv.work_orders.issue
+- inv.work_orders.return
+
+B1/CRS (design-only):
+- mro.work_orders.crs_sign
+
+#### Recommended role mapping
+CAMO:
+- CAMO_PLANNER: view, create, update(DRAFT), send
+- CAMO_ENGINEER: view (optional update(DRAFT))
+- CAMO_MANAGER: view, create, update(DRAFT), send, commit_workscope, close
+
+STORE:
+- INVENTORY_CONTROLLER: commit_workscope, reserve, issue, return
+- STORES_ISSUING: issue
+- STORES_RECEIVING: return
+
+MRO (recommended):
+- accept: LINE_MAINT_SUPERVISOR, BASE_MAINT_SUPERVISOR, SHIFT_LEADER, TENANT_ADMIN, PLATFORM_ADMIN
+- ready_for_crs: CERTIFYING_STAFF_CAT_B1, RELEASE_TO_SERVICE_AUTHORITY
+
+### Guards (mandatory)
+- origin guard: EPIC1 WO are origin="CAMO"; existing internal MRO WO are origin="MRO".
+- tenant guard: CAMO tenant vs assigned MRO tenant.

@@ -62,3 +62,6 @@ docker compose run --rm api bash -lc 'python -c "import main; print(\\"OK: main 
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+## EPIC1 — Work Orders (design-only) [2026-01-11]
+- Contract: `work_orders_contract.md`

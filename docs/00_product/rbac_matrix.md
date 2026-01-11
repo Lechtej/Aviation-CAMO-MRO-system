@@ -83,3 +83,38 @@ curl.exe -i -s --max-time 10 "http://localhost:8000/v1/tenants" -H "Authorizatio
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+## EPIC1 (CAMO→MRO) — Work Orders permissions (ADDENDUM 2026-01-11)
+
+### New permissions to add (DB)
+| Domain | Permission |
+|---|---|
+| CAMO | `camo.work_orders.view` |
+| CAMO | `camo.work_orders.create` |
+| CAMO | `camo.work_orders.update` |
+| CAMO | `camo.work_orders.send` |
+| CAMO | `camo.work_orders.commit_workscope` |
+| CAMO | `camo.work_orders.close` |
+| MRO | `mro.work_orders.accept` |
+| MRO | `mro.work_orders.ready_for_crs` |
+| INV | `inv.work_orders.commit_workscope` *(design-only)* |
+| INV | `inv.work_orders.reserve` *(design-only)* |
+| INV | `inv.work_orders.issue` *(design-only)* |
+| INV | `inv.work_orders.return` *(design-only)* |
+| MRO | `mro.work_orders.crs_sign` *(design-only)* |
+
+### Recommended role mapping
+| Role | EPIC1 permissions |
+|---|---|
+| CAMO_PLANNER | view, create, update(DRAFT), send |
+| CAMO_ENGINEER | view *(optional update(DRAFT))* |
+| CAMO_MANAGER | view, create, update(DRAFT), send, commit_workscope, close |
+| INVENTORY_CONTROLLER | *(design-only)* commit_workscope, reserve, issue, return |
+| STORES_ISSUING | *(design-only)* issue |
+| STORES_RECEIVING | *(design-only)* return |
+| LINE_MAINT_SUPERVISOR / BASE_MAINT_SUPERVISOR / SHIFT_LEADER | accept (+ existing mro.work_orders.* for execution) |
+| CERTIFYING_STAFF_CAT_B1 / RELEASE_TO_SERVICE_AUTHORITY | ready_for_crs (+ design-only crs_sign) |
+
+### Mandatory guards
+- origin="CAMO" for EPIC1 WO.
+- tenant boundary: CAMO tenant vs assigned MRO tenant.

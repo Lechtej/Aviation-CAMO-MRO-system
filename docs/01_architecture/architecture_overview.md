@@ -68,3 +68,17 @@ See: `docs/01_architecture/wbs_modules.md`.
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+## EPIC1 — Work Orders (design-only) [2026-01-11]
+
+### Concept
+EPIC1 introduces CAMO-originated Work Orders executed by an assigned MRO tenant:
+WorkOrder (header) → 1..N Tasks → 0..N TaskCards.
+
+### Key design flags
+- origin: CAMO | MRO (EPIC1 uses origin="CAMO")
+- requires_crs: boolean (enables READY_FOR_CRS and CRS signing flow)
+
+### RBAC
+Permission-based (DB). EPIC1 adds camo.work_orders.* and a small delta to existing MRO permissions.
+See: docs/02_api/work_orders_contract.md
