@@ -1,5 +1,19 @@
 # AviationCAMO-MRO — Release Notes (cumulative)
 
+## v0.2.42.3 (2026-01-11) — ENV strategy (local-first) + bootstrap/smoke scripts (docs)
+
+- Added environment strategy docs (local-first + server-dev as remote profile): `docs/environment/ENV_STRATEGY.md`
+- Added minimal DR/backup plan: `docs/environment/DR_BACKUP_PLAN.md`
+- Added canonical `.env.example` (keys only, no secrets)
+- Added deterministic scripts:
+  - `scripts/bootstrap_local.sh` (compose up + wait + optional API bootstrap + smoke)
+  - `scripts/smoke_auth.sh` (Direct Grant token, no jq)
+  - `scripts/smoke_api.sh` (roles/tenants gate)
+
+Notes:
+- `OIDC_CLIENT_ID` confirmed as `aviation-api` (from realm JSON).
+- Server naming differences are handled via `.env.server-dev` mapping; reconcile when server access returns.
+
 ## v0.2.42.2 (2026-01-11) — Keycloak Direct Grant unblock + tenant_id claim hardening (docs)
 
 - Keycloak/OIDC: documented + validated fix for `invalid_grant` / `Account is not fully set up` when using `grant_type=password`:

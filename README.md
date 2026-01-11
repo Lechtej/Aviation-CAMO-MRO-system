@@ -61,3 +61,13 @@ bash scripts/start_system.sh
 
 **Operational note:**
 - Keep `DEBUG_TENANT_HEADER=false` in production after verification; use debug header only as a controlled E2E bootstrap.
+
+
+## Environment (local-first)
+
+- Strategy: `docs/environment/ENV_STRATEGY.md`
+- DR / backups: `docs/environment/DR_BACKUP_PLAN.md`
+
+Quick start (local):
+- copy `.env.example` → `.env.local` and fill (do not commit)
+- run: `bash scripts/bootstrap_local.sh .env.local`
