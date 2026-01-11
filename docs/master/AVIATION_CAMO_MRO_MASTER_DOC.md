@@ -50,6 +50,7 @@ Build a modern, browser-based, multi-tenant CAMO & MRO system for small and mid-
 - DEC-006: One RELEASE_NOTES.md (continuously updated)
 - DEC-007: Stack = FastAPI, PostgreSQL, Redis/Celery, Keycloak, React/TypeScript
 - DEC-008: Tenant routing via PostgreSQL schema-per-tenant using search_path (middleware-driven context)
+- DEC-009: Tenant Feature Flags per tenant (DB source of truth) + API enforcement (403 FEATURE_DISABLED)
 
 ---
 

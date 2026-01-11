@@ -82,3 +82,47 @@ WorkOrder (header) → 1..N Tasks → 0..N TaskCards.
 ### RBAC
 Permission-based (DB). EPIC1 adds camo.work_orders.* and a small delta to existing MRO permissions.
 See: docs/02_api/work_orders_contract.md
+
+## EPIC Admin — Tenant Feature Flags + Admin Console (design-only) [2026-01-11]
+
+### Cel
+- Włączyć/wyłączyć funkcje per tenant (LOTAMS vs LST) bez reworku i bez zależności od Keycloak.
+
+### Decyzje (frozen)
+- Źródło prawdy: DB (nie Keycloak).
+- Egzekucja obowiązkowa w API (UI tylko UX), oraz w worker/jobs (skip/no-op).
+- Feature OFF → HTTP 403 + kod domenowy `FEATURE_DISABLED`.
+
+### Minimalny model danych (MVP)
+- `public.feature_flags`
+  - `key` (PK), `name`, `description`, `default_enabled`, `created_at`
+- `public.tenant_feature_flags`
+  - `id` (UUID PK), `tenant_id` (FK), `feature_key` (FK), `enabled`, `updated_at`, `updated_by`
+  - UNIQUE `(tenant_id, feature_key)`
+- Resolution:
+  - override w `tenant_feature_flags` ma priorytet
+  - inaczej `feature_flags.default_enabled`
+
+### Egzekucja (runtime)
+- API:
+  - Guard na router/prefix (np. `/stores/*`, `/work-orders/*`, `/crs/*`)
+  - Zwraca 403 `FEATURE_DISABLED` dla wyłączonych funkcji
+- Worker/Jobs:
+  - check na wejściu → `skipped` (NO-OP) jeśli feature OFF
+- UI (MVP opcjonalnie):
+  - ukrycie/disabled modułu, ale **bez zaufania** (API decyduje)
+
+### RBAC (Admin Console)
+- Rola globalna: `PLATFORM_ADMIN`
+- Minimalne permissions:
+  - `platform.features.read`
+  - `platform.features.manage`
+
+### Feature keys (minimalny zestaw)
+- `stores.enabled` — master switch dla magazynu (blokuje receipt/issue/return/adjustment)
+- `epic1.work_orders`
+- `epic4.crs`
+- `epic3.replenishment` — zależne od `stores.enabled`
+
+### Audit (MVP+ / rekomendowane od razu)
+- `public.tenant_feature_flag_audit`: kto/kiedy/co zmienił (old→new) + opcjonalnie `reason`

@@ -1,5 +1,11 @@
 # AviationCAMO-MRO — Release Notes (cumulative)
 
+## v0.2.42.4 (2026-01-11) — EPIC Admin: Tenant Feature Flags + Admin Console scope (docs)
+
+- Added ADR for tenant feature flags: `docs/architecture/adr/ADR-008-tenant-feature-flags-admin-console.md`
+- Updated architecture overview with EPIC Admin section (feature flags, enforcement, RBAC, audit): `docs/01_architecture/architecture_overview.md`
+- Updated Master Document with decision DEC-009 (tenant feature flags): `docs/master/AVIATION_CAMO_MRO_MASTER_DOC.md`
+
 ## v0.2.42.3 (2026-01-11) — ENV strategy (local-first) + bootstrap/smoke scripts (docs)
 
 - Added environment strategy docs (local-first + server-dev as remote profile): `docs/environment/ENV_STRATEGY.md`
