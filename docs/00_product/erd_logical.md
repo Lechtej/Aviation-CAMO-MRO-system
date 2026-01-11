@@ -33,3 +33,22 @@ erDiagram
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+
+---
+## Naming stability rules (additive)
+
+This system distinguishes between **technical enum identifiers** and **business / UI labels**.
+
+Technical enum values (e.g. `SERVICEABLE`, `ALERT_ONLY`, `DRAFT_REQUISITION`) are **contractual identifiers**
+used in APIs, database schemas, and audit logs. They are designed for **stability over time**.
+
+Business-facing labels, translations, and wording **may change** without breaking compatibility,
+as long as they remain mapped to the same technical identifier.
+
+**Rules:**
+- Do not reference enum *names* in business decisions; reference their *meaning*.
+- Renaming an enum value requires a migration and explicit mapping.
+- Adding new enum values is backward-compatible.
+
+(Added: 2026-01-11)
