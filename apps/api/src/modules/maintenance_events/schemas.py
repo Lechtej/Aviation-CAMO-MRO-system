@@ -19,7 +19,16 @@ class MaintenanceEventCreate(BaseModel):
     aircraft_id: UUID
     event_type: str = Field(..., min_length=1, max_length=64)
     description: Optional[str] = Field(None, max_length=5000)
-    status: MaintenanceEventStatus = MaintenanceEventStatus.OPEN
+
+
+class MaintenanceEventUpdate(BaseModel):
+    """MRO update payload (v0).
+
+    Only status + mro_notes are mutable in EPIC2 runtime.
+    """
+
+    status: MaintenanceEventStatus
+    mro_notes: Optional[str] = Field(None, max_length=5000)
 
 
 class MaintenanceEventOut(BaseModel):
@@ -30,6 +39,8 @@ class MaintenanceEventOut(BaseModel):
     description: Optional[str] = None
     status: MaintenanceEventStatus
     created_at: datetime
+    updated_at: Optional[datetime] = None
+    mro_notes: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -284,3 +284,12 @@ for U in "${USERS[@]}"; do
   done
 done
 ```
+
+## Troubleshooting: `invalid_grant` / `Account is not fully set up` (Password Grant)
+
+If `/protocol/openid-connect/token` returns:
+- `invalid_grant` + `Account is not fully set up`
+
+Then the realm Direct Grant flow is blocking password grant (commonly OTP / profile checks).
+Apply the fix procedure from:
+- `docs/03_ops/SERVER_AUTH_BOOTSTRAP.md` → **Fix: invalid_grant / Account is not fully set up**

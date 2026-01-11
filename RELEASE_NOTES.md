@@ -1,5 +1,17 @@
 # AviationCAMO-MRO — Release Notes (cumulative)
 
+## v0.2.42.2 (2026-01-11) — Keycloak Direct Grant unblock + tenant_id claim hardening (docs)
+
+- Keycloak/OIDC: documented + validated fix for `invalid_grant` / `Account is not fully set up` when using `grant_type=password`:
+  - clone Direct Grant flow → `direct-grant-no-otp` (OTP + condition disabled)
+  - set realm `directGrantFlow` to the cloned flow
+  - disable blocking Required Actions (VERIFY_PROFILE / UPDATE_PROFILE / UPDATE_PASSWORD / CONFIGURE_TOTP) in this test environment
+- Keycloak/OIDC: confirmed `tenant_id` claim delivered in access token via `oidc-usermodel-attribute-mapper` (attribute `tenant_id` on user + protocol mapper on `aviation-api` client).
+- Docs updated (append-only):
+  - `docs/03_ops/SERVER_AUTH_BOOTSTRAP.md`
+  - `docs/03_ops/SERVER_SMOKE_TEST_KEYCLOAK_OIDC.md`
+  - `docs/03_ops/deployment.md`
+
 ## v0.2.3.1 (2026-01-09) — Docs reconstruction + GitHub releasing + API import-time hardening notes
 - Docs: restored full historical `RELEASE_NOTES.md` and documentation set from last pre-release-cleanup ZIP.
 - Docs: added GitHub release procedure (ZIP-first, tags, single changelog).

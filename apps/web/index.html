@@ -146,6 +146,18 @@
       outline: none;
       min-width: 260px;
     }
+    textarea{
+      width: 100%;
+      min-height: 74px;
+      padding: 10px;
+      border-radius: 10px;
+      border:1px solid var(--border);
+      background: rgba(15,23,48,.65);
+      color: var(--text);
+      outline: none;
+      resize: vertical;
+      font-family: inherit;
+    }
     button{
       height:34px;
       padding:0 12px;
@@ -161,6 +173,27 @@
       border-color: var(--border);
       background: rgba(255,255,255,.05);
     }
+    button.primary{
+      border-color: rgba(61,220,151,.45);
+      background: rgba(61,220,151,.14);
+    }
+    button.primary:hover{ background: rgba(61,220,151,.20); }
+    button:disabled{ opacity:.45; cursor:not-allowed; }
+
+    .card{
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      background: rgba(255,255,255,.03);
+      margin: 12px 14px;
+    }
+    .card-title{ font-weight:700; margin-bottom:10px; }
+    .form{ display:grid; gap:8px; }
+    .form label{ font-size:12px; color:var(--muted); }
+
+    .row-actions{ display:grid; gap:8px; }
+    .row-actions .btns{ display:flex; gap:8px; flex-wrap:wrap; }
+    textarea.notes{ min-height: 70px; }
     .status{
       display:flex; align-items:center; gap:8px;
       font-size:12px;

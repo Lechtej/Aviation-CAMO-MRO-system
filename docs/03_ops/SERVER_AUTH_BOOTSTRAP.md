@@ -499,3 +499,100 @@ curl -sS -H "Authorization: Bearer $TOKEN"   "$API/v1/aircraft" | head -c 800; e
 - `/v1/aircraft` = **CAMO-only** (403 dla MRO/STORES jest poprawne).  
 - `_admin/bootstrap` = **PLATFORM_ADMIN-only**.  
 - `Account is not fully set up` → naprawione przez reset required actions + profil usera.
+
+## Fix: `invalid_grant` / `Account is not fully set up` for Password Grant (Direct Grant) — PROD-ready workaround
+
+**Symptom**
+- Token request (`grant_type=password`) returns:
+  - `{"error":"invalid_grant","error_description":"Account is not fully set up"}`
+
+**Root cause (observed)**
+- Realm has **Direct Grant** flow requiring OTP and/or profile verification actions.
+- Some **Required Actions** are enabled (even if not set on user), which blocks direct grant in this environment.
+
+**Target state (MVP / testing)**
+- Realm `directGrantFlow` points to a cloned flow with OTP disabled.
+- Required Actions that can block direct grant are disabled.
+
+> Note: this is **not** a security recommendation for production user-facing login. This is a pragmatic unblocker for service/UI testing in this project setup.
+
+### Commands (server-side)
+
+```bash
+# 0) SSH + go to compose dir
+ssh root@<SERVER_IP>
+cd /opt/aviationcamo/Aviation-CAMO-MRO-system/infra/docker
+
+KCADM="/opt/keycloak/bin/kcadm.sh"
+
+# 1) admin login for kcadm (session can expire)
+docker compose exec -T keycloak $KCADM config credentials   --server http://localhost:8080   --realm master   --user admin   --password 'admin123!'
+
+# 2) create (or reuse) a copy of built-in "direct grant" flow
+DG="direct%20grant"
+NEW="direct-grant-no-otp"
+
+# if it already exists -> Keycloak returns "New flow alias name already exists" (safe to ignore)
+docker compose exec -T keycloak $KCADM create "authentication/flows/$DG/copy" -r aviation -s "newName=$NEW" || true
+
+# 3) verify the executions in the new flow: OTP + condition must be DISABLED
+docker compose exec -T keycloak $KCADM get "authentication/flows/$NEW/executions" -r aviation   | egrep -n '"displayName"|"providerId"|"requirement"' -n
+
+# EXPECT (important lines):
+# - Condition - user configured -> DISABLED
+# - OTP -> DISABLED
+# - Username Validation -> REQUIRED
+# - Password -> REQUIRED
+
+# 4) assign realm directGrantFlow to new flow
+docker compose exec -T keycloak $KCADM update realms/aviation -s "directGrantFlow=$NEW"
+
+# 5) disable blocking Required Actions (safe for this test environment)
+for A in VERIFY_PROFILE UPDATE_PROFILE UPDATE_PASSWORD CONFIGURE_TOTP; do
+  docker compose exec -T keycloak $KCADM update "authentication/required-actions/$A" -r aviation -s enabled=false || true
+done
+```
+
+### Validation (PASS/FAIL)
+
+```bash
+ISSUER_LOCAL="http://localhost:8080/realms/aviation"
+CLIENT_ID="aviation-api"
+PASS='Camo1234!@'
+
+# CAMO
+curl -sS -X POST "$ISSUER_LOCAL/protocol/openid-connect/token"   -H "Content-Type: application/x-www-form-urlencoded"   -d "grant_type=password" -d "client_id=$CLIENT_ID"   -d "username=camo_lot" -d "password=$PASS"   -o /tmp/token_camo_local.json
+
+python3 - <<'PY'
+import json, base64
+o=json.load(open("/tmp/token_camo_local.json"))
+t=o.get("access_token")
+print("has_token:", bool(t))
+if not t:
+    print("FAIL:", o); raise SystemExit(1)
+p=json.loads(base64.urlsafe_b64decode(t.split(".")[1] + "==="))
+print("preferred_username:", p.get("preferred_username"))
+print("tenant_id:", p.get("tenant_id"))
+print("roles:", (p.get("realm_access") or {}).get("roles"))
+PY
+
+# MRO
+curl -sS -X POST "$ISSUER_LOCAL/protocol/openid-connect/token"   -H "Content-Type: application/x-www-form-urlencoded"   -d "grant_type=password" -d "client_id=$CLIENT_ID"   -d "username=mro_lotams" -d "password=$PASS"   -o /tmp/token_mro_local.json
+
+python3 - <<'PY'
+import json, base64
+o=json.load(open("/tmp/token_mro_local.json"))
+t=o.get("access_token")
+print("has_token:", bool(t))
+if not t:
+    print("FAIL:", o); raise SystemExit(1)
+p=json.loads(base64.urlsafe_b64decode(t.split(".")[1] + "==="))
+print("preferred_username:", p.get("preferred_username"))
+print("tenant_id:", p.get("tenant_id"))
+print("roles:", (p.get("realm_access") or {}).get("roles"))
+PY
+```
+
+**PASS criteria**
+- `has_token: True`
+- `tenant_id` claim present and equals expected tenant UUID.

@@ -23,3 +23,11 @@ Use Docker Compose under `infra/docker/docker-compose.yml`.
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+## Keycloak: password grant unblocker for test environment
+
+If your UI/API tests rely on `grant_type=password` and you get:
+- `invalid_grant` / `Account is not fully set up`
+
+Use the documented workaround:
+- `docs/03_ops/SERVER_AUTH_BOOTSTRAP.md` → **Fix: invalid_grant / Account is not fully set up**

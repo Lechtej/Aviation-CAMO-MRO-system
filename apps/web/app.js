@@ -308,23 +308,122 @@
     }
   }
 
-  async function apiFetch(baseUrl, path) {
+  async function apiRequest(baseUrl, path, opts) {
     const auth = loadAuth();
-    const headers = {};
+    const headers = { "Content-Type": "application/json" };
     if (isTokenValid(auth)) headers["Authorization"] = "Bearer " + auth.access_token;
 
-    const r = await fetch(baseUrl + path, { headers });
+    const r = await fetch(baseUrl + path, {
+      method: (opts?.method || "GET"),
+      headers,
+      body: opts?.body ? JSON.stringify(opts.body) : undefined,
+    });
     if (r.status === 401) {
       throw new Error("401 Unauthorized (login required)");
     }
     if (r.status === 403) {
-      throw new Error("403 Forbidden (missing role)");
+      throw new Error("403 Forbidden");
     }
     if (!r.ok) {
       const t = await r.text();
       throw new Error(`${r.status} ${r.statusText}: ${t}`);
     }
-    return r.json();
+    if (r.status === 204) return null;
+    const ct = (r.headers.get("content-type") || "").toLowerCase();
+    if (ct.includes("application/json")) return r.json();
+    return r.text();
+  }
+
+  async function apiFetch(baseUrl, path) {
+    return apiRequest(baseUrl, path, { method: "GET" });
+  }
+
+  function renderEventsTable(rows, mode) {
+    const arr = Array.isArray(rows) ? rows : [];
+    if (!arr.length) return `<div class="muted">Brak danych (0)</div>`;
+
+    const ths = [
+      "Event ID", "Aircraft", "Type", "Status", "Updated", (mode === "mro" ? "Actions" : "")
+    ].map(x => x ? `<th>${esc(x)}</th>` : "").join("");
+
+    const trs = arr.map((r) => {
+      const updated = r.updated_at ? String(r.updated_at) : "";
+      const actions = (mode !== "mro") ? "" : `
+        <div class="row-actions">
+          <textarea class="notes" data-eid="${esc(r.id)}" placeholder="mro_notes (optional)">${esc(r.mro_notes || "")}</textarea>
+          <div class="btns">
+            <button class="btn" data-act="in_progress" data-eid="${esc(r.id)}" ${r.status !== "OPEN" ? "disabled" : ""}>IN_PROGRESS</button>
+            <button class="btn" data-act="done" data-eid="${esc(r.id)}" ${r.status !== "IN_PROGRESS" ? "disabled" : ""}>DONE</button>
+          </div>
+        </div>
+      `;
+      return `
+        <tr>
+          <td>${esc(r.id)}</td>
+          <td>${esc(r.aircraft_id)}</td>
+          <td>${esc(r.event_type || "")}</td>
+          <td><b>${esc(r.status || "")}</b></td>
+          <td class="muted">${esc(updated)}</td>
+          ${mode === "mro" ? `<td>${actions}</td>` : ""}
+        </tr>
+      `;
+    }).join("");
+
+    return `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>${ths}</tr></thead>
+          <tbody>${trs}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function bindCamoCreate(baseUrl) {
+    const btn = document.getElementById("btnCreateEvent");
+    if (!btn) return;
+    btn.addEventListener("click", async () => {
+      const aircraftId = (document.getElementById("camoAircraftId")?.value || "").trim();
+      const eventType = (document.getElementById("camoEventType")?.value || "").trim();
+      const desc = (document.getElementById("camoDesc")?.value || "").trim();
+      const msg = document.getElementById("camoCreateMsg");
+      if (msg) msg.textContent = "";
+      try {
+        if (!aircraftId || !eventType) throw new Error("Aircraft ID and Event type are required");
+        const r = await apiRequest(baseUrl, "/v1/maintenance-events", {
+          method: "POST",
+          body: { aircraft_id: aircraftId, event_type: eventType, description: desc || null },
+        });
+        if (msg) msg.textContent = `OK: created ${r.id}`;
+        refresh();
+      } catch (e) {
+        const m = (e && e.message) ? e.message : String(e);
+        if (msg) msg.textContent = "ERROR: " + m;
+      }
+    });
+  }
+
+  function bindMroActions(baseUrl) {
+    const buttons = Array.from(contentBodyEl.querySelectorAll("button[data-act][data-eid]"));
+    buttons.forEach((b) => {
+      b.addEventListener("click", async () => {
+        const eid = b.getAttribute("data-eid");
+        const act = b.getAttribute("data-act");
+        const notesEl = contentBodyEl.querySelector(`textarea.notes[data-eid='${eid}']`);
+        const notes = (notesEl?.value || "").trim();
+        const status = (act === "in_progress") ? "IN_PROGRESS" : (act === "done") ? "DONE" : null;
+        if (!eid || !status) return;
+        try {
+          await apiRequest(baseUrl, `/v1/maintenance-events/${eid}`, {
+            method: "PATCH",
+            body: { status, mro_notes: notes || null },
+          });
+          refresh();
+        } catch (e) {
+          alert((e && e.message) ? e.message : String(e));
+        }
+      });
+    });
   }
 
   // ---------------------------
@@ -344,29 +443,34 @@
     },
     "#/camo/maintenance-events": {
       title: "CAMO / Maintenance Events",
-      sub: "Lista zdarzeń obsługowych (read-only)",
+      sub: "Create (CAMO) + lista eventów (owner)",
       load: async (baseUrl) => apiFetch(baseUrl, "/v1/maintenance-events"),
-      render: (rows) => renderTable(rows, [
-        { key: "id", label: "Event ID" },
-        { key: "aircraft_id", label: "Aircraft" },
-        { key: "event_type", label: "Type" },
-        { key: "due_date", label: "Due Date" },
-        { key: "status", label: "Status" },
-      ]),
-      hint: "GET /v1/maintenance-events",
+      render: (rows) => {
+        return `
+          <div class="card" style="margin-bottom:12px;">
+            <div class="card-title">Create maintenance event</div>
+            <div class="form">
+              <label>Aircraft ID</label>
+              <input id="camoAircraftId" placeholder="UUID" />
+              <label>Event type</label>
+              <input id="camoEventType" placeholder="e.g. A_CHECK" />
+              <label>Description</label>
+              <textarea id="camoDesc" placeholder="optional"></textarea>
+              <button id="btnCreateEvent" class="btn primary">CREATE (OPEN)</button>
+            </div>
+            <div id="camoCreateMsg" class="muted" style="margin-top:8px;"></div>
+          </div>
+          ${renderEventsTable(rows, "camo")}
+        `;
+      },
+      hint: "POST /v1/maintenance-events + GET /v1/maintenance-events",
     },
     "#/mro/maintenance-events": {
       title: "MRO / Maintenance Events",
-      sub: "Lista zdarzeń obsługowych (read-only)",
+      sub: "Update status (assigned) + mro_notes",
       load: async (baseUrl) => apiFetch(baseUrl, "/v1/maintenance-events"),
-      render: (rows) => renderTable(rows, [
-        { key: "id", label: "Event ID" },
-        { key: "aircraft_id", label: "Aircraft" },
-        { key: "event_type", label: "Type" },
-        { key: "due_date", label: "Due Date" },
-        { key: "status", label: "Status" },
-      ]),
-      hint: "GET /v1/maintenance-events",
+      render: (rows) => renderEventsTable(rows, "mro"),
+      hint: "GET /v1/maintenance-events + PATCH /v1/maintenance-events/{id}",
     },
   };
 
@@ -419,6 +523,14 @@
       const ms = Math.round(performance.now() - started);
       contentMetaEl.textContent = `${Array.isArray(rows) ? rows.length : 0} rows • ${ms} ms`;
       contentBodyEl.innerHTML = route.render(rows);
+
+      // Bind per-view actions (if present)
+      if (routeKey === "#/camo/maintenance-events") {
+        bindCamoCreate(baseUrl);
+      }
+      if (routeKey === "#/mro/maintenance-events") {
+        bindMroActions(baseUrl);
+      }
     } catch (e) {
       const msg = (e && e.message) ? e.message : String(e);
       contentMetaEl.textContent = "error";
