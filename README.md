@@ -45,3 +45,19 @@ bash scripts/start_system.sh
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+---
+## ADDENDUM 2026-01-11 — EPIC0B B1 (schema-per-tenant) E2E status
+
+**What is now proven working (PROD / public HTTPS):**
+- Domains + TLS via reverse proxy: `app.*`, `api.*`, `auth.*`.
+- UI performs **OIDC Authorization Code + PKCE** against Keycloak.
+- API enforces **RBAC** and **tenant routing**.
+
+**Tenant routing (runtime):**
+- Primary: `tenant_id` claim in access token (target state for PROD).
+- Admin override: `X-Tenant-Id` header (only for `PLATFORM_ADMIN`).
+- Debug override (temporary / non-prod): `X-Debug-Tenant-Id` when `DEBUG_TENANT_HEADER=true`.
+
+**Operational note:**
+- Keep `DEBUG_TENANT_HEADER=false` in production after verification; use debug header only as a controlled E2E bootstrap.

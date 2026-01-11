@@ -571,3 +571,27 @@ Date: 2026-01-05
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+---
+## 2026-01-11 (ops) — EPIC0B B1 tenant routing E2E
+
+- Verified schema-per-tenant routing in API (tenant schema resolved at request-time).
+- Added controlled debug routing via `X-Debug-Tenant-Id` gated by `DEBUG_TENANT_HEADER`.
+- UI bootstrap: OIDC code+PKCE against Keycloak (public client `aviation-ui`) + stable `API Base URL` persistence.
+- Public HTTPS entrypoints validated: `app.*` (UI), `api.*` (API), `auth.*` (Keycloak).
+
+## 2026-01-11 — EPIC0B B1 schema-per-tenant routing (E2E-ready)
+
+### Added / Changed
+- **Tenant routing middleware** (API): resolves tenant schema per request.
+- **Tenant resolution order** (documented + verified in E2E):
+  1. `X-Tenant-Id` header **only** for `PLATFORM_ADMIN` (admin override)
+  2. `tenant_id` claim from access token (target PROD path)
+  3. `X-Debug-Tenant-Id` header when `DEBUG_TENANT_HEADER=true` (E2E bootstrap / non-prod)
+- **Diagnostics**: API returns `X-Tenant-Id`, `X-Tenant-Schema`, `X-Tenant-Source` response headers for troubleshooting.
+- **Public HTTPS**: reverse proxy routing for `app.*`, `api.*`, `auth.*` (Caddy) with CORS validated for `app.* → api.*`.
+- **UI (static)**: OIDC Authorization Code + PKCE wiring aligned to Keycloak; debug-tenant header usage for E2E.
+
+### Notes / Risks
+- `DEBUG_TENANT_HEADER` MUST remain **false** by default and must not be enabled permanently in PROD.
+- Long-term: UI should stop using debug header and rely on `tenant_id` claim from token.

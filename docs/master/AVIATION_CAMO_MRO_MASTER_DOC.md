@@ -161,3 +161,26 @@ See `docs/00_product/erd_logical.md`.
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+## ADDENDUM 2026-01-11 — EPIC0B B1 closure (schema-per-tenant E2E)
+
+### Status
+CLOSED (PASS w środowisku HTTPS):
+
+* UI `https://app.forgemotionsystems.com` działa i obsługuje OIDC (Authorization Code + PKCE).
+* Auth: Keycloak `https://auth.forgemotionsystems.com`.
+* API: `https://api.forgemotionsystems.com` z CORS ustawionym na origin UI.
+* Tenant routing działa (schema-per-tenant) — request mapowany do schematu po `tenant_id`.
+
+### Runtime kontrakt tenant context
+
+API rozwiązuje `tenant_id` w kolejności (patrz też `docs/02_api/TENANT_CONTEXT.md`):
+
+1. `X-Tenant-Id` — tylko dla `PLATFORM_ADMIN` (override cross-tenant).
+2. Claim `tenant_id` w JWT — docelowy tryb produkcyjny.
+3. `X-Debug-Tenant-Id` — tylko gdy `DEBUG_TENANT_HEADER=true` (dev/demo).
+
+### Ryzyka / backlog
+
+* UI obecnie może działać na debug header (demo). Produkcyjnie wymagany jest mapper Keycloak dla claim `tenant_id` oraz usunięcie `DEBUG_TENANT_HEADER`.
+* Należy utrzymywać osobnego klienta Keycloak dla UI: `aviation-ui` (public + PKCE) i dla API: `aviation-api`.

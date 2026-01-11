@@ -131,3 +131,190 @@ Recommended long-term:
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+---
+## ADDENDUM 2026-01-11 — UI client for PKCE (fix for `Invalid parameter: redirect_uri`)
+
+### Problem
+UI was using Keycloak client `aviation-api` (confidential / API client). Keycloak rejected the browser redirect URI.
+
+### Decision
+Create a **separate public client** for the browser UI:
+- `clientId: aviation-ui`
+- `publicClient: true`
+- `standardFlowEnabled: true` (Authorization Code)
+- `PKCE S256`
+- `redirectUris: ["https://app.forgemotionsystems.com/*"]`
+- `webOrigins: ["https://app.forgemotionsystems.com"]`
+
+### kcadm (repeatable)
+```bash
+# login
+kcadm.sh config credentials --server http://localhost:8080 --realm master --user admin --password 'admin123!'
+
+# create UI client (public)
+kcadm.sh create clients -r aviation   -s clientId=aviation-ui   -s enabled=true   -s publicClient=true   -s standardFlowEnabled=true   -s implicitFlowEnabled=false   -s directAccessGrantsEnabled=false   -s serviceAccountsEnabled=false   -s 'redirectUris=["https://app.forgemotionsystems.com/*"]'   -s 'webOrigins=["https://app.forgemotionsystems.com"]'
+
+# sanity
+kcadm.sh get clients -r aviation -q clientId=aviation-ui --fields clientId,publicClient,redirectUris,webOrigins
+```
+
+### UI config
+In UI (static `app.js`) set:
+- `KC.clientId = "aviation-ui"`
+
+(keep API client separate; never use password grants from the browser).
+
+## ADDENDUM 2026-01-11 — UI client (aviation-ui) and redirect_uri fix
+
+### Problem
+- Browser OIDC login failed with: **"Invalid parameter: redirect_uri"**.
+
+### Root cause
+- UI was using clientId `aviation-api` (confidential/service style), but the browser requires a **public** client with correct `redirectUris` and `webOrigins`.
+
+### Fix (Keycloak)
+Create **public** client `aviation-ui`:
+
+```bash
+# login kcadm (master)
+docker compose exec keycloak /opt/keycloak/bin/kcadm.sh config credentials \
+  --server http://localhost:8080 \
+  --realm master \
+  --user admin \
+  --password 'admin123!'
+
+# create client
+docker compose exec keycloak /opt/keycloak/bin/kcadm.sh create clients -r aviation \
+  -s clientId=aviation-ui \
+  -s enabled=true \
+  -s publicClient=true \
+  -s standardFlowEnabled=true \
+  -s implicitFlowEnabled=false \
+  -s directAccessGrantsEnabled=false \
+  -s serviceAccountsEnabled=false \
+  -s 'redirectUris=["https://app.forgemotionsystems.com/*"]' \
+  -s 'webOrigins=["https://app.forgemotionsystems.com"]' \
+  -s 'attributes."pkce.code.challenge.method"="S256"'
+
+# sanity check
+docker compose exec keycloak /opt/keycloak/bin/kcadm.sh get clients -r aviation -q clientId=aviation-ui \
+  --fields clientId,publicClient,redirectUris,webOrigins,attributes
+```
+
+### Fix (UI)
+- UI must use **clientId = `aviation-ui`** in OIDC requests.
+- UI must use `https://app.forgemotionsystems.com/` as `redirect_uri` (same origin as served UI).
+
+### Notes
+- Keep API client `aviation-api` for service-to-service / password grant testing.
+- Do not enable password grant on the browser client.
+
+## ADDENDUM 2026-01-11 — UI client + redirect URI (fix „Invalid parameter: redirect_uri”)
+
+Problem: UI używa OIDC Authorization Code + PKCE i wysyła `redirect_uri=https://app.forgemotionsystems.com/`.
+Keycloak odrzuca logowanie jeśli **client** nie ma dopuszczonego tego redirect URI.
+
+### Decyzja
+
+- **Browser UI** używa osobnego klienta Keycloak: `aviation-ui` (public client).
+- **API** zostaje przy `aviation-api` (client credentials / password grant / introspection wg potrzeb).
+
+### Minimalna konfiguracja Keycloak (kcadm)
+
+> Uwaga: uruchamiaj wewnątrz hosta z docker-compose (server: `http://localhost:8080`).
+
+1) Login do kcadm:
+
+```bash
+docker compose exec keycloak /opt/keycloak/bin/kcadm.sh config credentials   --server http://localhost:8080   --realm master   --user admin   --password 'admin123!'
+```
+
+2) Utwórz klienta UI:
+
+```bash
+docker compose exec keycloak /opt/keycloak/bin/kcadm.sh create clients -r aviation   -s clientId=aviation-ui   -s enabled=true   -s publicClient=true   -s standardFlowEnabled=true   -s implicitFlowEnabled=false   -s directAccessGrantsEnabled=false   -s serviceAccountsEnabled=false   -s 'redirectUris=["https://app.forgemotionsystems.com/*"]'   -s 'webOrigins=["https://app.forgemotionsystems.com"]'
+```
+
+3) Sanity check:
+
+```bash
+docker compose exec keycloak /opt/keycloak/bin/kcadm.sh get clients -r aviation   -q clientId=aviation-ui --fields clientId,publicClient,redirectUris,webOrigins
+```
+
+### Minimalna zmiana w UI (app.js)
+
+W pliku UI ustaw `KC.clientId = "aviation-ui"`.
+
+> Jeśli UI jest serwowane jako statyczne pliki w kontenerze `web` (python `http.server`), modyfikacja dotyczy `/app/app.js`.
+
+### Ryzyko
+
+Jeśli UI i API współdzielą ten sam clientId, rośnie ryzyko błędów konfiguracyjnych (redirect URI / public vs confidential) i mieszania flow.
+Rozdzielenie klientów minimalizuje rework i upraszcza audyt.
+
+## ADDENDUM 2026-01-11 - UI (PKCE) client + redirect_uri
+
+### Problem: `Invalid parameter: redirect_uri`
+
+Objaw: po kliknieciu **Login** Keycloak pokazuje blad `Invalid parameter: redirect_uri`.
+
+Przyczyna: UI uzywalo clienta `aviation-api` (klient backendowy / confidential lub bez poprawnych redirect URIs).
+
+### Rozwiazanie docelowe
+
+1) W Keycloak utworz osobny klient dla UI (public, standard flow, PKCE):
+
+* `clientId`: **aviation-ui**
+* `publicClient`: **true**
+* `standardFlowEnabled`: **true**
+* `redirectUris`: `https://app.forgemotionsystems.com/*`
+* `webOrigins`: `https://app.forgemotionsystems.com`
+
+2) W UI ustaw `KC.clientId = "aviation-ui"`.
+
+### kcadm.sh (przyklad)
+
+```bash
+# login do master
+kcadm.sh config credentials --server http://localhost:8080 --realm master --user admin --password 'admin123!'
+
+# create client
+kcadm.sh create clients -r aviation   -s clientId=aviation-ui   -s enabled=true   -s publicClient=true   -s standardFlowEnabled=true   -s directAccessGrantsEnabled=false   -s 'redirectUris=["https://app.forgemotionsystems.com/*"]'   -s 'webOrigins=["https://app.forgemotionsystems.com"]'
+```
+
+### Uwagi do MVP
+
+W obecnym MVP UI moze dodawac header `X-Debug-Tenant-Id` (tylko przy `DEBUG_TENANT_HEADER=true`).
+W produkcji docelowo przechodzimy na claim `tenant_id`.
+
+## ADDENDUM 2026-01-11 - UI PKCE client (aviation-ui) + redirect_uri
+
+### Problem
+UI używa OIDC Authorization Code + PKCE. Próba logowania na kliencie **aviation-api** kończy się błędem **Invalid parameter: redirect_uri**, bo klient API nie ma dopuszczonych redirectUris dla domeny UI.
+
+### Decyzja
+* Dla UI utrzymujemy osobnego klienta Keycloak: **aviation-ui** (public client, standard flow, PKCE S256).
+* Klient **aviation-api** pozostaje po stronie API (Direct Access Grants / password w testach CLI), ale **nie** jest używany w przeglądarce.
+
+### Minimalny config klienta `aviation-ui`
+W realm `aviation`:
+* `publicClient=true`
+* `standardFlowEnabled=true`
+* `directAccessGrantsEnabled=false`
+* `redirectUris=["https://app.forgemotionsystems.com/*"]`
+* `webOrigins=["https://app.forgemotionsystems.com"]`
+
+### kcadm.sh (idempotentnie - kontrola po wykonaniu)
+Komendy (podane jako referencja operacyjna):
+1) `kcadm.sh config credentials ...` (realm `master`)
+2) `kcadm.sh create clients -r aviation ... clientId=aviation-ui ... redirectUris/webOrigins ...`
+3) `kcadm.sh get clients -r aviation -q clientId=aviation-ui --fields clientId,publicClient,redirectUris,webOrigins`
+
+### Zmiana w UI (app.js)
+W stałych Keycloak w `app.js`:
+* `clientId: "aviation-ui"` (zamiast `aviation-api`).
+
+Ryzyko/uwagi:
+* Jeżeli webOrigins/redirectUris są zbyt wąskie - logowanie będzie failować na etapie /auth.
+* Jeżeli są zbyt szerokie - rośnie powierzchnia ataku (zostawiamy tylko domenę UI + wildcard path).
