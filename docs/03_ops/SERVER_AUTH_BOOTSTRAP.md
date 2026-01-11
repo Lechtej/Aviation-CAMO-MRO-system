@@ -333,3 +333,169 @@ If it returns `404 Not Found`:
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+---
+
+## Update 2026-01-11 – DEV: dummy users, wspólne hasło, „Account is not fully set up”, oraz bootstrap danych
+
+### Cel
+1) Ustawić jedno startowe hasło dla dummy userów na DEV (np. `Camo1234!@`).  
+2) Naprawić błąd token endpoint: `invalid_grant / Account is not fully set up` (wymuszone required actions / brak profilu).  
+3) Zrobić szybki smoke test RBAC na realnych tokenach użytkowników.  
+4) Nadać `PLATFORM_ADMIN` użytkownikowi CAMO i wykonać bootstrappy `_admin`.
+
+### A. Ujednolicone hasło dla dummy userów (DEV only)
+> Ryzyko: jedno wspólne hasło jest OK tylko na DEV/test. Na prod: unikalne hasła + brak Direct Access Grants.
+
+Uruchom w katalogu docker (na serwerze):
+```bash
+cd /opt/aviationcamo/Aviation-CAMO-MRO-system/infra/docker
+KC="http://localhost:8080"
+REALM="aviation"
+NEWPASS='Camo1234!@'
+
+# login kcadm (w kontenerze)
+docker compose exec -T keycloak /opt/keycloak/bin/kcadm.sh config credentials   --server "$KC" --realm master --user admin --password admin
+
+# ustaw hasło dla wybranych userów
+for U in camo_lot mro_lotams mro_lst stores_lotams; do
+  echo "== set-password $U =="
+  docker compose exec -T keycloak /opt/keycloak/bin/kcadm.sh set-password     -r "$REALM" --username "$U" --new-password "$NEWPASS"
+done
+```
+
+### B. Naprawa `Account is not fully set up` (requiredActions + profil)
+Symptom: token endpoint zwraca:
+```json
+{"error":"invalid_grant","error_description":"Account is not fully set up"}
+```
+
+W praktyce na DEV pomogły 2 rzeczy:
+- wyczyszczenie `requiredActions` i ustawienie `enabled=true`, `emailVerified=true`,
+- uzupełnienie minimalnego profilu: `email`, `firstName`, `lastName`.
+
+**Uwaga:** w bash istnieje zmienna `UID` (readonly). Nie używaj `UID=...`; stosuj np. `USER_ID`.
+
+```bash
+cd /opt/aviationcamo/Aviation-CAMO-MRO-system/infra/docker
+KC="http://localhost:8080"
+REALM="aviation"
+
+ADMIN_TOKEN=$(curl -sS -X POST "$KC/realms/master/protocol/openid-connect/token"   -H "Content-Type: application/x-www-form-urlencoded"   -d "grant_type=password" -d "client_id=admin-cli" -d "username=admin" -d "password=admin" | python3 -c 'import sys,json; print(json.load(sys.stdin)["access_token"])')
+
+patch_user () {
+  local USERNAME="$1"
+  local EMAIL="$2"
+  local FIRST="$3"
+  local LAST="$4"
+
+  local USER_ID
+  USER_ID=$(curl -sS -H "Authorization: Bearer $ADMIN_TOKEN"     "$KC/admin/realms/$REALM/users?username=$USERNAME"   | python3 -c 'import sys,json; a=json.load(sys.stdin); print(a[0]["id"] if a else "")')
+
+  test -n "$USER_ID" || { echo "FAIL: user not found: $USERNAME"; return 1; }
+
+  echo "== patch $USERNAME ($USER_ID) =="
+  curl -sS -o /dev/null -w "$USERNAME: http %{http_code}
+"     -X PUT "$KC/admin/realms/$REALM/users/$USER_ID"     -H "Authorization: Bearer $ADMIN_TOKEN"     -H "Content-Type: application/json"     --data-binary "{"enabled":true,"emailVerified":true,"requiredActions":[],"email":"$EMAIL","firstName":"$FIRST","lastName":"$LAST"}"
+}
+
+patch_user mro_lotams   "mro_lotams@forgemotionsystems.local"   "MRO"    "LOTAMS"
+patch_user mro_lst     "mro_lst@forgemotionsystems.local"      "MRO"    "LST"
+patch_user stores_lotams "stores_lotams@forgemotionsystems.local" "STORES" "LOTAMS"
+```
+
+### C. Smoke test: token + roles + tenant_id
+```bash
+KC="http://localhost:8080"
+REALM="aviation"
+CLIENT_ID="aviation-api"
+PASS='Camo1234!@'
+
+for USER in mro_lotams mro_lst stores_lotams; do
+  echo "===== $USER ====="
+  curl -sS -o /tmp/token.json -X POST "$KC/realms/$REALM/protocol/openid-connect/token"     -H "Content-Type: application/x-www-form-urlencoded"     -d "grant_type=password" -d "client_id=$CLIENT_ID" -d "username=$USER" -d "password=$PASS"
+
+  python3 - <<'PY'
+import json, base64
+o=json.load(open("/tmp/token.json"))
+t=o["access_token"]
+p=t.split(".")[1]; p += "=" * (-len(p)%4)
+payload=json.loads(base64.urlsafe_b64decode(p.encode()))
+print("tenant_id:", payload.get("tenant_id"))
+print("preferred_username:", payload.get("preferred_username"))
+print("roles:", (payload.get("realm_access") or {}).get("roles"))
+PY
+done
+```
+
+### D. `PLATFORM_ADMIN` → CAMO user + bootstrappy `_admin`
+`/_admin/bootstrap` jest celowo ograniczone do `PLATFORM_ADMIN` (ochrona danych inicjalnych).
+
+1) pobierz JSON roli:
+```bash
+KC="http://localhost:8080"
+REALM="aviation"
+
+ADMIN_TOKEN=$(curl -sS -X POST "$KC/realms/master/protocol/openid-connect/token"   -H "Content-Type: application/x-www-form-urlencoded"   -d "grant_type=password" -d "client_id=admin-cli" -d "username=admin" -d "password=admin" | python3 -c 'import sys,json; print(json.load(sys.stdin)["access_token"])')
+
+curl -sS -H "Authorization: Bearer $ADMIN_TOKEN"   "$KC/admin/realms/$REALM/roles/PLATFORM_ADMIN"   -o /tmp/role_platform_admin.json
+```
+
+2) przypisz rolę `PLATFORM_ADMIN` do `camo_lot`:
+```bash
+KC="http://localhost:8080"
+REALM="aviation"
+USERNAME="camo_lot"
+
+ADMIN_TOKEN=$(curl -sS -X POST "$KC/realms/master/protocol/openid-connect/token"   -H "Content-Type: application/x-www-form-urlencoded"   -d "grant_type=password" -d "client_id=admin-cli" -d "username=admin" -d "password=admin" | python3 -c 'import sys,json; print(json.load(sys.stdin)["access_token"])')
+
+USER_ID=$(curl -sS -H "Authorization: Bearer $ADMIN_TOKEN"   "$KC/admin/realms/$REALM/users?username=$USERNAME" | python3 -c 'import sys,json; a=json.load(sys.stdin); print(a[0]["id"] if a else "")')
+
+ROLE_JSON=$(cat /tmp/role_platform_admin.json)
+
+curl -sS -o /dev/null -w "assign PLATFORM_ADMIN -> $USERNAME: http %{http_code}
+"   -X POST "$KC/admin/realms/$REALM/users/$USER_ID/role-mappings/realm"   -H "Authorization: Bearer $ADMIN_TOKEN"   -H "Content-Type: application/json"   --data-binary "[$ROLE_JSON]"
+```
+
+3) weryfikacja roli:
+```bash
+curl -sS -H "Authorization: Bearer $ADMIN_TOKEN"   "$KC/admin/realms/$REALM/users/$USER_ID/role-mappings/realm"   -o /tmp/camo_lot_realm_roles.json
+
+python3 - <<'PY'
+import json
+a=json.load(open("/tmp/camo_lot_realm_roles.json","r",encoding="utf-8"))
+names=sorted([x.get("name") for x in a if x.get("name")])
+print("roles:", names)
+print("has_PLATFORM_ADMIN:", "PLATFORM_ADMIN" in names)
+PY
+```
+
+4) bootstrappy w API (po stronie tenant context, z tokenem `camo_lot`):
+```bash
+ISSUER="https://auth.forgemotionsystems.com/realms/aviation"
+API="https://api.forgemotionsystems.com"
+CLIENT_ID="aviation-api"
+USER="camo_lot"
+PASS='Camo1234!@'
+
+curl -sS -o /tmp/token.json -X POST "$ISSUER/protocol/openid-connect/token"   -H "Content-Type: application/x-www-form-urlencoded"   -d "grant_type=password" -d "client_id=$CLIENT_ID" -d "username=$USER" -d "password=$PASS"
+
+TOKEN=$(python3 -c 'import json; print(json.load(open("/tmp/token.json"))["access_token"])')
+
+curl -sS -i -H "Authorization: Bearer $TOKEN" -X POST   "$API/v1/aircraft/_admin/bootstrap" | sed -n '1,40p'
+
+curl -sS -i -H "Authorization: Bearer $TOKEN" -X POST   "$API/v1/logistics/_admin/bootstrap" | sed -n '1,40p'
+```
+
+### E. Minimalny test funkcjonalny: Create + List aircraft (CAMO)
+```bash
+API="https://api.forgemotionsystems.com"
+curl -sS -i   -H "Authorization: Bearer $TOKEN"   -H "Content-Type: application/json"   -X POST "$API/v1/aircraft"   --data-binary '{"registration":"SP-TEST1"}' | sed -n '1,40p'
+
+curl -sS -H "Authorization: Bearer $TOKEN"   "$API/v1/aircraft" | head -c 800; echo
+```
+
+### F. Wnioski (na DEV)
+- `/v1/aircraft` = **CAMO-only** (403 dla MRO/STORES jest poprawne).  
+- `_admin/bootstrap` = **PLATFORM_ADMIN-only**.  
+- `Account is not fully set up` → naprawione przez reset required actions + profil usera.

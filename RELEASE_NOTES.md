@@ -17,6 +17,13 @@
 
 > Note: this entry documents the **DB baseline ZIP packaging** and the verified server steps. It does not imply the application code regressed from v0.2.42.
 
+## v0.2.42.1 (2026-01-11)
+
+Dokumentacja / DEV ops:
+- Uzupełniono `docs/03_ops/SERVER_AUTH_BOOTSTRAP.md` o procedurę: ustawienie wspólnego hasła dla dummy userów (DEV), naprawa `Account is not fully set up`, przypisanie `PLATFORM_ADMIN`, uruchomienie `_admin/bootstrap`, oraz minimalny test Create/List Aircraft.
+- Uzupełniono `docs/03_ops/SERVER_SMOKE_TEST_KEYCLOAK_OIDC.md` o smoke test dla password grant + automatyczny parsing `/openapi.json` + mini-macierz RBAC.
+- Uzupełniono `docs/00_product/PO_RBAC_AND_TENANTS_STATUS_v0.2.4.md` o obserwacje RBAC na DEV i rekomendacje backlog.
+
 ## v0.2.42 (2026-01-06)
 
 ### Fixed

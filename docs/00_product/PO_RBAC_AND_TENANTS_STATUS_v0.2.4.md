@@ -70,3 +70,31 @@ Generated: 2026-01-10T12:52:29.107065Z
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+---
+
+## Update 2026-01-11 – obserwacje RBAC na DEV (na podstawie realnych tokenów)
+
+### Co sprawdziliśmy
+- tokeny użytkowników: `camo_lot`, `mro_lotams`, `mro_lst`, `stores_lotams`,
+- nagłówki tenant context (`x-tenant-id`, `x-tenant-schema`, `x-tenant-source`),
+- dostęp do kluczowych endpointów (z `/openapi.json`).
+
+### Wynik (stan na DEV)
+| Endpoint | CAMO (camo_lot) | MRO (mro_*) | STORES (stores_*) | Uwagi |
+|---|---:|---:|---:|---|
+| `GET /v1/aircraft` | 200 | 403 | 403 | **CAMO-only** – OK |
+| `POST /v1/aircraft` | 201/409 | 403 | 403 | **CAMO-only** – OK |
+| `GET /v1/maintenance-events?aircraft_id=...` | 200 | 200 | 403 | STORES nie powinien widzieć zdarzeń utrzymaniowych – OK |
+| `POST /v1/aircraft/_admin/bootstrap` | 201 | 403 | 403 | **PLATFORM_ADMIN-only** – OK (ochrona danych inicjalnych) |
+| `POST /v1/logistics/_admin/bootstrap` | 201 | 403 | 403 | **PLATFORM_ADMIN-only** – OK |
+| `GET /v1/tenants` | 200 (po nadaniu `PLATFORM_ADMIN`) | 403 | 403 | Admin-only – OK |
+| `GET /v1/logistics/*` | 200 | 200 | 200 | Tymczasowo szerokie – do doprecyzowania w backlogu (patrz niżej) |
+| `GET /v1/inventory/parts` | 200 | 200 | 200 | jw. |
+| `GET /v1/roles` | 200 | 200 | 200 | jw. |
+
+### Backlog / ToDo (rekomendacja)
+1) **Uszczelnić Logistics/Inventory**: docelowo `STORES_*` powinien mieć dostęp do magazynu, ale niekoniecznie MRO/CAMO do wszystkich zasobów (zależnie od procesu e2e).  
+2) **Rozdzielić uprawnienia read vs write** w logistyce (np. `STORES_RECEIVING`, `STORES_ISSUING`).  
+3) Dodać testy automatyczne „RBAC matrix” (smoke) do pipeline (minimum: 10–15 krytycznych endpointów).  
+4) Dla produkcji: rozważyć wyłączenie Direct Access Grants, jeśli UI przechodzi na standard OIDC code flow.
