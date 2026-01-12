@@ -308,6 +308,7 @@ def delete_stock_item(stock_id: UUID, db: Session = Depends(get_db_session)):
     return None
 
 
+
 @router.post("/stock-transactions", response_model=StockTransactionOut, status_code=201)
 def create_stock_transaction(payload: StockTransactionCreate, db: Session = Depends(get_db_session)):
     obj = (
@@ -323,7 +324,8 @@ def create_stock_transaction(payload: StockTransactionCreate, db: Session = Depe
     t = payload.type.upper()
 
     if t == "ISSUE":
-        if obj.qty_on_hand < qty:
+        # safety: ensure comparable types even if qty_on_hand is float in this codebase
+        if Decimal(str(obj.qty_on_hand)) < qty:
             raise HTTPException(status_code=409, detail="Insufficient stock")
         obj.qty_on_hand -= qty
     elif t in ("RECEIPT", "RETURN"):
