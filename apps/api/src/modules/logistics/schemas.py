@@ -110,3 +110,14 @@ class StockItemOut(BaseModel):
     qty_on_hand: float
     qty_reserved: float
     qty_in_transit: float
+
+class StockTransactionCreate(BaseModel):
+    type: str = Field(pattern="^(RECEIPT|ISSUE|RETURN)$")
+    stock_item_id: UUID
+    qty: float = Field(gt=0)
+
+
+class StockTransactionOut(BaseModel):
+    transaction_id: UUID
+    stock_item_id: UUID
+    qty_on_hand: float

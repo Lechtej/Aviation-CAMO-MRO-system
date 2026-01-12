@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from decimal import Decimal
+
 from typing import List
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.exc import IntegrityError
@@ -14,7 +16,7 @@ from .schemas import (
     WarehouseCreate, WarehouseUpdate, WarehouseOut,
     LocationCreate, LocationUpdate, LocationOut,
     StockItemCreate, StockItemUpdate, StockItemOut,
-    UomOut,
+    UomOut, StockTransactionCreate, StockTransactionOut,
 )
 from .bootstrap import bootstrap_shared_dictionaries, bootstrap_tenant_tables
 
@@ -304,3 +306,37 @@ def delete_stock_item(stock_id: UUID, db: Session = Depends(get_db_session)):
     db.delete(obj)
     db.commit()
     return None
+
+
+@router.post("/stock-transactions", response_model=StockTransactionOut, status_code=201)
+def create_stock_transaction(payload: StockTransactionCreate, db: Session = Depends(get_db_session)):
+    obj = (
+        db.query(models.StockItem)
+        .filter(models.StockItem.id == payload.stock_item_id)
+        .with_for_update()
+        .one_or_none()
+    )
+    if not obj:
+        raise HTTPException(status_code=404, detail="Stock item not found")
+
+    qty = Decimal(str(payload.qty))
+    t = payload.type.upper()
+
+    if t == "ISSUE":
+        if obj.qty_on_hand < qty:
+            raise HTTPException(status_code=409, detail="Insufficient stock")
+        obj.qty_on_hand -= qty
+    elif t in ("RECEIPT", "RETURN"):
+        obj.qty_on_hand += qty
+    else:
+        raise HTTPException(status_code=422, detail="Invalid transaction type")
+
+    db.add(obj)
+    db.commit()
+    db.refresh(obj)
+
+    return {
+        "transaction_id": uuid4(),
+        "stock_item_id": obj.id,
+        "qty_on_hand": float(obj.qty_on_hand),
+    }
