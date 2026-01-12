@@ -52,3 +52,11 @@ Expected:
 - `401 Invalid token: Signature has expired` → token TTL exceeded; request a new token.
 - `500 ... badly formed hexadecimal UUID string` → invalid `X-Tenant-Id` (not UUID).
 - `404 Stock item not found` → wrong `STOCK_ID` or wrong tenant.
+
+
+## Update 2026-01-12 – Idempotency & UUID casting
+- Confirmed correct runtime path: `/app/modules/logistics/router.py`.
+- Fixed SQLAlchemy text() queries to use `CAST(:param AS uuid)` instead of `:param::uuid`.
+- Smoke test PASS:
+  - First ISSUE → HTTP 201, qty_on_hand decremented.
+  - Repeated ISSUE with same Idempotency-Key → HTTP 409, no stock change.

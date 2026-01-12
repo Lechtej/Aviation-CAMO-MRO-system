@@ -615,3 +615,7 @@ Date: 2026-01-05
 ### Notes / Risks
 - `DEBUG_TENANT_HEADER` MUST remain **false** by default and must not be enabled permanently in PROD.
 - Long-term: UI should stop using debug header and rely on `tenant_id` claim from token.
+### v0.2.45
+- FIX: /v1/logistics/stock-transactions – corrected SQL parameter casting for UUIDs (tenant_id, warehouse_id, part_id, stock_item_id).
+- VERIFIED: Idempotency-Key handling (201 on first call, 409 on duplicate).
+
