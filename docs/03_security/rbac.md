@@ -33,6 +33,9 @@ Adds role-based access control to stock transactions by transaction type, enforc
 API container runs code from image path `/app`. Any host-side code changes require
 `docker compose build --no-cache api` (no bind-mount in DEV).
 
+Recommendation (post #10.1): introduce a DEV-only bind-mount override so `apps/api/src` is mounted into `/app`.
+See `docs/03_ops/DEV_DOCKER_BIND_MOUNT_MINI_TASK.md`.
+
 **Verification (curl)**
 Validated with black-and-white tests:
 - MECH + RECEIPT → 403

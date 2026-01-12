@@ -185,3 +185,23 @@ API rozwiązuje `tenant_id` w kolejności (patrz też `docs/02_api/TENANT_CONTEX
 
 * UI obecnie może działać na debug header (demo). Produkcyjnie wymagany jest mapper Keycloak dla claim `tenant_id` oraz usunięcie `DEBUG_TENANT_HEADER`.
 * Należy utrzymywać osobnego klienta Keycloak dla UI: `aviation-ui` (public + PKCE) i dla API: `aviation-api`.
+
+## ADDENDUM 2026-01-12 — DEV runtime: container ships code via Docker COPY
+
+### Observation
+Backend `api` container builds application code into the image (`infra/docker/api.Dockerfile` uses `COPY ... /app`).
+Therefore, code changes on the host do not affect the running container unless the image is rebuilt.
+
+### Operational consequence
+For DEV backend work (e.g. RBAC changes in Epic #10.1), every code change must be followed by:
+
+```bash
+cd infra/docker
+docker compose build --no-cache api
+docker compose up -d api
+docker compose logs -n 80 --no-color api
+```
+
+### Recommendation (mini-task)
+After closing #10.1, introduce a DEV-only bind-mount (compose override or profile) to mount `apps/api/src` into `/app`.
+This must never be enabled in production. See `docs/03_ops/DEV_DOCKER_BIND_MOUNT_MINI_TASK.md`.

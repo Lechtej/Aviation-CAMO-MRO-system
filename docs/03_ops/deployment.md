@@ -14,6 +14,35 @@ Use Docker Compose under `infra/docker/docker-compose.yml`.
 ## Notes
 - Kubernetes support can be added post-MVP.
 
+## DEV runtime: API code sync (Docker COPY vs bind-mount)
+
+### Problem
+The `api` container ships application code into the image during build (see `infra/docker/api.Dockerfile`).
+Runtime code lives under `/app` inside the container.
+
+### Consequence (DEV)
+Host-side changes in `apps/api/src/...` are NOT visible in the running container unless the image is rebuilt.
+
+### Required workflow for backend code changes (DEV)
+From `infra/docker`:
+
+```bash
+docker compose build --no-cache api
+docker compose up -d api
+docker compose logs -n 80 --no-color api
+```
+
+PASS: container starts cleanly and subsequent curl tests hit the updated behavior.
+
+### Recommendation (post #10.1): dev-only bind-mount (mini-task)
+To avoid rebuilds for every small change in DEV, add a DEV-only bind-mount so that `apps/api/src` is mounted into `/app`.
+
+Rules:
+- DEV-only (never in production compose)
+- implemented as an override file (e.g. `docker-compose.dev.yml`) or compose profile
+
+See: `docs/03_ops/DEV_DOCKER_BIND_MOUNT_MINI_TASK.md`.
+
 
 ---
 ## ADDENDUM 2026-01 – PROD Auth & Multi-Tenancy (B1)
