@@ -213,3 +213,21 @@ Kazda odpowiedz API powinna zwracac naglowki diagnostyczne (pomocne w testach):
 ```bash
 curl -i   -H "Authorization: Bearer <JWT>"   -H "X-Debug-Tenant-Id: <TENANT_UUID>"   https://api.forgemotionsystems.com/v1/aircraft
 ```
+
+## Tenant header validation notes
+
+**Update 2026-01-12**
+
+### Common failure: badly formed tenant UUID
+
+If `X-Tenant-Id` is not a valid UUID string, middleware fails while parsing it and the API may return `500` with `ValueError: badly formed hexadecimal UUID string`.
+
+**Rule:** always pass a canonical UUID (e.g. `69dbc266-e94e-40e9-b2bd-280a05d6bedb`).
+
+### How to obtain tenant UUID (server)
+
+From the DB container, query `public.tenants` (note: DB user is not `postgres` in this stack; see `infra/docker/docker-compose.yml`):
+
+```bash
+docker compose exec db psql -U aviation -d aviation -c "select id,name,slug from public.tenants order by name;"
+```

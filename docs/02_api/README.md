@@ -65,3 +65,42 @@ docker compose run --rm api bash -lc 'python -c "import main; print(\\"OK: main 
 
 ## EPIC1 — Work Orders (design-only) [2026-01-11]
 - Contract: `work_orders_contract.md`
+
+## Logistics API (Parts/Stock) — MVP
+
+**Update 2026-01-12**
+
+### Logistics (MVP) — endpoints
+
+Tenant-scoped prefix: `/v1/logistics/*` (requires header `X-Tenant-Id: <tenant_uuid>`).
+
+| Endpoint | Purpose | Notes |
+|---|---|---|
+| `GET /v1/logistics/uom` | list shared UoM dictionary | read-only |
+| `GET/POST/PUT/DELETE /v1/logistics/parts` | Parts master data | `part_number` unique |
+| `GET/POST/PUT/DELETE /v1/logistics/warehouses` | Warehouse dictionary | `code` unique |
+| `GET/POST/PUT/DELETE /v1/logistics/locations` | Locations under warehouse | `(warehouse_id, code)` unique |
+| `GET/POST/PUT/DELETE /v1/logistics/stock-items` | Stock items per (part, location, serial) | tenant data |
+| `POST /v1/logistics/stock-transactions` | Apply stock delta (RECEIPT/ISSUE/RETURN) | **No RBAC yet** (planned) |
+
+### `POST /v1/logistics/stock-transactions`
+
+Request (JSON):
+- `type`: `RECEIPT` \| `ISSUE` \| `RETURN`
+- `stock_item_id`: UUID
+- `qty`: number > 0
+
+Response (JSON):
+- `transaction_id`: UUID (temporary; not persisted yet)
+- `stock_item_id`: UUID
+- `qty_on_hand`: number
+
+Failure modes:
+- `401` — missing/invalid bearer token
+- `400/500` — invalid `X-Tenant-Id` header (must be UUID of an existing tenant); see `TENANT_CONTEXT.md`
+- `404` — `stock_item_id` not found
+- `409` — `ISSUE` exceeds `qty_on_hand`
+- `422` — invalid `type`
+
+Implementation note:
+- qty is casted via `Decimal(str(payload.qty))` to avoid float rounding.

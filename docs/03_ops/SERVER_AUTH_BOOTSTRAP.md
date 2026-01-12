@@ -596,3 +596,45 @@ PY
 **PASS criteria**
 - `has_token: True`
 - `tenant_id` claim present and equals expected tenant UUID.
+
+## Token retrieval troubleshooting
+
+**Update 2026-01-12**
+
+### Token (Keycloak) — common pitfalls
+
+1) **Use correct clientId**  
+In `infra/docker/keycloak/realm-aviation.json` the public client for direct grants is `aviation-api`.
+
+2) **Passwords containing `!` in bash**  
+In interactive bash, `!` triggers history expansion and breaks commands. Use single quotes around the password, or disable history expansion:
+
+```bash
+PASS='qwe123!@#'      # safe
+# or: set +H
+```
+
+3) **Validate you really got a JWT**  
+A valid access token has **two dots** (`header.payload.signature`):
+
+```bash
+echo "TOKEN_DOTS=$(echo "$TOKEN" | awk -F. '{print NF-1}')"   # expect: 2
+```
+
+### Minimal server-side token command (password grant)
+
+```bash
+KC="http://localhost:8080"
+REALM="aviation"
+CLIENT_ID="aviation-api"
+USER="platformadmin"
+PASS='__YOUR_PASSWORD__'
+
+TOKEN=$(curl -sS   -d "grant_type=password"   -d "client_id=$CLIENT_ID"   -d "username=$USER"   -d "password=$PASS"   "$KC/realms/$REALM/protocol/openid-connect/token" | sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p')
+```
+
+### Tenant UUID lookup (server)
+
+```bash
+docker compose exec db psql -U aviation -d aviation -c "select id,name,slug from public.tenants order by name;"
+```
