@@ -153,6 +153,48 @@ Wprowadzono minimalne pola:
 - zdefiniować „initial stock load” jako jawny proces (RECEIPT z `source_ref_type='INITIAL_LOAD'`),
 - rozważyć tenant-scoping `stock_items` (aktualnie tenant jest w ledgerze).
 
+---
+
+## 2026-01-13 — Stock-transactions: idempotency contract + REPLAY on duplicates
+
+### Contract (client-visible)
+
+For `POST /v1/logistics/stock-transactions` the API supports idempotent writes using header:
+
+- `Idempotency-Key: <string>`
+
+Expected behavior per tenant:
+
+- **First request** with a new key → `201 Created` and a JSON body containing the created transaction.
+- **Replay request** with the same key (same tenant) → `200 OK` and **the same JSON body** as the first request.
+- No additional stock mutation occurs on replay.
+
+### Implementation notes (server-side)
+
+- DB should enforce uniqueness for the idempotency key (recommended): `UNIQUE (tenant_id, idempotency_key)`.
+- Insert path catches duplicate-key `IntegrityError` and resolves it as **REPLAY → 200** by reading the existing transaction and returning it.
+- API should treat missing `Idempotency-Key` as invalid for mutating operations (recommended guard): `400` with a clear message.
+
+### Example (ISSUE)
+
+Request (new key):
+
+```bash
+curl -sS -i -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "X-Tenant-Id: $TENANT_ID" \
+  -H "Idempotency-Key: E2E-IDEMP-ISSUE-001" \
+  -H "Content-Type: application/json" \
+  "http://127.0.0.1:8000/v1/logistics/stock-transactions" \
+  --data '{"type":"ISSUE","stock_item_id":"__UUID__","qty":1}'
+```
+
+Response:
+- `201 Created` with transaction payload.
+
+Repeat the same request (same key):
+- `200 OK` (REPLAY) with identical payload.
+
 ## Update #13 — Stock Reservations (soft lock)
 
 This release adds a **reservation layer** for CAMO/Stores flows without changing on-hand stock at reservation time.

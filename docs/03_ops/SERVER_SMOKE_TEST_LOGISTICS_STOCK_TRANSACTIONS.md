@@ -61,6 +61,45 @@ Expected:
   - First ISSUE → HTTP 201, qty_on_hand decremented.
   - Repeated ISSUE with same Idempotency-Key → HTTP 409, no stock change.
 
+> NOTE (superseded by later change): the `409` replay behavior above was later replaced with **REPLAY → 200 OK**.
+> Keep this note as history; use the newer section below as the current expected contract.
+
+## Update 2026-01-13 — Idempotency contract: REPLAY → 200 OK (current)
+
+Current expected behavior for `POST /v1/logistics/stock-transactions` with `Idempotency-Key`:
+
+- First request with a new key → **201 Created** + JSON payload.
+- Second (and next) request with the same key + same tenant → **200 OK** (REPLAY) + **exactly the same payload** as the first request.
+- Side effects: **no stock change** on replay.
+
+Minimal curl pattern:
+
+```bash
+KEY="E2E-IDEMP-ISSUE-001"
+
+curl -sS -i -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "X-Tenant-Id: $TENANT_ID" \
+  -H "Idempotency-Key: $KEY" \
+  -H "Content-Type: application/json" \
+  "http://127.0.0.1:8000/v1/logistics/stock-transactions" \
+  --data "{\"type\":\"ISSUE\",\"stock_item_id\":\"$STOCK_ID\",\"qty\":1}"
+
+# repeat (same KEY)
+curl -sS -i -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "X-Tenant-Id: $TENANT_ID" \
+  -H "Idempotency-Key: $KEY" \
+  -H "Content-Type: application/json" \
+  "http://127.0.0.1:8000/v1/logistics/stock-transactions" \
+  --data "{\"type\":\"ISSUE\",\"stock_item_id\":\"$STOCK_ID\",\"qty\":1}"
+```
+
+PASS criteria:
+- first call: `HTTP/1.1 201` (created)
+- second call: `HTTP/1.1 200` (replay)
+- both responses: same `transaction_id` and same body (except headers like `date`)
+
 ---
 
 ## 2026-01-12 — Investigation notes (ledger mismatch) + safe psql workflow
