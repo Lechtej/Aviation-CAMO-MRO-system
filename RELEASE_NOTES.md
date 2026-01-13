@@ -1,5 +1,11 @@
 # AviationCAMO-MRO — Release Notes (cumulative)
 
+## v0.2.42.5 (2026-01-13) — EPIC3 E2E GAP: Stock Reservation → ISSUE (docs)
+
+- Added token-safe single-shot smoke test for Reservation → ISSUE flow (fresh token → reserve → issue → verify): `docs/03_ops/SERVER_SMOKE_TEST_LOGISTICS_STOCK_TRANSACTIONS.md`
+- Documented required headers for `POST /v1/logistics/stock-transactions` (Idempotency-Key) and reservation endpoints (X-Tenant-Id)
+- Added integrity check + repair note for `qty_reserved` snapshot vs ledger `OPEN` net reservations (SQL validation)
+
 ## v0.2.42.4 (2026-01-11) — EPIC Admin: Tenant Feature Flags + Admin Console scope (docs)
 
 - Added ADR for tenant feature flags: `docs/architecture/adr/ADR-008-tenant-feature-flags-admin-console.md`

@@ -210,3 +210,17 @@ This release adds a **reservation layer** for CAMO/Stores flows without changing
 
 **Tenant header safety**
 - Tenant resolution middleware now guards invalid tenant UUID values and returns `400 Invalid X-Tenant-Id (expected UUID)` instead of crashing the API process.
+
+---
+
+## Schema note (current)
+
+For now, Logistics stock tables are created in **public** schema:
+- `public.stock_items`
+- `public.stock_reservations`
+- `public.stock_transactions`
+
+Tenant isolation is enforced at API level (required `X-Tenant-Id` header + `tenant_id` in reservation/transaction rows).
+If you query the DB directly, always filter by `tenant_id`.
+
+Planned (later): move Logistics stock tables into tenant schemas (e.g. `t_lot.*`) once cross-tenant bootstrap + migrations are ready.
