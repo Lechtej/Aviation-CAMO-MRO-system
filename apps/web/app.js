@@ -301,6 +301,50 @@ const KC = {
     }
   }
 
+
+// ---------------------------
+// Auth lifecycle (UI-side) — KROK 2
+// ---------------------------
+const AUTH_EXPIRED_CODE = "AUTH_EXPIRED";
+
+function authExpiredError(message) {
+  const e = new Error(message || "Session expired. Please login again.");
+  e.code = AUTH_EXPIRED_CODE;
+  return e;
+}
+
+function isProtectedPath(path) {
+  // Current UI routes are all protected (API v1). Keep it explicit to avoid blocking /openapi.json ping.
+  return String(path || "").startsWith("/v1/");
+}
+
+function ensureValidAuthFor(path) {
+  if (!isProtectedPath(path)) return loadAuth();
+  const auth = loadAuth();
+  if (!isTokenValid(auth)) {
+    // Deterministic: no API calls without a valid token
+    clearAuth();
+    updateAuthUi();
+    throw authExpiredError("Session expired. Please login again.");
+  }
+  return auth;
+}
+
+function renderSessionExpired() {
+  contentMetaEl.textContent = "auth required";
+  contentBodyEl.innerHTML = `
+    <div class="error-title">Session expired</div>
+    <div class="muted" style="margin-top:6px;">
+      Twoja sesja wygasła lub nie jesteś zalogowany. Kliknij <b>Login</b>, aby ponownie przejść przez Keycloak (PKCE).
+    </div>
+    <div style="margin-top:12px;">
+      <button id="btnReLogin" class="btn primary">Login</button>
+    </div>
+  `;
+  const b = document.getElementById("btnReLogin");
+  if (b) b.addEventListener("click", () => login());
+}
+
   // ---------------------------
   // API calls
   // ---------------------------
@@ -314,35 +358,43 @@ const KC = {
     }
   }
 
-  async function apiRequest(baseUrl, path, opts) {
-    const auth = loadAuth();
-    const headers = { "Content-Type": "application/json" };
-    if (isTokenValid(auth)) headers["Authorization"] = "Bearer " + auth.access_token;
+  
+async function apiRequest(baseUrl, path, opts) {
+  const headers = { "Content-Type": "application/json" };
 
-    const r = await fetch(baseUrl + path, {
-      method: (opts?.method || "GET"),
-      headers,
-      body: opts?.body ? JSON.stringify(opts.body) : undefined,
-    });
-    if (r.status === 401) {
-      throw new Error("401 Unauthorized (login required)");
-    }
-    if (r.status === 403) {
-      throw new Error("403 Forbidden");
-    }
-    if (!r.ok) {
-      const t = await r.text();
-      throw new Error(`${r.status} ${r.statusText}: ${t}`);
-    }
-    if (r.status === 204) return null;
-    const ct = (r.headers.get("content-type") || "").toLowerCase();
-    if (ct.includes("application/json")) return r.json();
-    return r.text();
-  }
+  // Preflight token lifecycle (KROK 2): block protected calls if token is missing/expired
+  const auth = ensureValidAuthFor(path);
+  if (auth && isTokenValid(auth)) headers["Authorization"] = "Bearer " + auth.access_token;
 
-  async function apiFetch(baseUrl, path) {
-    return apiRequest(baseUrl, path, { method: "GET" });
+  const r = await fetch(baseUrl + path, {
+    method: (opts?.method || "GET"),
+    headers,
+    body: opts?.body ? JSON.stringify(opts.body) : undefined,
+  });
+
+  if (r.status === 401) {
+    // Global 401 handler: clear auth and force controlled re-login UX (no loops, no silent retry)
+    clearAuth();
+    updateAuthUi();
+    throw authExpiredError("401 Unauthorized (session expired)");
   }
+  if (r.status === 403) {
+    throw new Error("403 Forbidden");
+  }
+  if (!r.ok) {
+    const t = await r.text();
+    throw new Error(`${r.status} ${r.statusText}: ${t}`);
+  }
+  if (r.status === 204) return null;
+  const ct = (r.headers.get("content-type") || "").toLowerCase();
+  if (ct.includes("application/json")) return r.json();
+  return r.text();
+}
+
+async function apiFetch(baseUrl, path) {
+  return apiRequest(baseUrl, path, { method: "GET" });
+}
+
 
   function renderEventsTable(rows, mode) {
     const arr = Array.isArray(rows) ? rows : [];
@@ -403,141 +455,11 @@ const KC = {
         if (msg) msg.textContent = `OK: created ${r.id}`;
         refresh();
       } catch (e) {
-        const m = (e && e.message) ? e.message : String(e);
-        if (msg) msg.textContent = "ERROR: " + m;
+      if (e && e.code === AUTH_EXPIRED_CODE) {
+        renderSessionExpired();
+        return;
       }
-    });
-  }
 
-  function bindMroActions(baseUrl) {
-    const buttons = Array.from(contentBodyEl.querySelectorAll("button[data-act][data-eid]"));
-    buttons.forEach((b) => {
-      b.addEventListener("click", async () => {
-        const eid = b.getAttribute("data-eid");
-        const act = b.getAttribute("data-act");
-        const notesEl = contentBodyEl.querySelector(`textarea.notes[data-eid='${eid}']`);
-        const notes = (notesEl?.value || "").trim();
-        const status = (act === "in_progress") ? "IN_PROGRESS" : (act === "done") ? "DONE" : null;
-        if (!eid || !status) return;
-        try {
-          await apiRequest(baseUrl, `/v1/maintenance-events/${eid}`, {
-            method: "PATCH",
-            body: { status, mro_notes: notes || null },
-          });
-          refresh();
-        } catch (e) {
-          alert((e && e.message) ? e.message : String(e));
-        }
-      });
-    });
-  }
-
-  // ---------------------------
-  // Views / Routing (hash routes)
-  // ---------------------------
-  const ROUTES = {
-    "#/camo/aircraft": {
-      title: "CAMO / Aircraft",
-      sub: "Lista statków powietrznych (read-only)",
-      load: async (baseUrl) => apiFetch(baseUrl, "/v1/aircraft"),
-      render: (rows) => renderTable(rows, [
-        { key: "registration", label: "Registration" },
-        { key: "type", label: "Type" },
-        { key: "status", label: "Status" },
-      ]),
-      hint: "GET /v1/aircraft",
-    },
-    "#/camo/maintenance-events": {
-      title: "CAMO / Maintenance Events",
-      sub: "Create (CAMO) + lista eventów (owner)",
-      load: async (baseUrl) => apiFetch(baseUrl, "/v1/maintenance-events"),
-      render: (rows) => {
-        return `
-          <div class="card" style="margin-bottom:12px;">
-            <div class="card-title">Create maintenance event</div>
-            <div class="form">
-              <label>Aircraft ID</label>
-              <input id="camoAircraftId" placeholder="UUID" />
-              <label>Event type</label>
-              <input id="camoEventType" placeholder="e.g. A_CHECK" />
-              <label>Description</label>
-              <textarea id="camoDesc" placeholder="optional"></textarea>
-              <button id="btnCreateEvent" class="btn primary">CREATE (OPEN)</button>
-            </div>
-            <div id="camoCreateMsg" class="muted" style="margin-top:8px;"></div>
-          </div>
-          ${renderEventsTable(rows, "camo")}
-        `;
-      },
-      hint: "POST /v1/maintenance-events + GET /v1/maintenance-events",
-    },
-    "#/mro/maintenance-events": {
-      title: "MRO / Maintenance Events",
-      sub: "Update status (assigned) + mro_notes",
-      load: async (baseUrl) => apiFetch(baseUrl, "/v1/maintenance-events"),
-      render: (rows) => renderEventsTable(rows, "mro"),
-      hint: "GET /v1/maintenance-events + PATCH /v1/maintenance-events/{id}",
-    },
-  };
-
-  function renderTable(rows, columns) {
-    const arr = Array.isArray(rows) ? rows : [];
-    if (!arr.length) {
-      return `<div class="muted">Brak danych (0)</div>`;
-    }
-
-    // Build header
-    const ths = columns.map(c => `<th>${esc(c.label)}</th>`).join("");
-    const trs = arr.map((row) => {
-      const tds = columns.map(c => `<td>${esc(row?.[c.key] ?? "")}</td>`).join("");
-      return `<tr>${tds}</tr>`;
-    }).join("");
-
-    return `
-      <div class="table-wrap">
-        <table>
-          <thead><tr>${ths}</tr></thead>
-          <tbody>${trs}</tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  function setView(routeKey) {
-    const route = ROUTES[routeKey] || ROUTES["#/camo/aircraft"];
-    viewTitleEl.textContent = route.title;
-    viewSubEl.textContent = route.sub;
-    contentHintEl.textContent = route.hint;
-    return route;
-  }
-
-  async function refresh() {
-    const baseUrl = normalizeBaseUrl(baseUrlEl.value);
-
-    const apiOk = await pingApi(baseUrl);
-    setApiStatus(apiOk, apiOk ? "API: OK" : "API: DOWN");
-
-    const routeKey = window.location.hash || "#/camo/aircraft";
-    const route = setView(routeKey);
-
-    contentMetaEl.textContent = "";
-    contentBodyEl.innerHTML = "";
-
-    try {
-      const started = performance.now();
-      const rows = await route.load(baseUrl);
-      const ms = Math.round(performance.now() - started);
-      contentMetaEl.textContent = `${Array.isArray(rows) ? rows.length : 0} rows • ${ms} ms`;
-      contentBodyEl.innerHTML = route.render(rows);
-
-      // Bind per-view actions (if present)
-      if (routeKey === "#/camo/maintenance-events") {
-        bindCamoCreate(baseUrl);
-      }
-      if (routeKey === "#/mro/maintenance-events") {
-        bindMroActions(baseUrl);
-      }
-    } catch (e) {
       const msg = (e && e.message) ? e.message : String(e);
       contentMetaEl.textContent = "error";
       contentBodyEl.innerHTML = `

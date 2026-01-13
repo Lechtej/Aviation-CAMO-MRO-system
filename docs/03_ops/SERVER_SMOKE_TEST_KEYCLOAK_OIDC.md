@@ -417,3 +417,28 @@ curl -i \
 - Expired token → `401 TOKEN_EXPIRED`
 - Malformed token → `401 TOKEN_MALFORMED`
 
+
+
+## UI (aviation-ui) — Token expiry simulation (KROK 2 / FE)
+
+Cel: potwierdzić, że UI nie generuje losowych 401 i ma kontrolowany UX po wygaśnięciu tokena.
+
+### Kroki
+1. Zaloguj się w UI (PKCE).
+2. DevTools → Console → wklej:
+```js
+(() => {
+  const k = "aviationcamo_auth_v1";
+  const raw = localStorage.getItem(k);
+  if (!raw) { console.error("missing key", k); return; }
+  const obj = JSON.parse(raw);
+  obj.expires_at = 0; // force expired
+  localStorage.setItem(k, JSON.stringify(obj));
+  console.log("updated expires_at:", JSON.parse(localStorage.getItem(k)).expires_at);
+})();
+```
+3. Odśwież UI (Ctrl+R) i kliknij dowolny widok wołający `/v1/*`.
+
+### Oczekiwane (PASS)
+- UI pokazuje ekran **Session expired** + przycisk **Login**
+- UI nie wykonuje requestów do `/v1/*` bez ważnego tokena (brak spamowania 401)
