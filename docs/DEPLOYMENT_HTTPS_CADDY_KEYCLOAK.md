@@ -318,3 +318,37 @@ W stałych Keycloak w `app.js`:
 Ryzyko/uwagi:
 * Jeżeli webOrigins/redirectUris są zbyt wąskie - logowanie będzie failować na etapie /auth.
 * Jeżeli są zbyt szerokie - rośnie powierzchnia ataku (zostawiamy tylko domenę UI + wildcard path).
+
+---
+
+## Update 2026-01-13 — CORS + OIDC flow (PKCE vs password grant)
+
+### Kontekst
+W trakcie podpinania UI/API/Auth pod subdomeny pojawiły się dwa typowe problemy:
+1) **CORS dla nagłówków tenantowych** (`X-Tenant-Id`, `X-Debug-Tenant-Id`) – przeglądarka wymaga, aby były jawnie dozwolone w odpowiedzi na preflight (OPTIONS).
+2) **Tokeny i flow OIDC** – w produkcyjnym kliencie UI używany jest **Authorization Code + PKCE**; *password grant* nie zawsze jest dozwolony (zależy od flagi **Direct Access Grants** na kliencie w Keycloak).
+
+### Decyzja (rekomendowana)
+- **CORS utrzymujemy w API (FastAPI) jako jedyne źródło prawdy.**  
+  Caddy *nie powinien* doklejać nagłówków CORS, bo kończy się to duplikatami `access-control-*` i trudnym debugiem.
+- Dla smoke-testów tokenów:
+  - **DEV**: password grant tylko jeśli klient ma włączone **Direct Access Grants**.
+  - **PROD**: token pobieramy z UI (PKCE) i testujemy go przez `/userinfo` oraz prosty endpoint API.
+
+### Minimalny zakres zmian w API (żeby nie potrzebować Caddy-CORS)
+W `apps/api/src/main.py` w `_apply_cors_headers()` ustaw:
+- `Access-Control-Allow-Headers` = `authorization,content-type,x-tenant-id,x-debug-tenant-id`
+- `Access-Control-Allow-Methods` = `GET,POST,PUT,PATCH,DELETE,OPTIONS`
+
+Dodatkowo upewnij się, że `allow_origins` w `CORSMiddleware` zawiera:
+- `https://app.forgemotionsystems.com`
+- (opcjonalnie) `http://65.108.250.169:3000` tylko dla testów lokalnych
+
+### Sygnały, że CORS jest OK
+- Preflight:
+  - `curl -X OPTIONS ... https://api.forgemotionsystems.com/v1/aircraft`
+  - odpowiedź **200/204** + `access-control-allow-headers` zawiera tenant headers
+- Brak duplikatów: w odpowiedzi występuje **tylko jedna** linia `access-control-allow-origin`, `allow-headers`, `allow-methods`.
+
+### Uwaga o "Password grant działa"
+Jeśli Keycloak zwraca `unauthorized_client: Client not allowed for direct access grants` → klient ma wyłączone Direct Access Grants (typowe w produkcji).

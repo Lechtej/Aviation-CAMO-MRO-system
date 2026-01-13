@@ -293,3 +293,72 @@ If `/protocol/openid-connect/token` returns:
 Then the realm Direct Grant flow is blocking password grant (commonly OTP / profile checks).
 Apply the fix procedure from:
 - `docs/03_ops/SERVER_AUTH_BOOTSTRAP.md` → **Fix: invalid_grant / Account is not fully set up**
+
+---
+
+## Update 2026-01-13 — tokeny w PROD i `unauthorized_client`
+
+### Problem: `unauthorized_client` przy token endpoint (password grant)
+Jeżeli przy wywołaniu:
+- `POST /realms/<realm>/protocol/openid-connect/token` z `grant_type=password`
+dostajesz:
+- `{"error":"unauthorized_client","error_description":"Client not allowed for direct access grants"}`
+
+to znaczy, że **klient nie ma włączonego Direct Access Grants**. To jest poprawne i pożądane w produkcji dla klienta UI.
+
+### Najprostsza ścieżka w PROD: token z UI (Authorization Code + PKCE)
+1) Zaloguj się w UI: `https://app.forgemotionsystems.com`
+2) Otwórz DevTools → Application/Storage → `localStorage` (lub Network → response z tokenami)
+3) Skopiuj `access_token` (ciąg zaczynający się od `eyJ...` z **2 kropkami**).
+
+#### Szybki test w bash bez wklejania do komend (bez echa)
+```bash
+cd /opt/aviationcamo/Aviation-CAMO-MRO-system/infra/docker
+
+umask 077
+read -s -p "PASTE access_token (JWT, 1 linia): " TOKEN; echo
+
+# walidacja JWT shape + TTL (bez weryfikacji podpisu)
+TOKEN="$TOKEN" python3 - <<'PY'
+import os, time, json, base64
+t=os.environ["TOKEN"].strip()
+print("len:", len(t), "dots:", t.count("."))
+if t.count(".") != 2:
+    raise SystemExit("FAIL: to nie jest JWT (muszą być 2 kropki)")
+h,p,_=t.split(".",2)
+def d(s): s+="="*(-len(s)%4); return base64.urlsafe_b64decode(s.encode())
+pl=json.loads(d(p))
+now=int(time.time())
+exp=int(pl.get("exp",0))
+print("ttl_sec:", exp-now)
+print("iss:", pl.get("iss"))
+print("azp:", pl.get("azp"))
+print("roles:", (pl.get("realm_access") or {}).get("roles"))
+PY
+
+# 1) Keycloak /userinfo (powinno być 200 jeśli token ważny)
+curl -sS -D- -o /dev/null   -H "Authorization: Bearer $TOKEN"   https://auth.forgemotionsystems.com/realms/aviation/protocol/openid-connect/userinfo | sed -n '1,40p'
+
+# 2) API call (powinno być 200, jeśli tenant podany i token ważny)
+curl -sS -D- -o /dev/null   -H "Authorization: Bearer $TOKEN"   -H "X-Tenant-Id: <TENANT_UUID>"   https://api.forgemotionsystems.com/v1/aircraft | sed -n '1,40p'
+
+unset TOKEN
+```
+
+**Interpretacja wyników**
+- `ttl_sec < 0` → token jest przeterminowany (to był case: `ttl_sec: -300`) → pobierz nowy z UI.
+- `/userinfo` → `401 invalid_token` → token nieważny (najczęściej expiry) lub issuer/realm nie pasuje.
+- API `401` przy poprawnym `/userinfo 200` → problem po stronie API weryfikacji JWT (issuer/audience/JWKS) albo brak tenant context.
+
+### Uwaga: token musi być "jedną linią"
+Jeżeli w terminalu wychodzi `dots: 0/1`, to wkleiłeś:
+- placeholder typu `PASTE_ACCESS_TOKEN_HERE`, albo
+- token z cudzysłowami/enterami, albo
+- fragment JSON zamiast samego JWT.
+
+Kopiuj **tylko wartość** `access_token`, bez `"access_token":` i bez cudzysłowów.
+
+### Alternatywa DEV: włączyć Direct Access Grants tylko na czas testu
+Jeżeli potrzebujesz password grant w DEV:
+- Keycloak → Client → Settings → **Direct Access Grants Enabled: ON**
+- po teście wróć na OFF (ryzyko bezpieczeństwa).
