@@ -109,6 +109,13 @@ POST /v1/logistics/movements → 404 Not Found
 - Token storage: `localStorage["aviationcamo_auth_v1"]`
 - Expected redirect_uri: `https://app.forgemotionsystems.com/`
 
+### UPDATE (2026-01-13) — SPA client name alignment (Keycloak)
+
+- SPA client used by frontend: `aviation-ui` (public client, Authorization Code + PKCE S256).
+- Previous notes may reference `aviation-api` as a client; treat that as **legacy / server-to-server** context only.
+- Expected issuer remains: `https://auth.forgemotionsystems.com/realms/aviation`
+
+
 ### Keycloak client settings (minimum)
 Client: `aviation-api` (realm: `aviation`)
 - Valid Redirect URIs:

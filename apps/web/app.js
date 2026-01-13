@@ -16,6 +16,9 @@
   const $ = (id) => document.getElementById(id);
 
   const baseUrlEl = $("baseUrl");
+  const kcBaseUrlEl = $("kcBaseUrl");
+  const kcRealmEl = $("kcRealm");
+  const kcClientIdEl = $("kcClientId");
   const btnSaveEl = $("btnSave");
   const btnRefreshEl = $("btnRefresh");
 
@@ -40,12 +43,15 @@
   const LS_KEY = "aviationcamo_ui_v1";
   const LS_AUTH_KEY = "aviationcamo_auth_v1";
 
-  // Keycloak (defaults; can be overridden via localStorage settings if needed later)
-  const KC = {
-    baseUrl: (location.origin || "http://localhost:3000").replace(":3000", ":8080"),
-    realm: "aviation",
-    clientId: "aviation-api",
-  };
+// Keycloak (defaults; can be overridden via UI settings stored in localStorage)
+// Production: auth is served from https://auth.forgemotionsystems.com (SPA runs on https://app.forgemotionsystems.com)
+const KC = {
+  baseUrl: (location.hostname === "app.forgemotionsystems.com")
+    ? "https://auth.forgemotionsystems.com"
+    : (location.origin || "http://localhost:3000").replace(":3000", ":8080"),
+  realm: "aviation",
+  clientId: "aviation-ui",
+};
 
   // ---------------------------
   // Utilities
@@ -201,7 +207,7 @@
     const params = new URLSearchParams({
       client_id: KC.clientId,
       response_type: "code",
-      scope: "openid profile",
+      scope: "openid profile email",
       redirect_uri: redirectUri,
       state,
       code_challenge: challenge,
@@ -552,15 +558,34 @@
     });
   }
 
-  function loadSettings() {
-    const s = safeJsonParse(localStorage.getItem(LS_KEY) || "{}", {});
-    baseUrlEl.value = normalizeBaseUrl(s.baseUrl || DEFAULT_BASE_URL);
-  }
+function loadSettings() {
+  const s = safeJsonParse(localStorage.getItem(LS_KEY) || "{}", {});
+  baseUrlEl.value = normalizeBaseUrl(s.baseUrl || DEFAULT_BASE_URL);
 
-  function saveSettings() {
-    const baseUrl = normalizeBaseUrl(baseUrlEl.value);
-    localStorage.setItem(LS_KEY, JSON.stringify({ baseUrl }));
-  }
+  // Keycloak settings (optional overrides)
+  const kcBase = String(s.kcBaseUrl || KC.baseUrl || "").trim();
+  const kcRealm = String(s.kcRealm || KC.realm || "").trim();
+  const kcClient = String(s.kcClientId || KC.clientId || "").trim();
+
+  if (kcBaseUrlEl) kcBaseUrlEl.value = kcBase;
+  if (kcRealmEl) kcRealmEl.value = kcRealm;
+  if (kcClientIdEl) kcClientIdEl.value = kcClient;
+
+  // Apply overrides to runtime config
+  if (kcBase) KC.baseUrl = kcBase.replace(/\/+$/, "");
+  if (kcRealm) KC.realm = kcRealm;
+  if (kcClient) KC.clientId = kcClient;
+}
+
+function saveSettings() {
+  const baseUrl = normalizeBaseUrl(baseUrlEl.value);
+
+  const kcBaseUrl = (kcBaseUrlEl?.value || KC.baseUrl || "").trim().replace(/\/+$/, "");
+  const kcRealm = (kcRealmEl?.value || KC.realm || "").trim();
+  const kcClientId = (kcClientIdEl?.value || KC.clientId || "").trim();
+
+  localStorage.setItem(LS_KEY, JSON.stringify({ baseUrl, kcBaseUrl, kcRealm, kcClientId }));
+}
 
   // ---------------------------
   // Boot

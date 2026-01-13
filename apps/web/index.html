@@ -336,7 +336,14 @@
         <div class="api-box">
           <label for="baseUrl">API Base URL</label>
           <input id="baseUrl" placeholder="http://localhost:8000" />
-          <button id="btnSave">Save</button>
+          
+          <label for="kcBaseUrl">Keycloak Base URL</label>
+          <input id="kcBaseUrl" placeholder="https://auth.forgemotionsystems.com" />
+          <label for="kcRealm">Realm</label>
+          <input id="kcRealm" placeholder="aviation" />
+          <label for="kcClientId">Client ID</label>
+          <input id="kcClientId" placeholder="aviation-ui" />
+<button id="btnSave">Save</button>
           <button id="btnRefresh" class="secondary">Refresh</button>
           <span class="spacer"></span>
           <span id="authUser" class="muted" style="margin-right:10px;"></span>
