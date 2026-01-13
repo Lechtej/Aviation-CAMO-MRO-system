@@ -152,3 +152,19 @@ Wprowadzono minimalne pola:
 - wprowadzić kontrolę spójności (np. constraint/materialized check) + testy E2E,
 - zdefiniować „initial stock load” jako jawny proces (RECEIPT z `source_ref_type='INITIAL_LOAD'`),
 - rozważyć tenant-scoping `stock_items` (aktualnie tenant jest w ledgerze).
+
+## Update #13 — Stock Reservations (soft lock)
+
+This release adds a **reservation layer** for CAMO/Stores flows without changing on-hand stock at reservation time.
+
+**DB / Ledger**
+- Migration `db/migrations/public/0005_public_stock_reservations.sql` introduces `public.stock_reservations` (tenant isolated by `tenant_id`).
+- `public.stock_transactions` gets optional `reservation_id` FK for traceability (e.g., CAMO ISSUE must reference a reservation).
+
+**API**
+- `GET /v1/logistics/stock-reservations` — list last 200 reservations for the tenant (roles: LOGISTICS_OFFICER, CAMO_PLANNER, or ADMIN).
+- `POST /v1/logistics/stock-reservations` — create reservation and increment `stock_items.qty_reserved` atomically.
+- `POST /v1/logistics/stock-transactions` — for `ISSUE` by `CAMO_PLANNER`, `reservation_id` is required (enforced in RBAC gate).
+
+**Tenant header safety**
+- Tenant resolution middleware now guards invalid tenant UUID values and returns `400 Invalid X-Tenant-Id (expected UUID)` instead of crashing the API process.

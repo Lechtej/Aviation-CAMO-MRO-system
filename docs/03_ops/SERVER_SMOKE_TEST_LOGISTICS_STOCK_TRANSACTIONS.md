@@ -245,3 +245,43 @@ ROLLBACK;
 ```
 
 **PASS:** `updated_at` zmienia się w wyniku UPDATE, ale po `ROLLBACK` stan danych zostaje bez zmian.
+
+## Update #13 — Smoke test: Stock Reservations
+
+### Preconditions
+- Use a **PLATFORM_ADMIN** token and provide explicit `X-Tenant-Id` (platformadmin token may not contain `tenant_id` claim).
+- If a client sends invalid `X-Tenant-Id` (non-UUID), API should respond **400** (guarded), not crash.
+
+### List reservations
+```bash
+BASE="https://api.forgemotionsystems.com"
+TOKEN="$(./get_token_dev.sh)"
+TENANT_ID="<TENANT_UUID>"
+
+curl -sS -o /dev/null -w "HTTP=%{http_code}\n" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "X-Tenant-Id: $TENANT_ID" \
+  "$BASE/v1/logistics/stock-reservations"
+# expect: HTTP=200
+```
+
+### Create reservation
+```bash
+STOCK_ITEM_ID="<STOCK_ITEM_UUID>"
+
+curl -sS -o /dev/null -w "HTTP=%{http_code}\n" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "X-Tenant-Id: $TENANT_ID" \
+  -H "Content-Type: application/json" \
+  -d '{"stock_item_id":"'"$STOCK_ITEM_ID"'","qty":1,"source_ref_type":"WO","source_ref_id":"'"$STOCK_ITEM_ID"'"}' \
+  "$BASE/v1/logistics/stock-reservations"
+# expect: HTTP=201 (or 409 if insufficient available stock)
+```
+
+### Verify DB objects (server)
+```bash
+cd infra/docker
+docker compose exec -T db psql -U aviation -d aviation -c "\\d+ public.stock_reservations"
+docker compose exec -T db psql -U aviation -d aviation -c "\\d+ public.stock_transactions"
+# expect: stock_transactions has reservation_id column + FK to stock_reservations
+```
