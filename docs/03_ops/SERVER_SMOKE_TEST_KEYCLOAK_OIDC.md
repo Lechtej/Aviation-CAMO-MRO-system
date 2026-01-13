@@ -362,3 +362,51 @@ Kopiuj **tylko wartość** `access_token`, bez `"access_token":` i bez cudzysło
 Jeżeli potrzebujesz password grant w DEV:
 - Keycloak → Client → Settings → **Direct Access Grants Enabled: ON**
 - po teście wróć na OFF (ryzyko bezpieczeństwa).
+
+
+## 2026-01 — AUTH / OIDC / TENANT CONTEXT STABILIZATION (#12 / #12.1)
+
+### Locked decisions
+- **PKCE only** for UI (`aviation-ui`). Password grant is disabled by design.
+- **CORS source of truth = API**, not Caddy.
+- **Tenant resolution**: `PLATFORM_ADMIN + X-Tenant-Id` only (no shortcuts).
+
+### Dev bypass (local only)
+- Enabled via env:
+  - `DEV_AUTH_BYPASS=true`
+  - `DEV_AUTH_BYPASS_SECRET=<shared-dev-secret>`
+- Header:
+  - `X-Dev-Bypass: <secret>`
+  - `X-Tenant-Id: <tenant_uuid>`
+- Purpose: unblock backend smoke tests without JWT.
+
+### Canonical smoke test (local)
+```bash
+BASE_URL=http://127.0.0.1:8000
+TENANT_ID=<tenant_uuid>
+DEV_SECRET=<shared-dev-secret>
+
+curl -i \
+  -H "X-Dev-Bypass: $DEV_SECRET" \
+  -H "X-Tenant-Id: $TENANT_ID" \
+  "$BASE_URL/v1/aircraft"
+```
+
+Expected: **HTTP 200**, response headers include `x-tenant-id`, `x-tenant-schema`.
+
+### Production test (UI token)
+1. Login via `aviation-ui` (PKCE).
+2. Copy **access_token** from DevTools.
+3. Call API with:
+```bash
+curl -i \
+  -H "Authorization: Bearer <access_token>" \
+  -H "X-Tenant-Id: <tenant_uuid>" \
+  https://api.forgemotionsystems.com/v1/aircraft
+```
+
+### Failure modes (expected)
+- No token → `401 Missing bearer token`
+- Expired token → `401 TOKEN_EXPIRED`
+- Malformed token → `401 TOKEN_MALFORMED`
+
