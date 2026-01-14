@@ -1,1 +1,0 @@
-- Przygotować **nawodnienie (seed)** dla grupy **PGL** i kluczowych tenantów:
