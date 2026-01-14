@@ -51,3 +51,12 @@ If counters row is missing, API creates it with zeros on first call.
 ## Notes
 - "Age" is derived from `manufacture_date` / `entry_into_service_date` (no separate field needed).
 - Forecasting/maintenance program will consume `total_fh/total_fc` + accomplishments in next steps.
+
+
+## Update 2026-01-14 — Utilization Ledger & Counters (Idempotent)
+
+- Ledger FH/FC jako source of truth.
+- POST `/v1/aircraft/{aircraft_id}/utilization` idempotentny:
+  - `source_ref != null` → UNIQUE (aircraft_id, source, source_ref)
+  - `source_ref == null` → UNIQUE (aircraft_id, op_date, source)
+- Counters aktualizowane transakcyjnie.

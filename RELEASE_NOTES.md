@@ -601,6 +601,7 @@ Date: 2026-01-05
 - UI: role-based navigation (CAMO vs MRO) based on Keycloak realm roles.
 - API: RBAC enforced for /v1/aircraft (CAMO roles) and /v1/maintenance-events (CAMO or MRO roles).
 - Keycloak: added test users camo_user (CAMO_PLANNER) and mro_user (MECHANIC).
+- Data baseline (PGL XLSX): uzupełniono mapowanie dostępu MRO do aircraft (`aircraft_mro_access`) na podstawie stagingu oraz dodano obsługę brakującego aircraft przez technicznego tenanta `unk` (UNKNOWN_OWNER). (2026-01-14)
 
 ## v0.2.45 (2026-01-07)
 
@@ -678,3 +679,12 @@ Date: 2026-01-05
 - Ledger utilization (FH/FC).
 - Idempotencja DB + API.
 - Counters snapshot.
+
+
+
+### 2026-01-14 — Logistics: Tenant-scoped idempotency & reservations integrity
+
+- **Stock transactions**: idempotency is now enforced per-tenant via `(tenant_id, idempotency_key)` to prevent cross-tenant collisions.
+- **Reservations**: availability checks are preceded by a ledger-based recalculation of `qty_reserved` from OPEN reservations to guarantee consistency.
+- **API**: logistics router aligned with runtime container (reservation lifecycle, recalculation, stricter role checks).
+

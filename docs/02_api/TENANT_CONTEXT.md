@@ -231,3 +231,11 @@ From the DB container, query `public.tenants` (note: DB user is not `postgres` i
 ```bash
 docker compose exec db psql -U aviation -d aviation -c "select id,name,slug from public.tenants order by name;"
 ```
+
+## Aircraft visibility (owner vs MRO) — 2026-01-14 update
+
+Endpointy pracują w kontekście `X-Tenant-Id` (resolved → schema per tenant). Dla zasobu **AIRCRAFT**:
+- tenant będący **ownerem** widzi aircraft po `aircraft.owner_tenant_id = <tenant_id>`,
+- tenant typu **MRO** widzi aircraft przez relację `public.aircraft_mro_access` (gdy `mro_tenant_id = <tenant_id>` i `active=true`).
+
+Dzięki temu tenant MRO może pracować na aircraft wielu operatorów/ownerów bez duplikacji rekordów.

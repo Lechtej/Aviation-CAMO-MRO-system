@@ -55,3 +55,12 @@ docker compose exec -T db psql -U aviation -d aviation -v ON_ERROR_STOP=1 -f db/
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+## 2026-01-14 — PGL XLSX baseline: aircraft + MRO access
+
+W ramach baseline importu PGL XLSX uzupełniono warstwę danych AIRCRAFT:
+
+- `public.aircraft` zawiera rekordy aircraft ownerowane przez tenanta (np. LOT) oraz rekordy placeholder dla aircraft bez jednoznacznego właściciela (`tenants.code='unk'`).
+- `public.aircraft_mro_access` mapuje dostęp MRO do aircraft na podstawie `public.staging_aircraft_pgl_full.mro` (normalizacja `upper()`), z unikalnością `(aircraft_id, mro_tenant_id)`.
+
+Dla detali operacyjnych (SQL + walidacja) patrz: `db/import/README.md` → sekcja **2026-01-14**.

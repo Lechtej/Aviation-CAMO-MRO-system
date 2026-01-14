@@ -122,3 +122,113 @@ docker compose exec -T db psql -U aviation -d aviation -v ON_ERROR_STOP=1 -f db/
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+## 2026-01-14 — Baseline aircraft import (PGL XLSX) + MRO access mapping
+
+### Cel
+- Ustabilizować **bazę referencyjną AIRCRAFT** po imporcie PGL XLSX oraz udostępnić aircraft do tenantów MRO na podstawie kolumny `mro` w stagingu.
+- Zapewnić deterministyczne wyniki endpointu `GET /v1/aircraft` dla tenantów: **LOT (owner)**, **LOTAMS (MRO)**, **LST (MRO / LS Technics)**.
+
+### Założenia / ograniczenia modelu
+- `public.aircraft.owner_tenant_id` jest **NOT NULL**.
+- Unikalność aircraft: `uq_aircraft_owner_registration (owner_tenant_id, registration)` — **nie ma** unikalności samego `registration`.  
+  Konsekwencja: `ON CONFLICT(registration)` nie działa (brak constraintu) — używaj konflików na `(owner_tenant_id, registration)` lub własnego warunku `WHERE NOT EXISTS`.
+
+### Mapowanie MRO (staging → tenant)
+Źródło: `public.staging_aircraft_pgl_full.mro` (normalizacja `upper()`):
+- `LOTAMS` → tenant LOTAMS
+- `LS TECHNICS` → tenant LST
+
+Tabela docelowa: `public.aircraft_mro_access(aircraft_id, mro_tenant_id, role, active)`  
+Constraint: `uq_aircraft_mro_access (aircraft_id, mro_tenant_id)`.
+
+### UPSERT dostępu MRO z stagingu
+Przykład (uruchamiane w `infra/docker`):
+
+```sql
+WITH map AS (
+  SELECT 'LOTAMS'::text AS mro_norm, '<LOTAMS_UUID>'::uuid AS mro_tenant_id
+  UNION ALL
+  SELECT 'LS TECHNICS'::text AS mro_norm, '<LST_UUID>'::uuid AS mro_tenant_id
+),
+src AS (
+  SELECT a.id AS aircraft_id, m.mro_tenant_id
+  FROM public.staging_aircraft_pgl_full s
+  JOIN map m ON upper(s.mro) = m.mro_norm
+  JOIN public.aircraft a ON upper(a.registration) = upper(s.registration)
+)
+INSERT INTO public.aircraft_mro_access (id, aircraft_id, mro_tenant_id, role, active)
+SELECT gen_random_uuid(), aircraft_id, mro_tenant_id, 'MRO', true
+FROM src
+ON CONFLICT (aircraft_id, mro_tenant_id)
+DO UPDATE SET active=true, role='MRO';
+```
+
+### Obsługa brakującego aircraft w `public.aircraft`
+Wykryto 1 rekord staging bez odpowiednika w `public.aircraft` (przykład: `OH-LWM`).
+
+**Decyzja (baseline):**
+- dodać technicznego właściciela `tenants.code='unk'` (`UNKNOWN_OWNER`) + schema `t_unk`
+- wstawić aircraft z `owner_tenant_id=unk`, `operator_tenant_id=unk`
+- dodać wpis w `aircraft_mro_access` dla tenant LST
+
+Minimalne SQL:
+
+```sql
+-- 1) create UNKNOWN tenant (once)
+INSERT INTO public.tenants (id, code, name, schema_name)
+SELECT gen_random_uuid(), 'unk', 'UNKNOWN_OWNER', 't_unk'
+WHERE NOT EXISTS (SELECT 1 FROM public.tenants WHERE code='unk');
+
+CREATE SCHEMA IF NOT EXISTS t_unk;
+
+-- 2) insert missing aircraft for owner=unk (example OH-LWM)
+WITH s AS (
+  SELECT upper(registration) AS reg, nullif(model,'') AS model_name, nullif(msn,'') AS msn
+  FROM public.staging_aircraft_pgl_full
+  WHERE upper(registration)='OH-LWM'
+  LIMIT 1
+),
+unk AS (SELECT id AS tenant_id FROM public.tenants WHERE code='unk' LIMIT 1),
+ins AS (
+  INSERT INTO public.aircraft (
+    id, owner_tenant_id, operator_tenant_id,
+    registration, aircraft_type, serial_number,
+    status_tech, notes
+  )
+  SELECT
+    gen_random_uuid(),
+    unk.tenant_id, unk.tenant_id,
+    s.reg,
+    COALESCE(s.model_name, 'UNKNOWN'),
+    s.msn,
+    'IN_SERVICE',
+    'baseline_import_pgl_xlsx_2026-01-14'
+  FROM s, unk
+  RETURNING id
+)
+SELECT COUNT(*) FROM ins;
+
+-- 3) grant MRO access (LST)
+WITH a AS (
+  SELECT id AS aircraft_id FROM public.aircraft WHERE upper(registration)='OH-LWM' LIMIT 1
+)
+INSERT INTO public.aircraft_mro_access (id, aircraft_id, mro_tenant_id, role, active)
+SELECT gen_random_uuid(), a.aircraft_id, '<LST_UUID>'::uuid, 'MRO', true
+FROM a
+ON CONFLICT (aircraft_id, mro_tenant_id)
+DO UPDATE SET active=true, role='MRO';
+```
+
+### Walidacja przez API
+```bash
+TOKEN="$(./get_token_dev.sh)"
+curl -sS -H "Authorization: Bearer $TOKEN" -H "X-Tenant-Id: <LOT_UUID>"    "https://api.forgemotionsystems.com/v1/aircraft" | jq 'length'
+curl -sS -H "Authorization: Bearer $TOKEN" -H "X-Tenant-Id: <LOTAMS_UUID>" "https://api.forgemotionsystems.com/v1/aircraft" | jq 'length'
+curl -sS -H "Authorization: Bearer $TOKEN" -H "X-Tenant-Id: <LST_UUID>"    "https://api.forgemotionsystems.com/v1/aircraft" | jq 'length'
+```
+
+Oczekiwane (na bazie stagingu z 2026-01-14):
+- LOT: ~52 aircraft (głównie `SP-*`)
+- LOTAMS: 316 aircraft
+- LST: 613 aircraft (w tym `OH-LWM`)

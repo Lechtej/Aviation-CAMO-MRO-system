@@ -61,3 +61,11 @@
 - aircraft_utilization_ledger
 - CHECK delta >= 0
 - UNIQUE indexy wg source_ref.
+
+
+
+### 2026-01-14 — stock_transactions idempotency (tenant-scoped)
+
+- Replaced global uniqueness of `idempotency_key` with tenant-scoped unique index.
+- Safe migration added (re-runnable): `2026-01-14_01_stock_transactions_idempotency_tenant_scoped.sql`.
+
