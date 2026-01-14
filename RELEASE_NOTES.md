@@ -1,5 +1,14 @@
 # AviationCAMO-MRO — Release Notes (cumulative)
 
+### ui_hotfix_events_v0.2.45 — 2026-01-14
+
+- **UI:** Fixed Maintenance Events view by adding required query parameter `aircraft_id`:
+  - fetch aircraft list (`GET /v1/aircraft`)
+  - fetch events with parameter (`GET /v1/maintenance-events?aircraft_id=<UUID>`)
+- **Scope:** hotfix; currently uses the first aircraft returned (no selector yet).
+- **Ops:** web container rebuilt from updated `apps/web/app.js`.
+
+
 ## v0.2.42.6 (2026-01-14) — FRONTEND AUTH: token lifecycle (KROK 2)
 
 - UI: deterministic token lifecycle handling (no silent refresh):

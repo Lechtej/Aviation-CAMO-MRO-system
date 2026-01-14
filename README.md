@@ -83,3 +83,22 @@ bash scripts/start_system.sh
 Quick start (local):
 - copy `.env.example` → `.env.local` and fill (do not commit)
 - run: `bash scripts/bootstrap_local.sh .env.local`
+
+## UI Hotfix: Maintenance Events require `aircraft_id` (server hotfix)
+
+**Date:** 2026-01-14  
+**Problem:** UI performed `GET /v1/maintenance-events` without required query parameter and API returned `422` (missing/invalid `aircraft_id`).  
+**Fix (web UI):** UI now loads aircraft first (`GET /v1/aircraft`) and then calls:
+- `GET /v1/maintenance-events?aircraft_id=<UUID>`
+
+**Current limitation (hotfix scope):**
+- UI selects **first aircraft** returned by `/v1/aircraft` to build the query parameter.
+- Target behaviour (next iteration): add aircraft selector + persist selection (localStorage).
+
+**Deploy / rebuild (Docker Compose):**
+```bash
+cd /opt/aviationcamo/Aviation-CAMO-MRO-system/infra/docker
+docker compose build web
+docker compose up -d --no-deps web
+docker compose exec -T web sh -lc 'grep -n "maintenance-events?aircraft_id" /app/app.js | head -5'
+```

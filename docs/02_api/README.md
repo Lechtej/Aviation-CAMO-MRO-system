@@ -104,3 +104,12 @@ Failure modes:
 
 Implementation note:
 - qty is casted via `Decimal(str(payload.qty))` to avoid float rounding.
+
+## Maintenance Events — required query parameter
+
+**Date:** 2026-01-14  
+Endpoint `GET /v1/maintenance-events` requires query parameter:
+- `aircraft_id` (UUID)
+
+Example:
+- `GET /v1/maintenance-events?aircraft_id=<UUID>`
