@@ -55,3 +55,9 @@
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+
+### v0.2.47 — DB
+- aircraft_utilization_ledger
+- CHECK delta >= 0
+- UNIQUE indexy wg source_ref.

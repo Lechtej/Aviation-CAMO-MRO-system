@@ -672,3 +672,9 @@ Date: 2026-01-05
 - Snapshot `qty_reserved` liczony z ledgeru.
 - Pełne walidacje ISSUE z rezerwacją.
 - Zidentyfikowane ryzyko krótkiego TTL tokenów w testach CLI.
+
+
+### v0.2.47 — Aircraft Utilization
+- Ledger utilization (FH/FC).
+- Idempotencja DB + API.
+- Counters snapshot.

@@ -68,3 +68,9 @@ Jeśli później wypełnisz `Fleet`, przygotujemy kolejną paczkę seed v0.2.2 z
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+
+## v0.2.47 — Aircraft Utilization
+- Append-only ledger.
+- Counters = cache.
+- Rebuild możliwy z ledger.
