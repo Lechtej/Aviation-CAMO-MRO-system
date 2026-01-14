@@ -2,28 +2,71 @@ from __future__ import annotations
 
 from decimal import Decimal
 from typing import List
-from uuid import UUID, uuid4
 from datetime import datetime, timezone
+from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy import and_, or_, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 
 from shared.db import get_db_session
-from . import models
-from .schemas import (
-    PartCreate, PartUpdate, PartOut,
-    WarehouseCreate, WarehouseUpdate, WarehouseOut,
-    LocationCreate, LocationUpdate, LocationOut,
-    StockItemCreate, StockItemUpdate, StockItemOut,
+from modules.logistics import models
+from modules.logistics.bootstrap import bootstrap_shared_dictionaries, bootstrap_tenant_tables
+from modules.logistics.schemas import (
     UomOut,
-    StockTransactionCreate, StockTransactionOut,
-    StockReservationCreate, StockReservationOut,
-)
-from .bootstrap import bootstrap_shared_dictionaries, bootstrap_tenant_tables
 
-router = APIRouter(prefix="/v1/logistics", tags=["Logistics"])
+    PartCreate,
+    PartUpdate,
+    PartOut,
+
+    WarehouseCreate,
+    WarehouseUpdate,
+    WarehouseOut,
+
+    LocationCreate,
+    LocationUpdate,
+    LocationOut,
+
+    StockItemCreate,
+    StockItemUpdate,
+    StockItemOut,
+
+    StockReservationCreate,
+    StockReservationOut,
+
+    StockTransactionCreate,
+    StockTransactionOut,
+)
+
+
+def recalc_qty_reserved(db: Session, stock_item_id: UUID) -> Decimal:
+    net = db.execute(
+        text(
+            """
+            SELECT COALESCE(SUM(qty_reserved - qty_consumed), 0)
+            FROM public.stock_reservations
+            WHERE stock_item_id = :id
+              AND status = 'OPEN'
+            """
+        ),
+        {"id": str(stock_item_id)},
+    ).scalar_one()
+
+    db.execute(
+        text(
+            """
+            UPDATE public.stock_items
+            SET qty_reserved = :net
+            WHERE id = :id
+            """
+        ),
+        {"net": net, "id": str(stock_item_id)},
+    )
+    return net
+
+
+router = APIRouter(prefix="/v1/logistics", tags=["logistics"])
 
 
 def require_role(request: Request, role: str) -> None:
@@ -303,10 +346,13 @@ def delete_stock_item(stock_id: UUID, db: Session = Depends(get_db_session)):
     return None
 
 
+# STOCK TRANSACTIONS
+
 # --- #13 STOCK RESERVATIONS (soft lock; does NOT change on-hand) ---
 
-@router.get("/stock-reservations", response_model=List[StockReservationOut])
+@router.get("/stock-reservations", response_model=list[StockReservationOut])
 def list_stock_reservations(request: Request, db: Session = Depends(get_db_session)):
+    # Roles: CAMO + STORE + ADMIN
     ROLE_STORE = "LOGISTICS_OFFICER"
     ROLE_CAMO = "CAMO_PLANNER"
     ROLE_ADMIN = {"PLATFORM_ADMIN", "TENANT_ADMIN"}
@@ -333,20 +379,20 @@ def list_stock_reservations(request: Request, db: Session = Depends(get_db_sessi
         {"tenant_id": tenant_id},
     ).mappings().all()
 
-    out: list[dict] = []
+    # Convert for Pydantic (keep strings for timestamptz)
+    out = []
     for r in rows:
-        out.append(
-            {
-                **r,
-                "created_at": r["created_at"].isoformat() if r["created_at"] else None,
-                "expires_at": r["expires_at"].isoformat() if r["expires_at"] else None,
-            }
-        )
+        out.append({**r, "created_at": r["created_at"].isoformat() if r["created_at"] else None,
+                       "expires_at": r["expires_at"].isoformat() if r["expires_at"] else None})
     return out
 
 
 @router.post("/stock-reservations", response_model=StockReservationOut, status_code=201)
-def create_stock_reservation(payload: StockReservationCreate, request: Request, db: Session = Depends(get_db_session)):
+def create_stock_reservation(
+    payload: StockReservationCreate,
+    request: Request,
+    db: Session = Depends(get_db_session),
+):
     ROLE_STORE = "LOGISTICS_OFFICER"
     ROLE_CAMO = "CAMO_PLANNER"
     ROLE_ADMIN = {"PLATFORM_ADMIN", "TENANT_ADMIN"}
@@ -360,6 +406,7 @@ def create_stock_reservation(payload: StockReservationCreate, request: Request, 
     if not (roles & ROLE_ADMIN or ROLE_STORE in roles or ROLE_CAMO in roles):
         raise HTTPException(status_code=403, detail="Missing role for reservations")
 
+    # Lock stock item row
     item = (
         db.query(models.StockItem)
         .filter(models.StockItem.id == payload.stock_item_id)
@@ -369,78 +416,118 @@ def create_stock_reservation(payload: StockReservationCreate, request: Request, 
     if not item:
         raise HTTPException(status_code=404, detail="Stock item not found")
 
+    # --- NEW: recalc snapshot BEFORE availability check
+    recalc_qty_reserved(db, item.id)
+    db.refresh(item)
+    db.commit()
+
     qty = Decimal(str(payload.qty))
-    on_hand = Decimal(str(item.qty_on_hand))
-    reserved = Decimal(str(item.qty_reserved))
-    avail = on_hand - reserved
+    avail = Decimal(str(item.qty_on_hand)) - Decimal(str(item.qty_reserved))
     if avail < qty:
-        raise HTTPException(status_code=409, detail="Insufficient available stock for reservation")
+        raise HTTPException(
+            status_code=409,
+            detail="Insufficient available stock for reservation",
+        )
 
     loc = db.get(models.Location, item.location_id)
     if not loc:
         raise HTTPException(status_code=500, detail="Stock item location missing")
+
     part = db.get(models.Part, item.part_id)
     if not part:
         raise HTTPException(status_code=500, detail="Stock item part missing")
+
     uom = getattr(part, "uom_code", None) or "EA"
 
-    created_by_user_id = str(getattr(auth, "sub", None) or getattr(auth, "user_id", None) or "unknown")
+    created_by_user_id = str(
+        getattr(auth, "sub", None)
+        or getattr(auth, "user_id", None)
+        or "unknown"
+    )
     created_by_username = getattr(auth, "username", None)
 
-    rec = db.execute(
+    # INSERT reservation row via SQL (no ORM model exists for stock_reservations)
+    row = db.execute(
         text(
-            "INSERT INTO public.stock_reservations ("
-            "created_by_user_id, created_by_username, tenant_id, status, "
-            "warehouse_id, part_id, stock_item_id, qty_reserved, qty_consumed, uom, "
-            "source_ref_type, source_ref_id, expires_at"
-            ") VALUES ("
-            ":created_by_user_id, :created_by_username, CAST(:tenant_id AS uuid), 'OPEN', "
-            "CAST(:warehouse_id AS uuid), CAST(:part_id AS uuid), CAST(:stock_item_id AS uuid), "
-            ":qty_reserved, 0, :uom, :source_ref_type, CAST(:source_ref_id AS uuid), "
-            "CASE WHEN :expires_at IS NULL OR :expires_at = '' THEN NULL ELSE CAST(:expires_at AS timestamptz) END"
-            ") RETURNING id, created_at"
+            """
+            INSERT INTO public.stock_reservations (
+                tenant_id,
+                warehouse_id,
+                part_id,
+                stock_item_id,
+                qty_reserved,
+                qty_consumed,
+                status,
+                uom,
+                source_ref_type,
+                source_ref_id,
+                expires_at,
+                created_by_user_id,
+                created_by_username
+            ) VALUES (
+                CAST(:tenant_id AS uuid),
+                CAST(:warehouse_id AS uuid),
+                CAST(:part_id AS uuid),
+                CAST(:stock_item_id AS uuid),
+                :qty_reserved,
+                0,
+                'OPEN',
+                :uom,
+                :source_ref_type,
+                CAST(NULLIF(:source_ref_id,'') AS uuid),
+                :expires_at,
+                :created_by_user_id,
+                :created_by_username
+            )
+            RETURNING
+                id, created_at,
+                tenant_id, warehouse_id, part_id, stock_item_id,
+                qty_reserved, qty_consumed, status, uom,
+                source_ref_type, source_ref_id, expires_at,
+                created_by_user_id, created_by_username
+            """
         ),
         {
-            "created_by_user_id": created_by_user_id,
-            "created_by_username": created_by_username,
             "tenant_id": tenant_id,
             "warehouse_id": str(loc.warehouse_id),
             "part_id": str(item.part_id),
-            "stock_item_id": str(item.id),
+            "stock_item_id": str(payload.stock_item_id),
             "qty_reserved": qty,
             "uom": uom,
             "source_ref_type": payload.source_ref_type,
-            "source_ref_id": str(payload.source_ref_id),
-            "expires_at": payload.expires_at or "",
+            "source_ref_id": str(payload.source_ref_id) if payload.source_ref_id else None,
+            "expires_at": payload.expires_at,
+            "created_by_user_id": created_by_user_id,
+            "created_by_username": created_by_username,
         },
-    ).mappings().first()
+    ).mappings().one()
 
-    item.qty_reserved = Decimal(str(item.qty_reserved)) + qty
-    db.add(item)
-
-    db.commit()
+    # NEW: recalc snapshot AFTER INSERT (drift-proof)
+    recalc_qty_reserved(db, item.id)
     db.refresh(item)
+    # NEW: persist reservation row (otherwise it may rollback on session close)
+    db.commit()
 
     return {
-        "id": rec["id"],
-        "created_at": rec["created_at"].isoformat() if rec["created_at"] else None,
-        "created_by_user_id": created_by_user_id,
-        "created_by_username": created_by_username,
-        "tenant_id": UUID(tenant_id),
-        "status": "OPEN",
-        "warehouse_id": UUID(str(loc.warehouse_id)),
-        "part_id": UUID(str(item.part_id)),
-        "stock_item_id": UUID(str(item.id)),
-        "qty_reserved": float(qty),
-        "qty_consumed": 0.0,
-        "uom": uom,
-        "source_ref_type": payload.source_ref_type,
-        "source_ref_id": payload.source_ref_id,
-        "expires_at": payload.expires_at,
+        "id": str(row["id"]),
+        "created_at": row["created_at"].isoformat() if row["created_at"] else None,
+        "created_by_user_id": row["created_by_user_id"],
+        "created_by_username": row["created_by_username"],
+        "tenant_id": str(row["tenant_id"]),
+        "warehouse_id": str(row["warehouse_id"]),
+        "part_id": str(row["part_id"]),
+        "stock_item_id": str(row["stock_item_id"]),
+        "qty_reserved": float(row["qty_reserved"]),
+        "qty_consumed": float(row["qty_consumed"]),
+        "status": row["status"],
+        "uom": row["uom"],
+        "source_ref_type": row["source_ref_type"],
+        "source_ref_id": str(row["source_ref_id"]) if row["source_ref_id"] else None,
+        "expires_at": row["expires_at"].isoformat() if row["expires_at"] else None,
     }
 
 
-# STOCK TRANSACTIONS
+
 @router.post("/stock-transactions", response_model=StockTransactionOut, status_code=201)
 def create_stock_transaction(payload: StockTransactionCreate, request: Request, db: Session = Depends(get_db_session)):
     ROLE_STORE = "LOGISTICS_OFFICER"
@@ -471,13 +558,16 @@ def create_stock_transaction(payload: StockTransactionCreate, request: Request, 
             pass
         elif t == "ISSUE" and ROLE_CAMO in roles:
             if not getattr(payload, "reservation_id", None):
-                raise HTTPException(status_code=403, detail="CAMO_PLANNER ISSUE requires reservation_id")
+                raise HTTPException(
+                    status_code=403,
+                    detail="CAMO_PLANNER ISSUE requires reservation_id",
+                )
         else:
             raise HTTPException(status_code=403, detail="Missing role for transaction")
     else:
         raise HTTPException(status_code=422, detail="Invalid transaction type")
 
-    # Idempotency replay (tenant scoped)
+    # Idempotency: fast check in PUBLIC ledger (REPLAY -> 200)
     existing = db.execute(
         text(
             "SELECT id, stock_item_id FROM public.stock_transactions "
@@ -488,99 +578,103 @@ def create_stock_transaction(payload: StockTransactionCreate, request: Request, 
 
     if existing:
         qty_on_hand = db.execute(
-            text("SELECT qty_on_hand FROM public.stock_items WHERE id = CAST(:id AS uuid)"),
+            text("SELECT qty_on_hand FROM public.stock_items WHERE id = :id"),
             {"id": str(existing["stock_item_id"])},
         ).scalar()
+
         return {
-            "transaction_id": uuid4(),
-            "stock_transaction_id": existing["id"],
-            "stock_item_id": existing["stock_item_id"],
-            "qty_on_hand": float(qty_on_hand) if qty_on_hand is not None else None,
+            "transaction_id": str(existing["id"]),
+            "stock_item_id": str(existing["stock_item_id"]),
+            "qty_on_hand": float(qty_on_hand) if qty_on_hand is not None else 0.0,
         }
 
-    qty = Decimal(str(payload.qty))
+
 
     # Lock stock item
-    obj = (
-        db.query(models.StockItem)
-        .filter(models.StockItem.id == payload.stock_item_id)
-        .with_for_update()
-        .one_or_none()
-    )
+    obj = db.query(models.StockItem).filter(models.StockItem.id == payload.stock_item_id).with_for_update().one_or_none()
     if not obj:
         raise HTTPException(status_code=404, detail="Stock item not found")
 
-    # Derive warehouse_id + uom
-    loc = db.get(models.Location, obj.location_id)
-    if not loc:
-        raise HTTPException(status_code=500, detail="Stock item location missing")
-    part = db.get(models.Part, obj.part_id)
-    if not part:
-        raise HTTPException(status_code=500, detail="Stock item part missing")
-    uom = getattr(part, "uom_code", None) or "EA"
+    qty = Decimal(str(payload.qty))
+    if qty <= 0:
+        raise HTTPException(status_code=422, detail="Invalid qty")
 
-    # Reservation rules (ISSUE)
-    reservation_id = getattr(payload, "reservation_id", None)
-    if t == "ISSUE":
-        if reservation_id:
-            # lock reservation row
-            r = db.execute(
-                text(
-                    "SELECT id, tenant_id, status, stock_item_id, qty_reserved, qty_consumed, expires_at "
-                    "FROM public.stock_reservations "
-                    "WHERE id = CAST(:id AS uuid) "
-                    "FOR UPDATE"
-                ),
-                {"id": str(reservation_id)},
-            ).mappings().first()
-            if not r:
-                raise HTTPException(status_code=404, detail="Reservation not found")
-            if str(r["tenant_id"]) != str(tenant_id):
-                raise HTTPException(status_code=403, detail="Reservation tenant mismatch")
-            if r["status"] != "OPEN":
-                raise HTTPException(status_code=409, detail="Reservation is not OPEN")
-            if str(r["stock_item_id"]) != str(obj.id):
-                raise HTTPException(status_code=409, detail="Reservation stock_item_id mismatch")
-            if r["expires_at"] is not None:
-                now = datetime.now(timezone.utc)
-                if r["expires_at"] <= now:
-                    raise HTTPException(status_code=409, detail="Reservation expired")
+    reservation_row = None
+    if t == "ISSUE" and getattr(payload, "reservation_id", None):
+        reservation_row = db.execute(
+            text("""
+                SELECT id, status, stock_item_id, qty_reserved, qty_consumed, expires_at
+                FROM public.stock_reservations
+                WHERE tenant_id = CAST(:tenant_id AS uuid)
+                  AND id = CAST(:id AS uuid)
+                FOR UPDATE
+            """),
+            {"tenant_id": tenant_id, "id": str(payload.reservation_id)},
+        ).mappings().first()
 
-            remaining = Decimal(str(r["qty_reserved"])) - Decimal(str(r["qty_consumed"]))
-            if remaining < qty:
-                raise HTTPException(status_code=409, detail="Reservation remaining qty is insufficient")
+        if not reservation_row:
+            raise HTTPException(status_code=404, detail="Reservation not found")
+        if reservation_row["status"] != "OPEN":
+            raise HTTPException(status_code=409, detail="Reservation not OPEN")
+        if str(reservation_row["stock_item_id"]) != str(obj.id):
+            raise HTTPException(status_code=409, detail="Reservation stock_item mismatch")
+        if reservation_row["expires_at"] and reservation_row["expires_at"] < datetime.now(timezone.utc):
+            raise HTTPException(status_code=409, detail="Reservation expired")
 
-            # Apply on-hand + reserved snapshot changes
-            if Decimal(str(obj.qty_on_hand)) < qty:
-                raise HTTPException(status_code=409, detail="Insufficient stock")
-            obj.qty_on_hand = Decimal(str(obj.qty_on_hand)) - qty
-            obj.qty_reserved = Decimal(str(obj.qty_reserved)) - qty
+        remaining = Decimal(reservation_row["qty_reserved"]) - Decimal(reservation_row["qty_consumed"])
+        if qty > remaining:
+            raise HTTPException(status_code=409, detail="Over-consume reservation")
 
-            # Consume reservation
-            new_consumed = Decimal(str(r["qty_consumed"])) + qty
-            new_status = "CONSUMED" if new_consumed == Decimal(str(r["qty_reserved"])) else "OPEN"
-            db.execute(
-                text(
-                    "UPDATE public.stock_reservations "
-                    "SET qty_consumed = :qc, status = :st "
-                    "WHERE id = CAST(:id AS uuid)"
-                ),
-                {"qc": new_consumed, "st": new_status, "id": str(reservation_id)},
-            )
-        else:
-            # Issue from FREE stock only (don't steal reserved)
-            free = Decimal(str(obj.qty_on_hand)) - Decimal(str(obj.qty_reserved))
-            if free < qty:
-                raise HTTPException(status_code=409, detail="Insufficient free stock (reserved stock exists)")
-            obj.qty_on_hand = Decimal(str(obj.qty_on_hand)) - qty
+        # NEW: sync snapshot from ledger BEFORE snapshot-based checks
+        recalc_qty_reserved(db, obj.id)
+        db.refresh(obj)
 
-    elif t in ("RECEIPT", "RETURN"):
-        obj.qty_on_hand = Decimal(str(obj.qty_on_hand)) + qty
+        if Decimal(obj.qty_reserved) < qty:
+            raise HTTPException(status_code=409, detail="Insufficient qty_reserved snapshot")
+        if Decimal(obj.qty_on_hand) < qty:
+            raise HTTPException(status_code=409, detail="Insufficient qty_on_hand")
 
-    created_by_user_id = str(getattr(auth, "sub", None) or getattr(auth, "user_id", None) or "unknown")
-    created_by_username = getattr(auth, "username", None)
+        obj.qty_on_hand = Decimal(obj.qty_on_hand) - qty
+
+        new_consumed = Decimal(reservation_row["qty_consumed"]) + qty
+        new_status = "CONSUMED" if new_consumed >= Decimal(reservation_row["qty_reserved"]) else "OPEN"
+
+    # Reservation consume: update reservation row + resync snapshot
+
+    # APPLY reservation consumption ONLY when reservation exists
+    if reservation_row is not None:
+        db.execute(
+            text("""
+                UPDATE public.stock_reservations
+                SET qty_consumed = :qc,
+                    status = :st
+                WHERE tenant_id = CAST(:tenant_id AS uuid)
+                  AND id = CAST(:id AS uuid)
+            """),
+            {
+                "tenant_id": tenant_id,
+                "id": str(payload.reservation_id),
+                "qc": new_consumed,
+                "st": new_status,
+            },
+        )
+
+        # sync snapshot AFTER reservation consume
+        recalc_qty_reserved(db, obj.id)
+        db.refresh(obj)
+
+
+    # NO reservation flow (all other cases)
+    if reservation_row is None:
+        if t in ("RECEIPT", "RETURN"):
+            obj.qty_on_hand = Decimal(obj.qty_on_hand) + qty
+        elif t == "ISSUE":
+            if Decimal(obj.qty_on_hand) < qty:
+                raise HTTPException(status_code=409, detail="Insufficient qty_on_hand")
+            obj.qty_on_hand = Decimal(obj.qty_on_hand) - qty
 
     try:
+
         stock_tx_id = db.execute(
             text(
                 """
@@ -597,56 +691,66 @@ def create_stock_transaction(payload: StockTransactionCreate, request: Request, 
                     CAST(:warehouse_id AS uuid), CAST(:part_id AS uuid), CAST(:stock_item_id AS uuid),
                     :qty, :uom,
                     :idempotency_key, :request_hash,
-                    CAST(:reservation_id AS uuid)
+                    :reservation_id
                 )
                 RETURNING id
                 """
             ),
             {
-                "created_by_user_id": created_by_user_id,
-                "created_by_username": created_by_username,
+                "created_by_user_id": str(getattr(auth, "sub", None) or getattr(auth, "user_id", None) or "unknown"),
+                "created_by_username": getattr(auth, "username", None),
                 "tenant_id": tenant_id,
                 "transaction_type": t,
-                "warehouse_id": str(loc.warehouse_id),
+                "warehouse_id": str(db.get(models.Location, obj.location_id).warehouse_id),
                 "part_id": str(obj.part_id),
                 "stock_item_id": str(obj.id),
-                "qty": qty,
-                "uom": uom,
+                "qty": Decimal(str(payload.qty)),
+                "uom": getattr(db.get(models.Part, obj.part_id), "uom_code", None) or "EA",
                 "idempotency_key": idem_key,
                 "request_hash": None,
-                "reservation_id": str(reservation_id) if reservation_id else None,
+                "reservation_id": (str(payload.reservation_id) if getattr(payload, "reservation_id", None) else None),
             },
         ).scalar_one()
+        db.commit()
+
     except IntegrityError:
         db.rollback()
-        # replay response
+
         existing = db.execute(
             text(
-                "SELECT id, stock_item_id FROM public.stock_transactions "
-                "WHERE tenant_id = CAST(:tenant_id AS uuid) AND idempotency_key = :k"
+                """
+                SELECT id, stock_item_id
+                FROM public.stock_transactions
+                WHERE tenant_id = CAST(:tenant_id AS uuid)
+                  AND idempotency_key = :k
+                LIMIT 1
+                """
             ),
             {"tenant_id": tenant_id, "k": idem_key},
         ).mappings().first()
+
         if existing:
             qty_on_hand = db.execute(
-                text("SELECT qty_on_hand FROM public.stock_items WHERE id = CAST(:id AS uuid)"),
+                text("SELECT qty_on_hand FROM public.stock_items WHERE id = :id"),
                 {"id": str(existing["stock_item_id"])},
             ).scalar()
+
             return {
-                "transaction_id": uuid4(),
-                "stock_transaction_id": existing["id"],
-                "stock_item_id": existing["stock_item_id"],
+                # idempotency: zwracamy stały identyfikator powiązany z istniejącym wpisem
+                "transaction_id": str(existing["id"]),
+                "stock_item_id": str(existing["stock_item_id"]),
                 "qty_on_hand": float(qty_on_hand) if qty_on_hand is not None else None,
             }
-        raise HTTPException(status_code=409, detail="Duplicate idempotency_key")
 
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
+    # NEW insert path (no existing idempotency hit) — tx_id mamy z INSERT RETURNING powyżej
+    stock_item_id = str(payload.stock_item_id)
+    qty_on_hand = db.execute(
+        text("SELECT qty_on_hand FROM public.stock_items WHERE id = :id"),
+        {"id": stock_item_id},
+    ).scalar()
 
     return {
-        "transaction_id": uuid4(),
-        "stock_transaction_id": stock_tx_id,
-        "stock_item_id": obj.id,
-        "qty_on_hand": float(obj.qty_on_hand),
+        "transaction_id": str(stock_tx_id),
+        "stock_item_id": stock_item_id,
+        "qty_on_hand": float(qty_on_hand) if qty_on_hand is not None else None,
     }

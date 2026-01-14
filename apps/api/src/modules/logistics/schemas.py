@@ -112,12 +112,43 @@ class StockItemOut(BaseModel):
     qty_in_transit: float
 
 class StockTransactionCreate(BaseModel):
+    # MVP: validate allowed values by regex (no new imports needed)
     type: str = Field(pattern="^(RECEIPT|ISSUE|RETURN)$")
     stock_item_id: UUID
+    reservation_id: UUID | None = None
     qty: float = Field(gt=0)
+
 
 
 class StockTransactionOut(BaseModel):
     transaction_id: UUID
     stock_item_id: UUID
     qty_on_hand: float
+
+
+# --- #13 Stock Reservations (soft lock; consumed by ISSUE) ---
+
+class StockReservationCreate(BaseModel):
+    stock_item_id: UUID
+    qty: float = Field(gt=0)
+    source_ref_type: str = Field(pattern="^(WO|TASK)$")
+    source_ref_id: UUID
+    expires_at: Optional[str] = None  # ISO-8601; parsed in router
+
+
+class StockReservationOut(BaseModel):
+    id: UUID
+    created_at: str
+    created_by_user_id: str
+    created_by_username: Optional[str] = None
+    tenant_id: UUID
+    status: str
+    warehouse_id: UUID
+    part_id: UUID
+    stock_item_id: UUID
+    qty_reserved: float
+    qty_consumed: float
+    uom: str
+    source_ref_type: Optional[str] = None
+    source_ref_id: Optional[UUID] = None
+    expires_at: Optional[str] = None
