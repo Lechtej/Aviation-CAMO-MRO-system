@@ -644,3 +644,10 @@ Date: 2026-01-05
 - FIX: /v1/logistics/stock-transactions – corrected SQL parameter casting for UUIDs (tenant_id, warehouse_id, part_id, stock_item_id).
 - VERIFIED: Idempotency-Key handling (201 on first call, 409 on duplicate).
 
+
+
+### v0.2.x – Stock Reservations E2E (#13)
+- Trwały zapis rezerwacji (`db.commit()` po INSERT).
+- Snapshot `qty_reserved` liczony z ledgeru.
+- Pełne walidacje ISSUE z rezerwacją.
+- Zidentyfikowane ryzyko krótkiego TTL tokenów w testach CLI.

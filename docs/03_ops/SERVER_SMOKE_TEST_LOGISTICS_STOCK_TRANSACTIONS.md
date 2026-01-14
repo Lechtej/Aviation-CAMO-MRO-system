@@ -324,3 +324,20 @@ docker compose exec -T db psql -U aviation -d aviation -c "\\d+ public.stock_res
 docker compose exec -T db psql -U aviation -d aviation -c "\\d+ public.stock_transactions"
 # expect: stock_transactions has reservation_id column + FK to stock_reservations
 ```
+
+
+---
+
+## Update #13 – Stock Reservations flow
+
+**Nowy test E2E**
+1. `POST /v1/logistics/stock-reservations`
+2. Weryfikacja w `public.stock_reservations`.
+3. `POST /v1/logistics/stock-transactions` (ISSUE + reservation_id).
+4. Sprawdzenie:
+   - status rezerwacji
+   - `qty_consumed`
+   - snapshot `qty_reserved`, `qty_on_hand`.
+
+**Uwaga**
+- Przed testami sprawdzić TTL tokena (`exp-now > 120s`).

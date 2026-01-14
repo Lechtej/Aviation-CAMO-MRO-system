@@ -224,3 +224,27 @@ Tenant isolation is enforced at API level (required `X-Tenant-Id` header + `tena
 If you query the DB directly, always filter by `tenant_id`.
 
 Planned (later): move Logistics stock tables into tenant schemas (e.g. `t_lot.*`) once cross-tenant bootstrap + migrations are ready.
+
+
+---
+
+## Update: Stock Reservations E2E (Epic #13)
+
+**Zakres**
+- Endpoint: `POST /v1/logistics/stock-reservations`
+- Integracja z `ISSUE` w `POST /v1/logistics/stock-transactions`
+- Spójność snapshot ↔ ledger (`qty_reserved`)
+
+**Zmiany kluczowe**
+- Rezerwacje zapisywane bezpośrednio do `public.stock_reservations` (SQL INSERT).
+- **Jawny `db.commit()` po INSERT rezerwacji** – zapobiega rollbackowi na zamknięciu sesji.
+- Snapshot `stock_items.qty_reserved` liczony wyłącznie z ledgeru rezerwacji:
+  - `recalc_qty_reserved()` po INSERT i po CONSUME.
+- Walidacje ISSUE:
+  - rezerwacja istnieje, `OPEN`, nieprzeterminowana
+  - `qty <= (qty_reserved - qty_consumed)`
+  - zgodność `stock_item_id`
+
+**Ryzyka / wnioski**
+- Krótki TTL tokenów OIDC powoduje 401 w długich testach CLI.
+  - Rekomendacja: helper `auth_smoke_test.sh` lub automatyczny refresh.
