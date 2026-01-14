@@ -63,6 +63,18 @@ bash scripts/start_system.sh
 - Keep `DEBUG_TENANT_HEADER=false` in production after verification; use debug header only as a controlled E2E bootstrap.
 
 
+---
+## ADDENDUM 2026-01-14 — EPIC12 closure (FRONTEND AUTH / OIDC / TENANT FLOW)
+
+**Proven working (PROD):**
+- UI login via **OIDC Authorization Code + PKCE** (`aviation-ui`) without manual tokens.
+- Token lifecycle: controlled UX on expiry/401 (**Session expired → Login**); no silent refresh.
+- Tenant propagation: UI sends `X-Tenant-Id`; API returns diagnostics headers (`X-Tenant-Id`, `X-Tenant-Schema`, `X-Tenant-Source`).
+
+**Operational constraints:**
+- Public client → expiry requires **re-login** (expected).
+- DEV bypass headers are **local-only** (must not be enabled in PROD).
+
 ## Environment (local-first)
 
 - Strategy: `docs/environment/ENV_STRATEGY.md`

@@ -8,6 +8,17 @@
 - UI: added Session expired screen (single action: Login via PKCE)
 - Docs: extended OIDC smoke test with UI token expiry simulation and expected UX
 
+## v0.2.42.7 (2026-01-14) — FRONTEND AUTH: closure (#12.2 KROK 3–5)
+
+- UI → API: **tenant propagation verified** (`X-Tenant-Id` header) and backend diagnostics confirmed via response headers:
+  - `X-Tenant-Id`, `X-Tenant-Schema`, `X-Tenant-Source: header(debug)`
+- UI: **login + lifecycle stable** in PROD (PKCE login, controlled re-login UX on expiry/401; no silent refresh).
+- Docs: consolidated FE auth/tenant verification steps into the canonical smoke-test procedure (no manual token workflows).
+
+### Notes / Risks
+- Public client → no refresh token in browser: expiry requires **explicit re-login** (by design).
+- `DEV_AUTH_BYPASS` remains **local-only**; must not be enabled in PROD.
+
 ## v0.2.42.5 (2026-01-13) — EPIC3 E2E GAP: Stock Reservation → ISSUE (docs)
 
 - Added token-safe single-shot smoke test for Reservation → ISSUE flow (fresh token → reserve → issue → verify): `docs/03_ops/SERVER_SMOKE_TEST_LOGISTICS_STOCK_TRANSACTIONS.md`

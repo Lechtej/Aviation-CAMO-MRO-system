@@ -1,5 +1,44 @@
 # Server Smoke Test – Keycloak / OIDC (client_credentials)
 
+## STATUS FREEZE (2026-01-14) – EPIC12 closure (Frontend PKCE + token lifecycle + tenant propagation)
+
+### Scope
+- PROD verification for **aviation-ui** (public client, PKCE S256).
+- Confirms: login → token acquisition → controlled expiry UX → tenant header propagation.
+
+### Procedure (PROD)
+1. Open UI: `https://app.forgemotionsystems.com`
+2. Ensure UI settings (top bar):
+   - API Base URL = `https://api.forgemotionsystems.com`
+   - Keycloak Base URL = `https://auth.forgemotionsystems.com`
+   - Realm = `aviation`
+   - Client ID = `aviation-ui`
+3. Click **Login** → authenticate in Keycloak → return to UI.
+4. Verify API call (example): `GET /v1/aircraft` returns **200**.
+
+### Evidence checks (DevTools)
+- LocalStorage:
+  - `aviationcamo_auth_v1` exists and contains `access_token` + `expires_at`
+- Network → request `GET /v1/aircraft`:
+  - Request Headers include: `Authorization: Bearer …` and `X-Tenant-Id: <UUID>`
+  - Response Headers include: `X-Tenant-Id`, `X-Tenant-Schema`, `X-Tenant-Source: header(debug)`
+
+### Expiry simulation (UI lifecycle)
+1. DevTools → Console, set expiry to past:
+   ```js
+   (() => {
+     const k = "aviationcamo_auth_v1";
+     const obj = JSON.parse(localStorage.getItem(k));
+     obj.expires_at = 0;
+     localStorage.setItem(k, JSON.stringify(obj));
+   })();
+   ```
+2. Refresh UI and trigger any `/v1/*` call.
+3. Expected: **Session expired** screen + button **Login** (no “white screen”, no random 401 loops).
+
+### Notes
+- Public client: no browser refresh token; controlled **re-login** is required when expired.
+- `DEV_AUTH_BYPASS` is local-only and must not be enabled in PROD.
 
 ## STATUS FREEZE (2026-01-09) – Local dev closure (Keycloak + API + RBAC DB)
 
