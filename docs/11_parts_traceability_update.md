@@ -60,3 +60,34 @@
 - Opisać backfill RECEIPT (kiedy wolno, jak idempotentnie, jak walidować PASS).
 - Opisać trigger `updated_at` i pola audytowe `stock_items`.
 
+
+
+
+### Update – Stock Reservation E2E (Issue-driven)
+
+#### Scope
+- Added **StockReservation** model and public.stock_reservations table usage.
+- Introduced `/v1/logistics/stock-reservations` endpoint with idempotency support.
+- Integrated reservation-aware flow into `/v1/logistics/stock-transactions` (ISSUE with reservation_id).
+
+#### Behaviour
+- Reservation creation increases `stock_items.qty_reserved` via ledger-based recalculation.
+- ISSUE with reservation:
+  - validates OPEN status, expiry, and remaining qty
+  - consumes reservation (`qty_consumed`) and auto-transitions status to CONSUMED when exhausted
+  - updates `qty_on_hand` and recalculates reserved snapshot post-ledger
+- ISSUE without reservation remains supported (direct on-hand decrement).
+
+#### Consistency rules
+- Snapshot (`stock_items`) is always recalculated from ledger before and after reservation consumption.
+- Over-consume and expired reservation cases return HTTP 409.
+- Idempotency-Key guarantees replay safety for both reservations and transactions.
+
+#### E2E verification
+- Multiple OPEN reservations correctly accumulate `qty_reserved`.
+- ISSUE without reservation returns 201 and decrements on-hand.
+- Reservation-based ISSUE enforces remaining qty and updates snapshots correctly.
+
+#### Known follow-ups
+- Add DB UNIQUE constraint for reservation idempotency_key (tenant scoped).
+- Add automated E2E tests covering mixed reservation/non-reservation ISSUE.
