@@ -102,3 +102,15 @@ docker compose build web
 docker compose up -d --no-deps web
 docker compose exec -T web sh -lc 'grep -n "maintenance-events?aircraft_id" /app/app.js | head -5'
 ```
+
+
+### UI Tenant Context – Current Model
+
+The UI **does not assume** a pre‑existing tenant context.
+
+On first authenticated load:
+1. UI calls `GET /v1/tenants` (Bearer token only).
+2. Tenant is deterministically selected and stored in `localStorage`.
+3. All domain calls (`/v1/aircraft`, `/v1/maintenance-events`, etc.) include `x-tenant-id`.
+
+This design intentionally decouples UI startup from backend session‑state and prevents init‑storm patterns.

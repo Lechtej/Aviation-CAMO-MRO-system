@@ -688,3 +688,32 @@ Date: 2026-01-05
 - **Reservations**: availability checks are preceded by a ledger-based recalculation of `qty_reserved` from OPEN reservations to guarantee consistency.
 - **API**: logistics router aligned with runtime container (reservation lifecycle, recalculation, stricter role checks).
 
+
+
+## UI v1 – Tenant Bootstrap & Aircraft Context Stabilization (Jan 2026)
+
+**Problem addressed**
+- UI entered init‑storm on `/v1/aircraft` when tenant context was missing or expired.
+- Hard dependency on `x-tenant-id` header without deterministic client‑side bootstrap.
+- Result: intermittent 401/403, frozen UI, dead controls.
+
+**Implemented solution (Option B)**
+- Deterministic tenant bootstrap via `GET /v1/tenants` on UI startup.
+- Automatic selection rules:
+  1. Prefer ACTIVE tenant with `code=lot`
+  2. Else first ACTIVE non‑`unk`
+  3. Else first ACTIVE
+- Persisted to `localStorage (tenant_uuid, tenant_schema)`.
+
+**Hardening**
+- Request deduplication (single in‑flight promise).
+- Min‑interval throttle (1.5s).
+- Cooldown backoff:
+  - 401 → 15s
+  - 403 / tenant missing → 30s
+  - 5xx → 5s
+
+**Result**
+- Stable UI startup.
+- Deterministic tenant context.
+- No repeated aircraft fetch storms.

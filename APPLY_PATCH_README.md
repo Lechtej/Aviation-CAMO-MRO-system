@@ -12,3 +12,22 @@ Ten ZIP zawiera **tylko pliki do podmiany/dodania** (delta), bez usuwania treśc
 - Architecture Overview ma sekcję: `EPIC Admin — Tenant Feature Flags + Admin Console`.
 - ADR-008 istnieje w `docs/architecture/adr/`.
 - `RELEASE_NOTES.md` zawiera wpis `v0.2.42.4`.
+
+
+## UI Patch – Tenant Bootstrap (Option B)
+
+This patch introduces **client‑side tenant bootstrap** and **aircraft fetch throttling**.
+
+### Modified area
+- `apps/web/app.js`
+  - `apiGetAircraftList`
+  - new helper: `__bootstrapTenantOnce()`
+
+### Safety
+- Patch is **idempotent**.
+- No backend schema or API changes required.
+- Fully compatible with existing `/v1/tenants` contract.
+
+### Rollback
+- Restore previous `app.js` from backup.
+- No DB or server‑side rollback required.
