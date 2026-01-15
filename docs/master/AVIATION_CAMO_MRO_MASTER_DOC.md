@@ -205,3 +205,11 @@ docker compose logs -n 80 --no-color api
 ### Recommendation (mini-task)
 After closing #10.1, introduce a DEV-only bind-mount (compose override or profile) to mount `apps/api/src` into `/app`.
 This must never be enabled in production. See `docs/03_ops/DEV_DOCKER_BIND_MOUNT_MINI_TASK.md`.
+
+
+## UI #14.3 – Aircraft Context & E2E Prep (Completed)
+- Implemented Aircraft Context selector (throttled, cooldown-protected) bound to /v1/aircraft.
+- Added ownership badge (OWNER/MRO) and permission flags derived from tenant context.
+- Stabilized UI init (dedupe, retry) and cleared ERROR/COOLDOWN after successful fetch.
+- Added E2E navigation placeholder; backend E2E flow validated via API (Reservation → ISSUE → RETURN).
+- Outcome: UI stable, ready for E2E Step 3 execution.
