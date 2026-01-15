@@ -16,6 +16,7 @@ from modules.inventory.router import router as inventory_router
 from modules.core.tenants_router import router as tenants_router
 from modules.aircraft.router import router as aircraft_router
 from modules.maintenance_events.router import router as maintenance_events_router
+from modules.dms.router import router as dms_router
 
 OPENAPI_YAML_PATH = Path("/app/openapi.yaml")
 
@@ -50,6 +51,7 @@ app.include_router(inventory_router)
 app.include_router(tenants_router)
 app.include_router(aircraft_router)
 app.include_router(maintenance_events_router)
+app.include_router(dms_router)
 
 _cached_schema: dict | None = None
 
