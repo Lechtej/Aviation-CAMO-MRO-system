@@ -51,6 +51,7 @@ Build a modern, browser-based, multi-tenant CAMO & MRO system for small and mid-
 - DEC-007: Stack = FastAPI, PostgreSQL, Redis/Celery, Keycloak, React/TypeScript
 - DEC-008: Tenant routing via PostgreSQL schema-per-tenant using search_path (middleware-driven context)
 - DEC-009: Tenant Feature Flags per tenant (DB source of truth) + API enforcement (403 FEATURE_DISABLED)
+- DEC-010: DMS as core subsystem (Document ≠ attachment; lifecycle + signatures + immutable archive)
 
 ---
 
@@ -213,3 +214,21 @@ This must never be enabled in production. See `docs/03_ops/DEV_DOCKER_BIND_MOUNT
 - Stabilized UI init (dedupe, retry) and cleared ERROR/COOLDOWN after successful fetch.
 - Added E2E navigation placeholder; backend E2E flow validated via API (Reservation → ISSUE → RETURN).
 - Outcome: UI stable, ready for E2E Step 3 execution.
+
+---
+## ADDENDUM 2026-01-15 — DMS (Document Management System) confirmed
+
+### Decision summary
+- DMS is a **core subsystem** (not an attachments-only feature).
+- Document types are registry-driven; each document has lifecycle, signatures and retention.
+- Immutable archive is enforced after `ISSUED`/`SIGNED` depending on type.
+
+### MVP document families
+- CAMO: AMP revisions, AD/SB status, ARC, CRS_CAMO
+- MRO: Work Orders, Task/Job Cards, CRS_145, RTS package
+- STORES: EASA Form 1 (structured + PDF), CoC, tags (serviceable/quarantine)
+
+### Artifacts
+- Rendered PDFs and print tags are generated from templates.
+- Uploaded scans are allowed only as **attachments bound to a document instance**.
+

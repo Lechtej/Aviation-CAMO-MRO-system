@@ -114,3 +114,11 @@ On first authenticated load:
 3. All domain calls (`/v1/aircraft`, `/v1/maintenance-events`, etc.) include `x-tenant-id`.
 
 This design intentionally decouples UI startup from backend session‑state and prevents init‑storm patterns.
+
+---
+## ADDENDUM 2026-01-15 — DMS (Document Management System)
+
+- DMS confirmed as **core module** for regulatory documents (CAMO/MRO/STORES).
+- Document is a domain object with lifecycle and signatures; attachments are secondary artifacts.
+- Baseline architecture: `docs/01_architecture/dms_overview.md`.
+

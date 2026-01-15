@@ -60,3 +60,10 @@
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+---
+## ADDENDUM 2026-01-15 — DMS baseline
+
+- DMS introduced as core subsystem (Document ≠ attachment).
+- Registry-driven document types, lifecycle, signatures and archive are planned as Platform 1.7.
+

@@ -717,3 +717,11 @@ Date: 2026-01-05
 - Stable UI startup.
 - Deterministic tenant context.
 - No repeated aircraft fetch storms.
+
+
+### 2026-01-15 — DMS module baseline (documentation)
+
+- DMS confirmed as a core subsystem (Document ≠ attachment).
+- Added architecture overview, ADR-0004, and draft API contract for DMS.
+- Updated WBS to include Platform 1.7 (DMS) and product scope.
+

@@ -43,3 +43,17 @@
 - `public.tenants.schema_name` is routing key.
 - Keycloak is source of roles; DB maps permissions.
 - `tenant_id` claim mandatory in access token (PROD).
+
+## DMS Module (Document Management System)
+- Document Type Registry (controlled)
+- Document lifecycle & workflow
+- Signatures (role-aware)
+- Print outputs (PDF, tags)
+- Immutable archive + retention
+
+---
+## ADDENDUM 2026-01-15 — DMS scope confirmed
+
+- Full DMS module confirmed for CAMO/MRO/STORES.
+- Document is a domain object with lifecycle; files are artifacts.
+
