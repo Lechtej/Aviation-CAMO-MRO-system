@@ -725,3 +725,20 @@ Date: 2026-01-05
 - Added architecture overview, ADR-0004, and draft API contract for DMS.
 - Updated WBS to include Platform 1.7 (DMS) and product scope.
 
+
+### 2026-01-16 — DEV Keycloak persistence note (DMS unblock)
+- Added documentation on DEV Keycloak realm persistence (avoid "Realm does not exist" after restarts).
+- Clarified OIDC issuer/JWKS container networking expectations for stable token validation.
+
+## 2026-01-16
+### DEV ops hardening: Keycloak realm persistence
+- Documented Keycloak DEV failure mode where `aviation` realm may be lost after container recreate without persisted `/opt/keycloak/data`.
+- Added recommended docker-compose snippet + safe rebuild procedure.
+- See: `docs/03_ops/KEYCLOAK_DEV_REALM_PERSISTENCE.md`.
+
+
+### 2026-01-16 — DMS documentation hardening (review pass)
+- Clarified **source vs generated** artifacts and deterministic re-print constraints.
+- Added explicit **entity link model** and creation rule (no unbound documents by default).
+- Extended ADR-0004 with tenancy + storage abstraction + no binaries in DB.
+- Added tenant-context + RBAC minimum + smoke-test snippet to DMS API contract.

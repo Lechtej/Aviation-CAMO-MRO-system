@@ -122,3 +122,26 @@ This design intentionally decouples UI startup from backend session‑state and 
 - Document is a domain object with lifecycle and signatures; attachments are secondary artifacts.
 - Baseline architecture: `docs/01_architecture/dms_overview.md`.
 
+
+---
+## ADDENDUM 2026-01-16 — DEV Keycloak realm persistence (common failure mode)
+
+**Observed failure mode (DEV):** after removing `--import-realm` or restarting Keycloak without persistent storage, the `aviation` realm can appear to "disappear".
+This is not a logical deletion; it is typically a **stateless Keycloak data directory** being re-created.
+
+**Rule for DEV:**
+- Keycloak must have persistent volume for `/opt/keycloak/data`.
+- Realm import should be **one-time** initialization, not required for every restart.
+
+**Expected docker-compose direction:**
+- `OIDC_ISSUER` and `OIDC_JWKS_URL` should use docker DNS names for container consistency (e.g. `http://keycloak:8080/...`).
+- If `--import-realm` is removed, ensure the realm already exists in the persisted data.
+
+## ADDENDUM 2026-01-16 — Keycloak DEV realm persistence (critical)
+Observed failure mode: removing `--import-realm` or recreating Keycloak without a persisted data volume can result in **realm loss** (`Realm does not exist`).
+
+Action:
+- Persist Keycloak data directory as a docker volume (`/opt/keycloak/data`).
+- Keep realm import only for first boot / deliberate reset.
+
+Details: `docs/03_ops/KEYCLOAK_DEV_REALM_PERSISTENCE.md`.

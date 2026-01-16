@@ -16,3 +16,10 @@
 - (Brak wykrytych plików referencyjnych w ZIP)
 
 Update 2026-01: pliki referencyjne istnieją i są linkowane wyżej (Auth bootstrap + smoke tests).
+
+### Workforce
+- `SERVER_SMOKE_TEST_WORKFORCE.md` — API smoke tests for workforce/employees (requires PLATFORM_ADMIN token + X-Tenant-Id)
+
+
+## Workforce module
+- `SERVER_SMOKE_TEST_WORKFORCE.md` — smoke tests for `/v1/workforce/*` and common failure modes (OpenAPI YAML vs runtime, missing deps, auth prerequisites).

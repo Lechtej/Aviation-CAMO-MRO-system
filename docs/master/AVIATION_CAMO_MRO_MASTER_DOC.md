@@ -232,3 +232,17 @@ This must never be enabled in production. See `docs/03_ops/DEV_DOCKER_BIND_MOUNT
 - Rendered PDFs and print tags are generated from templates.
 - Uploaded scans are allowed only as **attachments bound to a document instance**.
 
+
+
+---
+
+## ADDENDUM 2026-01-16 — DMS review pass (docs hardening)
+
+### DMS references
+- Architecture: `docs/01_architecture/dms_overview.md`
+- ADR: `docs/01_architecture/decisions/ADR-0004-dms-core.md`
+- API contract: `docs/02_api/dms.md`
+
+### DEV dependency (Keycloak)
+DMS smoke tests are blocked unless DEV Keycloak realm persistence is stable.
+See: `docs/03_ops/KEYCLOAK_DEV_REALM_PERSISTENCE.md`.

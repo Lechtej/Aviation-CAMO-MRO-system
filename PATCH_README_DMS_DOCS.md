@@ -21,3 +21,14 @@ Updated / new documentation files:
 ## Notes
 - Patch is documentation-only (no code, no migrations).
 - The DMS API described in `docs/02_api/dms.md` is a **contract draft** for the next implementation iteration.
+
+## Patch: DMS DOCS v0.2.49 (additive)
+- Extended DMS overview with regulatory baseline (CAMO/MRO/STORES) and print/tag outputs.
+- Extended DMS API doc with OIDC/JWKS runtime requirements + troubleshooting.
+- Added DEV Keycloak realm persistence ops note.
+- Added README addendum + release notes entry.
+
+## v0.2.49 — DMS docs + DEV auth/keycloak ops
+- Extended DMS overview with regulatory baseline (CAMO/MRO/STORES) and required artifacts.
+- Extended DMS API doc with OIDC issuer/JWKS troubleshooting.
+- Added DEV ops guide for Keycloak realm persistence.

@@ -17,6 +17,8 @@ tags:
 - name: Inventory
 - name: Aircraft
 - name: Integrations
+- name: Workforce
+  description: Staff & employees management
 components:
   securitySchemes:
     bearerAuth:
@@ -804,6 +806,101 @@ components:
         type: string
         format: date-time
 
+
+
+    EmployeeOut:
+      type: object
+      required:
+        - id
+        - first_name
+        - last_name
+        - is_active
+      properties:
+        id:
+          type: string
+          format: uuid
+        employee_no:
+          type: string
+          nullable: true
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        is_active:
+          type: boolean
+        keycloak_user_id:
+          type: string
+          format: uuid
+          nullable: true
+
+    EmployeeCreate:
+      type: object
+      required:
+        - first_name
+        - last_name
+      properties:
+        employee_no:
+          type: string
+          nullable: true
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        is_active:
+          type: boolean
+          default: true
+        keycloak_user_id:
+          type: string
+          format: uuid
+          nullable: true
+
+    EmployeeUpdate:
+      type: object
+      properties:
+        employee_no:
+          type: string
+          nullable: true
+        first_name:
+          type: string
+          nullable: true
+        last_name:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        is_active:
+          type: boolean
+          nullable: true
+        keycloak_user_id:
+          type: string
+          format: uuid
+          nullable: true
+
+    EmployeesList:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmployeeOut'
   parameters:
     TenantIdHeader:
       name: X-Tenant-Id
@@ -2059,3 +2156,96 @@ paths:
             application/json:
               schema:
                 type: object
+
+  /v1/workforce/employees:
+    get:
+      tags:
+        - Workforce
+      summary: List employees (tenant-isolated)
+      parameters:
+        - name: active_only
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeesList'
+    post:
+      tags:
+        - Workforce
+      summary: Create employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeCreate'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeOut'
+
+  /v1/workforce/employees/{employee_id}:
+    get:
+      tags:
+        - Workforce
+      summary: Get employee
+      parameters:
+        - name: employee_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeOut'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - Workforce
+      summary: Update employee
+      parameters:
+        - name: employee_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeOut'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+

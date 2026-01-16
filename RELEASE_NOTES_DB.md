@@ -69,3 +69,8 @@
 - Replaced global uniqueness of `idempotency_key` with tenant-scoped unique index.
 - Safe migration added (re-runnable): `2026-01-14_01_stock_transactions_idempotency_tenant_scoped.sql`.
 
+
+
+### 2026-01-16 — DMS tenant migration
+- Tenant migration added for DMS core tables: `db/migrations/tenant/0002_dms.sql`.
+- Scope: document type registry + document instances + artifacts + audit events (tenant-scoped).

@@ -481,3 +481,45 @@ Cel: potwierdzić, że UI nie generuje losowych 401 i ma kontrolowany UX po wyga
 ### Oczekiwane (PASS)
 - UI pokazuje ekran **Session expired** + przycisk **Login**
 - UI nie wykonuje requestów do `/v1/*` bez ważnego tokena (brak spamowania 401)
+---
+
+## Addendum (2026-01-16) — troubleshooting Direct Grant (token)
+
+### Symptom: `TOKEN_LEN=0` and API returns `{"detail":"Missing bearer token"}`
+**Root causes observed:**
+- `scripts/smoke_auth.sh` not executable (permission denied)
+- Keycloak token endpoint returns **401** (wrong credentials/client) or Keycloak/realm temporarily unavailable
+
+### Quick checks
+1) Ensure scripts are executable:
+```bash
+cd /opt/aviationcamo/work/Aviation-CAMO-MRO-system
+ls -la ./scripts/smoke_auth.sh ./get_token_dev.sh
+chmod +x ./scripts/smoke_auth.sh ./get_token_dev.sh
+```
+
+2) Validate token endpoint directly (captures HTTP + body):
+```bash
+ENV_FILE="./.env.local"
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+TOKEN_URL="${KC_BASE_URL%/}/realms/${KC_REALM}/protocol/openid-connect/token"
+
+curl -sS -i -X POST "$TOKEN_URL" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  --data-urlencode "grant_type=password" \
+  --data-urlencode "client_id=${OIDC_CLIENT_ID}" \
+  --data-urlencode "username=${OIDC_TEST_USERNAME}" \
+  --data-urlencode "password=${OIDC_TEST_PASSWORD}" \
+| sed -n '1,120p'
+```
+
+**PASS:** HTTP 200 and JSON contains `access_token`.
+
+### If Keycloak realm/service is down
+If Keycloak is being restored in parallel (realm missing / import in progress), pause API auth validation. Continue only with:
+- local compilation checks (`python -m py_compile`) and
+- OpenAPI contract checks (`/openapi.json` once API is up)
+
+
+---

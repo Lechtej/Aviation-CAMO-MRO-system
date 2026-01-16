@@ -75,3 +75,80 @@ docker compose down
 docker compose up -d --build
 ```
 
+
+---
+
+## Addendum (2026-01-16) — pitfalls observed on server
+
+### PowerShell truncates heredocs / pasted blocks
+When pasting multi-line blocks from Windows PowerShell, the content may be truncated or merged (e.g. stray `PY` tokens, duplicated decorators). **Prefer editing on the server** (nano) or use a single `cat <<'EOF'` heredoc executed on the server.
+
+**Recommendation:** create/replace files using:
+
+```bash
+cat > <PATH> <<'EOF'
+# full file content
+EOF
+python3 -m py_compile <PATH>
+```
+
+### `curl | head` hides failures
+`echo $?` after a pipeline may not reflect `curl` failure. Use pipefail:
+
+```bash
+set -o pipefail
+curl -sS http://127.0.0.1:8000/openapi.json | head -c 200; echo
+echo "curl_exit=${PIPESTATUS[0]}  head_exit=${PIPESTATUS[1]}"
+```
+
+### Verify container content (bind mount vs baked image)
+If you expect runtime changes without rebuild, verify `/app` content inside the container:
+
+```bash
+cd infra/docker
+docker compose exec -T api sh -lc 'ls -la /app; ls -la /app/modules'
+```
+
+
+---
+
+## Update #20 — Notes from live server debugging (2026-01-16)
+
+### PowerShell truncation when pasting code (common)
+Symptoms: pasted `cat <<'PY' ... PY` blocks end up **corrupted** (duplicated fragments, missing newlines, stray tokens).
+
+Recommendation (server-side): prefer one of these patterns:
+1) **nano** edit (safe for short files):
+```bash
+nano apps/api/src/modules/workforce/router.py
+```
+2) **heredoc but from bash on server**, not through PowerShell copy/paste:
+```bash
+cat > apps/api/src/modules/workforce/router.py <<'PY'
+# ...content...
+PY
+```
+3) Validate immediately:
+```bash
+python3 -m py_compile apps/api/src/modules/workforce/router.py
+```
+
+### curl pipelines: exit codes can lie without pipefail
+If you pipe into `head`, `sed`, etc., `echo $?` often reports the last command, not `curl`.
+Use:
+```bash
+set -o pipefail
+curl -sS http://127.0.0.1:8000/openapi.json | head -c 200; echo
+echo "curl_exit=${PIPESTATUS[0]}  head_exit=${PIPESTATUS[1]}"
+```
+
+### Dev note: container image COPY vs bind mount
+If API code changes do not show up, confirm whether you are:
+- running **image COPY** (`docker compose up -d --build`) OR
+- running **bind mount override** (dev compose override)
+
+Always verify what the container sees:
+```bash
+cd infra/docker
+docker compose exec api ls -la /app | sed -n '1,40p'
+```
