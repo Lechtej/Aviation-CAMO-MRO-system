@@ -1,0 +1,50 @@
+# v0.2.49 — DMS addendum (paste into docs/02_api/openapi.yaml)
+# NOTE: snippet only; keep existing document structure.
+
+components:
+  schemas:
+    DmsDomain:
+      type: string
+      enum: [CAMO, MRO, STORES, EASA]
+    DmsType:
+      type: object
+      required: [id, code, name, domain]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+        domain: { $ref: '#/components/schemas/DmsDomain' }
+    DmsDocument:
+      type: object
+      required: [id, type_id, title, domain, status, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        type_id: { type: string, format: uuid }
+        title: { type: string }
+        domain: { $ref: '#/components/schemas/DmsDomain' }
+        status: { type: string, enum: [DRAFT, REVIEW, APPROVED, ISSUED, ARCHIVED] }
+        created_at: { type: string, format: date-time }
+
+paths:
+  /v1/dms/types:
+    get:
+      summary: List DMS document types
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DmsType' }
+  /v1/dms/documents:
+    get:
+      summary: List DMS documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/DmsDocument' }

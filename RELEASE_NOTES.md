@@ -742,3 +742,11 @@ Date: 2026-01-05
 - Added explicit **entity link model** and creation rule (no unbound documents by default).
 - Extended ADR-0004 with tenancy + storage abstraction + no binaries in DB.
 - Added tenant-context + RBAC minimum + smoke-test snippet to DMS API contract.
+
+
+### 2026-01-17 — DMS runtime fix + verification notes
+
+- **FIX:** `/v1/dms/types` response validation error removed by aligning `DmsDomain` with seeded data (**added `EASA`** to allowed literals).
+- **OPS:** after backend schema/model changes in `apps/api/src`, **API container must be rebuilt** (`docker compose up -d --build --force-recreate api`) — otherwise old code remains in image.
+- **DEV:** added helper scripts for consistent token acquisition from the **same OIDC issuer** as configured in API and for a deterministic DMS smoke test.
+- **NOTE:** UI aircraft / maintenance regressions tracked in separate thread (out of scope of DMS patch).

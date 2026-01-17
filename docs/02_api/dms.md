@@ -132,3 +132,66 @@ curl -sS -H "Authorization: Bearer $TOKEN" -H "X-Tenant-Id: <TENANT_UUID>"   htt
 ### Note (documentation hygiene)
 This file contains duplicated Auth/OIDC troubleshooting content preserved for history.
 Canonical section is the **first** "Auth / OIDC runtime requirements" block; future edits should extend it rather than adding new duplicates.
+
+---
+## Addendum (2026-01-17) — DMS `domain` enum alignment (EASA)
+
+### Symptom
+`GET /v1/dms/types` returned **HTTP 500** with `fastapi.exceptions.ResponseValidationError`:
+- `domain` field contained value `EASA`, while API schema allowed only `CAMO|MRO|STORES`.
+
+### Root cause
+Seeded/DB data contained `EASA_FORM_1` as `domain=EASA`, but `DmsDomain` was defined too narrowly.
+
+### Fix (code)
+- `apps/api/src/modules/dms/schemas.py`: `DmsDomain = Literal["CAMO", "MRO", "STORES", "EASA"]`
+
+### Deployment note (critical)
+When deploying to Docker:
+- **Rebuild** API image to pick up python source changes:
+  - `cd infra/docker && docker compose up -d --build --force-recreate api`
+
+### Quick verification
+- Token must be issued by **exact `OIDC_ISSUER` configured in API**.
+- Validate:
+  - `GET /v1/dms/types` → `200` + JSON array containing `EASA_FORM_1`.
+
+
+---
+
+## Addendum 2026-01-17 — Runtime validation + rebuild requirement
+
+### Symptom
+`GET /v1/dms/types` returned **500** with FastAPI `ResponseValidationError`:
+- `domain` field contained `EASA`
+- schema allowed only `CAMO | MRO | STORES`
+
+### Root cause
+Seed data includes document type **EASA_FORM_1** with `domain=EASA`, while `DmsDomain` was defined without `EASA`.
+
+### Fix
+- Align API schemas with seeded data:
+  - `apps/api/src/modules/dms/schemas.py`: `DmsDomain = Literal["CAMO", "MRO", "STORES", "EASA"]`
+
+### Required deploy step
+Because API is built as an image (COPY source at build-time), after changing backend code run:
+
+```bash
+cd infra/docker
+docker compose up -d --build --force-recreate api
+```
+
+If you run only `--force-recreate` (without `--build`), the container restarts with the **old** image and the fix is not applied.
+
+### Verification (server-side)
+Use dev helpers:
+
+```bash
+# token derived from exact issuer configured in API
+scripts/dev/get_token_dev.sh platformadmin 'qwe1234@#' > /tmp/token.txt
+TOKEN="$(cat /tmp/token.txt)"
+
+TENANT_ID="<tenant_uuid>"  # e.g. LOT tenant UUID
+curl -sS -H "Authorization: Bearer $TOKEN" -H "X-Tenant-Id: $TENANT_ID" \
+  http://127.0.0.1:8000/v1/dms/types | head -c 200; echo
+```
