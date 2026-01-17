@@ -750,3 +750,9 @@ Date: 2026-01-05
 - **OPS:** after backend schema/model changes in `apps/api/src`, **API container must be rebuilt** (`docker compose up -d --build --force-recreate api`) — otherwise old code remains in image.
 - **DEV:** added helper scripts for consistent token acquisition from the **same OIDC issuer** as configured in API and for a deterministic DMS smoke test.
 - **NOTE:** UI aircraft / maintenance regressions tracked in separate thread (out of scope of DMS patch).
+
+### 2026-01-17 — UI Process ↔ Backend Coverage Matrix (documentation)
+
+- Added a backend coverage matrix for CAMO/MRO/STORES clickable UI processes.
+- Explicitly listed implemented modules/endpoints vs design-only areas and DB/migration gaps.
+- See: `docs/00_product/UI_PROCESS_BACKEND_COVERAGE_MATRIX.md`.
