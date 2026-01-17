@@ -1,32 +1,40 @@
-#!/usr/bin/env sh
-set -eu
+#!/usr/bin/env bash
+set -euo pipefail
 
-TENANT_ID=${1:-}
-if [ -z "$TENANT_ID" ]; then
-  echo "Usage: $0 <TENANT_UUID>" 1>&2
+TENANT_ID="${1:-}"
+if [[ -z "$TENANT_ID" ]]; then
+  echo "Usage: $0 <TENANT_UUID>" >&2
   exit 2
 fi
 
-ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
-TOKEN=$("$ROOT_DIR/scripts/dev/get_token_dev.sh")
+BASE_URL="${BASE_URL:-http://127.0.0.1:8000}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# API base: override env if needed.
-# Server: zwykle http://localhost:8000 (host) albo https://api.forgemotionsystems.com
-API_BASE=${API_BASE:-http://localhost:8000}
+TOKEN="$("${SCRIPT_DIR}/get_token_dev.sh")"
 
-req() {
-  path=$1
-  echo "==> GET $path"
-  # Print HTTP status + body (first 2000 chars)
-  # -D - prints headers; sed trims noisy headers if needed by caller
-  curl -sS -D - \
-    -H "Authorization: Bearer $TOKEN" \
-    -H "X-Tenant-ID: $TENANT_ID" \
-    "$API_BASE$path" \
-  | sed -n '1,200p'
-  echo ""
+echo "== DMS smoke =="
+echo "BASE_URL=${BASE_URL}"
+echo "TENANT_ID=${TENANT_ID}"
+echo
+
+call() {
+  local path="$1"
+  echo "-- GET ${path}"
+  local resp http
+  resp="$(mktemp)"
+  http="$(curl -sS -o "${resp}" -w "%{http_code}"     -H "Authorization: Bearer ${TOKEN}"     -H "X-Tenant-ID: ${TENANT_ID}"     "${BASE_URL}${path}")"
+  echo "HTTP ${http}"
+  cat "${resp}"
+  echo
+  rm -f "${resp}"
+
+  if [[ "${http}" != "200" ]]; then
+    echo "FAIL: ${path} returned HTTP ${http}" >&2
+    return 1
+  fi
 }
 
-echo "[SMOKE DMS] tenant=$TENANT_ID api=$API_BASE"
-req "/v1/dms/types"
-req "/v1/dms/documents"
+call "/v1/dms/types"
+call "/v1/dms/documents"
+
+echo "PASS: DMS smoke OK"
