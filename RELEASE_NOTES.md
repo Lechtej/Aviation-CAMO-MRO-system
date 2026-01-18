@@ -756,3 +756,13 @@ Date: 2026-01-05
 - Added a backend coverage matrix for CAMO/MRO/STORES clickable UI processes.
 - Explicitly listed implemented modules/endpoints vs design-only areas and DB/migration gaps.
 - See: `docs/00_product/UI_PROCESS_BACKEND_COVERAGE_MATRIX.md`.
+
+---
+
+## 2026-01-17 - UI hotfix: tenant discovery for Incognito / fresh profile
+
+- Web UI: dodano automatyczny bootstrap tenant context, gdy `tenant_id` nie jest jeszcze znane (Incognito / czyste storage).
+- Mechanizm: `GET /v1/tenants` (Authorization-only) -> zapis `tenant_id` + `tenant_schema` do localStorage -> kolejne wywolania ustawiajace `X-Tenant-Id`.
+- Dodatkowo: bootstrap z response headers zapisuje `tenant_id` / `tenant_schema` tylko gdy nie sa jeszcze ustawione (best-effort, non-fatal).
+
+---

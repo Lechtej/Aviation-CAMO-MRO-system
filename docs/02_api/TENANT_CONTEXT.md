@@ -239,3 +239,60 @@ Endpointy pracują w kontekście `X-Tenant-Id` (resolved → schema per tenant).
 - tenant typu **MRO** widzi aircraft przez relację `public.aircraft_mro_access` (gdy `mro_tenant_id = <tenant_id>` i `active=true`).
 
 Dzięki temu tenant MRO może pracować na aircraft wielu operatorów/ownerów bez duplikacji rekordów.
+
+## ADDENDUM 2026-01-17 - UI (web) tenant bootstrap in Incognito / fresh profile
+
+### Problem
+
+W trybie **Incognito** / "fresh profile" UI posiada poprawny JWT (Keycloak login OK), ale **nie ma jeszcze tenant context** w localStorage.
+Jeżeli token **nie zawiera claimu `tenant_id`**, pierwsze wywołania API (np. `/v1/aircraft`, `/v1/maintenance-events`) bez `X-Tenant-Id` kończą się:
+- `403` (tenant context missing) albo
+- `500` (jeżeli backend oczekuje UUID i dostaje placeholder / pusty string).
+
+Dodatkowo endpoint diagnostyczny `/v1/_debug/context` może być niedostępny (`404`) w danym deployu i nie należy go traktować jako stabilnej ścieżki produkcyjnej.
+
+### Rozwiązanie (rekomendowane)
+
+**Discovery po stronie UI** (bez debug header):
+
+1) UI wywołuje `GET /v1/tenants` z samym `Authorization: Bearer <token>`.
+2) UI wybiera tenant (preferuj `code != "unk"` oraz `status == "active"`, inaczej pierwszy z listy).
+3) UI zapisuje do localStorage:
+   - `tenant_id` = `<tenant_uuid>`
+   - `tenant_uuid` = `<tenant_uuid>` *(legacy fallback)*
+   - `tenant_schema` = np. `t_lot`
+4) Kolejne requesty API są wykonywane z nagłówkiem: `X-Tenant-Id: <tenant_uuid>`.
+
+**Uwaga:** To działa poprawnie, gdy użytkownik ma uprawnienia pozwalające na listowanie tenantów (np. `PLATFORM_ADMIN`). Dla userów "tenantowych" (bez cross-tenant) docelowo wymagany jest claim `tenant_id` w tokenie.
+
+### UI/DevTools - szybki test (Incognito)
+
+W DevTools → Console:
+
+```js
+['tenant_id','tenant_uuid','tenant_schema']
+  .reduce((a,k)=>{a[k]=localStorage.getItem(k);return a;}, {})
+```
+
+Oczekiwane:
+- `tenant_id` = UUID
+- `tenant_schema` = `t_<...>`
+
+Opcjonalny test requestu (bezpośrednio z przeglądarki):
+
+```js
+fetch('https://api.forgemotionsystems.com/v1/aircraft', {
+  headers: {
+    'Authorization': 'Bearer ' + JSON.parse(localStorage.getItem('aviationcamo_auth_v1')).access_token,
+    'X-Tenant-Id': localStorage.getItem('tenant_id')
+  }
+}).then(r => r.status)
+```
+
+### Implementation note (frontend)
+
+W `apps/web/app.js` logika `apiFetch()` powinna:
+- używać `tenant_id` jako canonical,
+- wspierać legacy `tenant_uuid` tylko jako fallback,
+- gdy `tenant_id` brak → wykonać discovery po `/v1/tenants` i dopiero potem odpalać pozostałe endpointy.
+

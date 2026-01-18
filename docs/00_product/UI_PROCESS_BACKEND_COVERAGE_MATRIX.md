@@ -239,3 +239,11 @@ Everything else required for full CAMO↔MRO process execution must be implement
 - Work Orders + Tasks (+ minimal status engine)
 - Workforce + assignments
 - CAMO program demand generators (MP/AD/SB/Reliability)
+
+---
+
+## Appendix - UI Auth + Tenant Context (Incognito / first run)
+
+UI wymagane jest ustawienie `X-Tenant-Id` dla większości endpointow domenowych.
+Dla sytuacji, gdy token nie niesie claimu `tenant_id` (szczegolnie Incognito / fresh profile), UI wykonuje bootstrap przez `GET /v1/tenants` (Authorization-only) i zapisuje do localStorage: `tenant_id`, `tenant_uuid` (legacy), `tenant_schema`.
+Szczegoly: `docs/02_api/TENANT_CONTEXT.md` (Addendum 2026-01-17).
