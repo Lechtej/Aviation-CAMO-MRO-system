@@ -296,3 +296,24 @@ W `apps/web/app.js` logika `apiFetch()` powinna:
 - wspierać legacy `tenant_uuid` tylko jako fallback,
 - gdy `tenant_id` brak → wykonać discovery po `/v1/tenants` i dopiero potem odpalać pozostałe endpointy.
 
+
+---
+
+## Addendum (2026-01-18) — UI bootstrap and why `/v1/tenants` may not be called
+
+UI policy for tenant discovery:
+
+1. **Source of truth:** `localStorage.tenant_uuid` (and optional `tenant_schema`).
+2. If tenant exists in storage → UI **does not call** `/v1/tenants` (to avoid extra traffic).
+3. If tenant is missing (Incognito / fresh profile) and user is authenticated → UI performs **one** discovery call:
+   - `GET /v1/tenants` with `Authorization: Bearer <access_token>`
+   - persists `tenant_uuid` + `tenant_schema`
+4. Requests that require tenant context (e.g. `/v1/aircraft`) must send:
+   - `X-Tenant-Id: <tenant_uuid>`
+   - optional: `X-Tenant-Schema: <tenant_schema>`
+
+Troubleshooting:
+- If you expect `/v1/tenants` and you do not see it in DevTools → check `Application → Local Storage` first.
+- For a clean bootstrap test, clear keys:
+  - `tenant_uuid`, `tenant_id`, `tenant_schema`
+  - then refresh and authenticate.

@@ -247,3 +247,16 @@ Everything else required for full CAMO↔MRO process execution must be implement
 UI wymagane jest ustawienie `X-Tenant-Id` dla większości endpointow domenowych.
 Dla sytuacji, gdy token nie niesie claimu `tenant_id` (szczegolnie Incognito / fresh profile), UI wykonuje bootstrap przez `GET /v1/tenants` (Authorization-only) i zapisuje do localStorage: `tenant_id`, `tenant_uuid` (legacy), `tenant_schema`.
 Szczegoly: `docs/02_api/TENANT_CONTEXT.md` (Addendum 2026-01-17).
+
+---
+
+### 2026-01-18 — UI aircraft context stabilization (implementation note)
+
+- `apps/web/app.js` contains an embedded **Aircraft Context** block (UI-only) which:
+  - enforces **AUTH GATE** (no `/v1/aircraft` call before login),
+  - ensures tenant context exists (uses `tenant_uuid` from storage; optional one-time `/v1/tenants` discovery for Incognito),
+  - throttles/retries to avoid request storms.
+
+Current status:
+- Navigation/buttons: **PASS**
+- Aircraft list rendering on `/camo/aircraft`: **FAIL** (tracked in #14.8)

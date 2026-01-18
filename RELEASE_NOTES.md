@@ -766,3 +766,26 @@ Date: 2026-01-05
 - Dodatkowo: bootstrap z response headers zapisuje `tenant_id` / `tenant_schema` tylko gdy nie sa jeszcze ustawione (best-effort, non-fatal).
 
 ---
+
+---
+
+## 2026-01-18 — UI web/app.js hardening: ES2019 compatibility + syntax recovery
+
+### What changed
+- **Node toolchain installed (DEV server)** to enable deterministic `node --check` validation of `apps/web/app.js`.
+- **ES2019 compatibility sweep** in `apps/web/app.js`:
+  - removed usage of optional chaining `?.` and nullish coalescing `??` in UI code paths.
+  - kept behavior identical (defensive property reads / fallbacks).
+- **Hotfix:** repaired a corrupted `getBaseUrl()` line (broken during earlier bulk replace) to:
+  - `const __baseEl = $("baseUrl");`
+- **Syntax fix:** resolved unmatched brace in the 2nd IIFE (Aircraft Context block). After fix:
+  - `node --check apps/web/app.js` returns **RC=0**.
+
+### Verification (PASS)
+- `node --check apps/web/app.js` → **RC=0** (syntax OK).
+- UI loads without JS fatal error; navigation buttons respond.
+
+### Known gaps / follow-up (tracked in #14.8)
+- Aircraft list is **not loading** in `/camo/aircraft` view.
+- `GET /v1/tenants` may not appear in Network when `tenant_uuid` is already present in `localStorage` (expected under current bootstrap rules).
+- Aircraft selector dropdown currently visible in Maintenance view, but not present in Aircraft view → needs alignment of UI routes/components.
