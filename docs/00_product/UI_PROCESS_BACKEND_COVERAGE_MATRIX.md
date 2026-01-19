@@ -257,6 +257,12 @@ Szczegoly: `docs/02_api/TENANT_CONTEXT.md` (Addendum 2026-01-17).
   - ensures tenant context exists (uses `tenant_uuid` from storage; optional one-time `/v1/tenants` discovery for Incognito),
   - throttles/retries to avoid request storms.
 
-Current status:
-- Navigation/buttons: **PASS**
-- Aircraft list rendering on `/camo/aircraft`: **FAIL** (tracked in #14.8)
+Current status (as of 2026-01-19):
+- Backend `GET /v1/aircraft` with `Authorization` + `X-Tenant-Id` : **PASS** (200 + response headers `x-tenant-id`, `x-tenant-schema`).
+- UI: navigation/routing: **PASS**
+- UI aircraft data binding: **FAIL** when `tenant_uuid` is present but UI does not issue `GET /v1/aircraft` (or issues it without `X-Tenant-Id`).
+
+Debug checklist:
+- DevTools → Network: confirm `GET /v1/aircraft` is executed **after login** and carries `X-Tenant-Id: <tenant_uuid>`.
+- If `/v1/tenants` is missing: this is **expected** when `tenant_uuid` already exists in localStorage (no discovery).
+- If aircraft list is empty: confirm tenant is correct (try clearing `tenant_uuid` to force one-time discovery).

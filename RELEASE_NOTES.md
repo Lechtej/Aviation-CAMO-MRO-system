@@ -789,3 +789,13 @@ Date: 2026-01-05
 - Aircraft list is **not loading** in `/camo/aircraft` view.
 - `GET /v1/tenants` may not appear in Network when `tenant_uuid` is already present in `localStorage` (expected under current bootstrap rules).
 - Aircraft selector dropdown currently visible in Maintenance view, but not present in Aircraft view → needs alignment of UI routes/components.
+
+## 2026-01-19 — #14.8 documentation: UI tenant bootstrap + aircraft loading contract
+
+- Updated `docs/02_api/TENANT_CONTEXT.md` with an explicit **UI v1 contract** for:
+  - token gating (no `/v1/*` calls before login),
+  - deterministic tenant discovery (`GET /v1/tenants` only when `tenant_uuid` missing),
+  - tenant-scoped calls (`GET /v1/aircraft` with `X-Tenant-Id`),
+  - anti-storm rules and response-header bootstrap.
+- Updated `docs/00_product/UI_PROCESS_BACKEND_COVERAGE_MATRIX.md` with the current status of **Aircraft list loading** and the required tenant header contract.
+

@@ -317,3 +317,48 @@ Troubleshooting:
 - For a clean bootstrap test, clear keys:
   - `tenant_uuid`, `tenant_id`, `tenant_schema`
   - then refresh and authenticate.
+
+---
+## ADDENDUM 2026-01-19 — UI v1 (apps/web/app.js) tenant bootstrap + aircraft loading rules (#14.8)
+
+### LocalStorage keys used by UI
+UI (mock web, `apps/web/app.js`) uses:
+- `aviationcamo_auth_v1` — serialized auth object (contains `access_token`, `expires_at`, etc.)
+- `tenant_uuid` — effective tenant id used for routing (UUID string)
+- `tenant_schema` — effective schema name returned by API (e.g. `t_lotams`) (debug/telemetry)
+- `tenant_id` — legacy/alias used in some parts of UI; **treat as synonym** of `tenant_uuid` in mock
+- `active_aircraft_id` — selected aircraft context (optional; UI-only filtering)
+
+### Deterministic boot order (UI)
+1. **Auth gate**
+   - If token missing/expired → UI must not call tenant-scoped endpoints.
+2. **Tenant gate**
+   - If `tenant_uuid` already exists in localStorage → UI does **NOT** call `/v1/tenants`.
+   - If `tenant_uuid` missing and user is authenticated → UI does **ONE** discovery call:
+     - `GET /v1/tenants` with `Authorization: Bearer <token>` only
+     - selects a tenant (current mock: first ACTIVE) and stores:
+       - `tenant_uuid` (UUID)
+       - `tenant_schema` (from payload `schema_name`)
+3. **Tenant-scoped API calls**
+   - For tenant-scoped reads (e.g. `GET /v1/aircraft`) UI sends:
+     - `Authorization: Bearer <token>`
+     - `X-Tenant-Id: <tenant_uuid>`
+   - `X-Tenant-Schema` is **not required** by API for routing (API resolves schema server-side);
+     UI may log/keep it for debug only.
+
+### Response header bootstrap (best-effort)
+When API returns tenant resolution headers:
+- `x-tenant-id`
+- `x-tenant-schema`
+UI may store them (best-effort) into localStorage to stabilize future requests.
+
+### Anti-storm requirement
+UI must ensure:
+- max **1** tenant discovery request per page load (no loops)
+- aircraft list requested only after tenant context is available
+
+### Verified backend behavior (server tests)
+Example (platform_admin + explicit tenant):
+- `GET /v1/aircraft` + `X-Tenant-Id: <TENANT_UUID>` returns `200` and response headers:
+  - `x-tenant-id`, `x-tenant-schema`, `x-tenant-source: header(platform_admin)`
+
